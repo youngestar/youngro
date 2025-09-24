@@ -1,0 +1,22 @@
+{
+  "name": "youngro-root",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "description": "Youngro monorepo root",
+  "scripts": {
+    "prepare": "husky install",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,yml,yaml}\"",
+    "web": "pnpm --filter @youngro/web",
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^5.4.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.0",
+    "prettier": "^3.3.3"
+  }
+}
