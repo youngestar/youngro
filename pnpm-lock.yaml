@@ -23,6 +23,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@youngro/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -73,7 +76,7 @@ importers:
         specifier: npm:rolldown-vite@7.1.12
         version: rolldown-vite@7.1.12(jiti@2.6.0)(yaml@2.8.1)
 
-  package/ui:
+  packages/ui:
     dependencies:
       class-variance-authority:
         specifier: ^0.7.1
