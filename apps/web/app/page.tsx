@@ -32,7 +32,7 @@ export default function Home() {
           priority
         />
         <ol>
-          <li>
+          <li className=" bg-red-200">
             Get started by editing <code>apps/web/app/page.tsx</code>
           </li>
           <li>Save and see your changes instantly.</li>
@@ -63,9 +63,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
+        <Button>Open alert</Button>
       </main>
       <footer className={styles.footer}>
         <a
