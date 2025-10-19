@@ -1,4 +1,36 @@
+/* VS Code workspace settings for Tailwind IntelliSense in a monorepo */
 {
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript",
+    "javascriptreact": "javascript"
+  },
+
+  "tailwindCSS.emmetCompletions": true,
+  // The extension will auto-discover Tailwind config files in the workspace.
+  // If needed, you can set `tailwindCSS.experimental.configFile` to a string path.
+
+  // Help the extension find classes inside helper functions like cn() or clsx()
+  "tailwindCSS.experimental.classRegex": [
+    "className\\s*=\\s*\\\"([^\\\"]*)\\\"",
+    "class\\s*=\\s*{?`([^`]*)`?}",
+    "cn\\(([^)]*)\\)",
+    "clsx\\(([^)]*)\\)",
+    "cva\\s*\\(\\s*`([^`]*)`",
+    "cva\\s*\\(\\s*\\\"([^\\\"]*)\\\"",
+    "cva\\s*\\(\\s*'([^']*)'",
+    "\\b[A-Za-z0-9_]+\\s*:\\s*\\\"([^\\\"]*)\\\"",
+    "\\b[A-Za-z0-9_]+\\s*:\\s*'([^']*)'"
+  ],
+
+  // Quick suggestions in strings so completions show up while typing className
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+
+  // Keep ESLint working directories auto-detected for monorepo
   "eslint.workingDirectories": [
     {
       "mode": "auto"
