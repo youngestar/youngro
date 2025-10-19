@@ -10,7 +10,8 @@
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit",
-    "build:css": "pnpm exec tailwindcss -i ./src/styles.css -o ./dist/ui-tw.css --minify --config ./tailwind.config.js"
+    "build:css": "pnpm exec tailwindcss -i ./src/styles.css -o ./dist/ui-tw.css --minify --config ./tailwind.config.js",
+    "build:ui": "tsup src/index.ts --format cjs,esm --dts --outDir dist"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -22,9 +23,11 @@
     "eslint": "^9.34.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.0",
+    "tsup": "^6.7.0",
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.546.0",
