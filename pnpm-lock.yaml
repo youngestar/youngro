@@ -24,6 +24,9 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+      yaml:
+        specifier: ^2.8.1
+        version: 2.8.1
 
   apps/docs:
     dependencies:
@@ -2445,6 +2448,11 @@ packages:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
 
+  yaml@2.8.1:
+    resolution: {integrity: sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
@@ -4834,5 +4842,7 @@ snapshots:
       strip-ansi: 7.1.2
 
   yaml@1.10.2: {}
+
+  yaml@2.8.1: {}
 
   yocto-queue@0.1.0: {}
