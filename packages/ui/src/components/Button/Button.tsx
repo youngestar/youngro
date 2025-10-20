@@ -10,7 +10,7 @@ const button = cva(
   {
     variants: {
       intent: {
-        default: "bg-slate-900  text-white hover:bg-slate-700",
+        default: "bg-slate-900 text-white hover:bg-slate-700",
         destructive: "bg-red-600 text-white hover:bg-red-500",
         subtle: "bg-slate-100 text-slate-900 hover:bg-slate-200",
       },
