@@ -20,6 +20,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@radix-ui/react-select": "^2.2.6"
+    "@radix-ui/react-select": "^2.2.6",
+    "zustand": "^4.4.0"
   }
 }
