@@ -2,7 +2,9 @@
   "name": "youngro",
   "private": true,
   "scripts": {
+    "prebuild": "pnpm --filter @youngro/design-tokens build",
     "build": "turbo run build",
+    "predev": "pnpm --filter @youngro/design-tokens build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

@@ -1,13 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+const shared = require("../../packages/design-tokens/tailwind.config.cjs");
+
 module.exports = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../docs/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
-  ],
-  darkMode: "media",
-  theme: {
-    extend: {},
-  },
-  plugins: [],
+  ...shared,
+  // web-specific content (if any) can be appended here
+  content: [...shared.content, "./app/**/*.{js,ts,jsx,tsx,mdx}"],
+  // web prefers class-based dark mode
+  darkMode: "class",
+  plugins: [...(shared.plugins || [])],
 };

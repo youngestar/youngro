@@ -1,7 +1,9 @@
+"use client";
+
 import Image, { type ImageProps } from "next/image";
 import { Button, Card } from "@repo/ui";
 import styles from "./page.module.css";
-import AiChatMessage from "../../src/components/ai-chat-message";
+import AiChatMessage from "../../src/components/AIChatMessage";
 
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
@@ -22,7 +24,21 @@ const ThemeImage = (props: Props) => {
 export default function Home() {
   return (
     <>
-      <AiChatMessage name="123" chatContent="123"></AiChatMessage>
+      <AiChatMessage
+        name="123"
+        content="12333333333333333333333333333333asssssssssssssssssssssssssssssss"
+        role="user"
+      ></AiChatMessage>
+      <AiChatMessage
+        name="123"
+        content="12333333333333333333333333333333asssssssssssssssssssssssssssssss"
+        role="error"
+      ></AiChatMessage>
+      <AiChatMessage
+        name="123"
+        content="12333333333333333333333333333333asssssssssssssssssssssssssssssss"
+        role="assistant"
+      ></AiChatMessage>
       <div>
         <h1 className={styles.title}>Welcome to Youngro</h1>
       </div>

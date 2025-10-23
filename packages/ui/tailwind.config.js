@@ -1,10 +1,12 @@
 /** @type {import('tailwindcss').Config} */
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const shared = require("../design-tokens/tailwind.config.cjs");
+
 export default {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "../../apps/web/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  darkMode: "media",
-  theme: { extend: {} },
-  plugins: [],
+  ...shared,
+  // include this package's own sources explicitly
+  content: [...shared.content, "./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  darkMode: "class",
+  plugins: [...(shared.plugins || [])],
 };
