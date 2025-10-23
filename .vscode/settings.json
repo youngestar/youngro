@@ -19,8 +19,22 @@
     "cva\\s*\\(\\s*`([^`]*)`",
     "cva\\s*\\(\\s*\\\"([^\\\"]*)\\\"",
     "cva\\s*\\(\\s*'([^']*)'",
+    // catch cva([...]) and cva([`...`, ...]) array first-arg forms
+    "cva\\s*\\(\\s*\\[\\s*`([^`]*)`",
+    "cva\\s*\\(\\s*\\[\\s*\\\"([^\\\"]*)\\\"",
+    "cva\\s*\\(\\s*\\[\\s*'([^']*)'",
+    // catch simple concatenations or template expressions inside cva(...) or clsx/cn
+    "cva\\s*\\([^)]*`([^`]*)`[^)]*\\)",
+    "cva\\s*\\([^)]*\\\"([^\\\"]*)\\\"[^)]*\\)",
     "\\b[A-Za-z0-9_]+\\s*:\\s*\\\"([^\\\"]*)\\\"",
     "\\b[A-Za-z0-9_]+\\s*:\\s*'([^']*)'"
+  ],
+
+  // Ensure the extension scans the UI source files inside the monorepo
+  "tailwindCSS.files": [
+    "packages/ui/src/**/*.{ts,tsx}",
+    "apps/web/**/*.{ts,tsx,js,jsx,html}",
+    "packages/**/*.{ts,tsx,js,jsx,html}"
   ],
 
   // Quick suggestions in strings so completions show up while typing className

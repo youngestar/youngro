@@ -27,14 +27,6 @@ out/
 build
 dist
 
-# Per-app tailwind/temp folders sometimes generated during dev
-.tw-clean/
-.tw-isolate/
-.twcheck/
-
-# Ignore dist folders for packages explicitly
-packages/*/dist/
-
 
 # Debug
 npm-debug.log*

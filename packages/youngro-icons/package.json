@@ -1,0 +1,19 @@
+{
+  "name": "@youngro/icons",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node ./src/build-icons.mjs",
+    "prepare": "pnpm run build"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    "./react": "./dist/react/index.js",
+    "./": "./dist/index.js"
+  }
+}
