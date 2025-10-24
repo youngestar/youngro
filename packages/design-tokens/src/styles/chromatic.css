@@ -1,0 +1,49 @@
+/*
+  Chromatic theme variables for Youngro
+  - Drives primary/complementary via a single hue
+  - Provides light/dark background/foreground
+  - Exposes both flat color triples (for hsl(var(--token))) and a few shade triples
+*/
+
+:root {
+  /* Base chromatic hue (0–360). Projects can override this on html/body */
+  --chromatic-hue: 240.25;
+
+  /* Primary color (from base hue) */
+  --primary-h: var(--chromatic-hue);
+  --primary-s: 70%;
+  --primary-l: 50%;
+  --primary: var(--primary-h) var(--primary-s) var(--primary-l);
+  --primary-foreground: 0 0% 100%;
+
+  /* Complementary color (hue + 180) */
+  --complementary-h: calc(var(--chromatic-hue) + 180);
+  --complementary-s: 70%;
+  --complementary-l: 50%;
+  --complementary: var(--complementary-h) var(--complementary-s)
+    var(--complementary-l);
+  --complementary-foreground: 0 0% 100%;
+
+  /* A few usable primary shades (derive from primary-h) */
+  --primary-50: var(--primary-h) 100% 97%;
+  --primary-100: var(--primary-h) 95% 92%;
+  --primary-200: var(--primary-h) 90% 84%;
+  --primary-300: var(--primary-h) 85% 75%;
+  --primary-400: var(--primary-h) 80% 68%;
+  --primary-500: var(--primary-h) 70% 50%;
+  --primary-600: var(--primary-h) 65% 40%;
+  --primary-700: var(--primary-h) 60% 30%;
+  --primary-800: var(--primary-h) 55% 22%;
+  --primary-900: var(--primary-h) 50% 15%;
+  --primary-950: var(--primary-h) 50% 10%;
+
+  /* App background/foreground (light) */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+}
+
+/* Dark mode flips bg/fg; colors remain driven by hue */
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+}

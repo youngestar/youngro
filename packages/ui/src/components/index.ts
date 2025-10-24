@@ -25,3 +25,7 @@ export {
   CardContent,
   CardFooter,
 } from "./Card";
+export { Icon } from "./Icon";
+export type { IconProps } from "./Icon";
+export { BrandLogo } from "./BrandLogo";
+export type { BrandLogoProps } from "./BrandLogo";

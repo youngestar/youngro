@@ -1,35 +1,20 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui";
+"use client";
+
+import { Button, BrandLogo, Icon } from "@repo/ui";
+import { Globe, Square } from "lucide-react";
 import styles from "./page.module.css";
-
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <ThemeImage
+        <BrandLogo
           className={styles.logo}
           srcLight="turborepo-dark.svg"
           srcDark="turborepo-light.svg"
           alt="Turborepo logo"
           width={180}
           height={38}
-          priority
         />
         <ol>
           <li>
@@ -45,7 +30,8 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               className={styles.logo}
               src="/vercel.svg"
               alt="Vercel logomark"
@@ -73,12 +59,11 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <Icon
+            icon={Square}
+            size="sm"
+            className={styles.logo}
+            aria-label="Window icon"
           />
           Examples
         </a>
@@ -87,12 +72,11 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+          <Icon
+            icon={Globe}
+            size="sm"
+            className={styles.logo}
+            aria-label="Globe icon"
           />
           Go to turborepo.com →
         </a>

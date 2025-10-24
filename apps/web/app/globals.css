@@ -1,4 +1,8 @@
+@import "@youngro/design-tokens/styles/chromatic.css";
+
 :root {
+  /* 主题色设计 */
+  --chromatic-hue: 200.44;
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -6,6 +10,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Set base font families so the injected CSS variables actually take effect globally */
+@layer base {
+  html {
+    @apply font-sans;
+  }
+  code,
+  kbd,
+  samp,
+  pre {
+    @apply font-mono;
+  }
+}
 
 @media (prefers-color-scheme: dark) {
   :root {

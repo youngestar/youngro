@@ -133,3 +133,22 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.com/docs/reference/configuration)
 - [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+
+## 图标规范与用法
+
+- 系统图标：统一使用 `@repo/ui` 的 `Icon` 搭配 `lucide-react`，通过 `text-*` 控制颜色、`size` 控制尺寸。
+- 品牌/Logo：使用 `@repo/ui` 的 `BrandLogo` 或原生 `<img>`；SVG 资源不使用 `next/image`。
+- Lint 约束：
+  - 禁止 `<Image src="*.svg"/>`（会触发 ESLint 报错）。
+  - `<img>`/`BrandLogo` 必须提供 `alt` 文本（无障碍要求）。
+
+示例：
+
+```tsx
+import { Icon, BrandLogo } from "@repo/ui";
+import { Check } from "lucide-react";
+
+<Icon icon={Check} size="sm" className="text-muted-foreground" aria-label="ok" />
+
+<BrandLogo srcLight="logo-light.svg" srcDark="logo-dark.svg" alt="Brand" width={180} height={38} />
+```

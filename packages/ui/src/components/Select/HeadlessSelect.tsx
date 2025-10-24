@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as RadixSelect from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
+import { Icon } from "../Icon";
 import clsx from "clsx";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -74,7 +75,7 @@ export const HeadlessSelect: React.FC<
       >
         <RadixSelect.Value />
         <RadixSelect.Icon>
-          <ChevronDown className="ml-2 h-4 w-4" />
+          <Icon icon={ChevronDown} size="sm" className="ml-2" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
       <RadixSelect.Portal>
@@ -88,7 +89,7 @@ export const HeadlessSelect: React.FC<
               >
                 <RadixSelect.ItemText>{o.label}</RadixSelect.ItemText>
                 <RadixSelect.ItemIndicator className="ml-auto">
-                  <Check className="h-4 w-4" />
+                  <Icon icon={Check} size="sm" />
                 </RadixSelect.ItemIndicator>
               </RadixSelect.Item>
             ))}

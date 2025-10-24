@@ -120,6 +120,7 @@ export async function processMarkdown(markdown: string): Promise<string> {
     return result.toString();
   } catch (err) {
     // fallback to simpler pipeline
+    void err;
     const fb = await fallback();
     return fb.processSync(markdown).toString();
   }

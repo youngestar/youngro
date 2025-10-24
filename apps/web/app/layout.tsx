@@ -2,13 +2,28 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = localFont({
+// Sans (variable font)
+const fontSans = localFont({
   src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
+  display: "swap",
+  variable: "--font-sans",
+  weight: "100 900",
 });
-const geistMono = localFont({
+
+// Mono (variable font); if you prefer Departure Mono, swap to its regular file
+const fontMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+  display: "swap",
+  variable: "--font-mono",
+  weight: "100 900",
+});
+
+// CJK (regular weight)
+const fontCJK = localFont({
+  src: "./fonts/XiaolaiSC-Regular.ttf",
+  display: "swap",
+  variable: "--font-cjk",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -22,10 +37,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-      </body>
+    <html
+      lang="zh-CN"
+      className={`${fontSans.variable} ${fontMono.variable} ${fontCJK.variable}`}
+    >
+      <body>{children}</body>
     </html>
   );
 }

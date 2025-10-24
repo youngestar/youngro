@@ -8,10 +8,11 @@
     "clean": "pnpm exec rimraf .next .output",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint --max-warnings 0",
+    "lint": "eslint . --max-warnings 0 --ext .ts,.tsx",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@youngro/design-tokens": "workspace:*",
     "@repo/ui": "workspace:*",
     "@shikijs/rehype": "^3.12.2",
     "clsx": "^2.1.1",

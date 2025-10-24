@@ -28,11 +28,12 @@ export default function AiChatMessage({
   const isError = role === "error";
 
   const bubbleClass = clsx(
-    "flex flex-col shadow-sm min-w-20 rounded-lg px-2 py-1",
+    "flex flex-col shadow-sm min-w-20 rounded-lg px-2 py-1 shadow-md",
     {
-      "bg-cyan-50/80 dark:bg-cyan-900/80": isUser,
-      "bg-primary-50/80 dark:bg-primary-900/80": isAssistant,
-      "bg-violet-50/80 dark:bg-violet-900/80": isError,
+      "bg-cyan-50/80 dark:bg-cyan-900/80 shadow-cyan-300/50": isUser,
+      "bg-primary-50/80 dark:bg-primary-900/80 shadow-primary-300/50":
+        isAssistant,
+      "bg-violet-50/80 dark:bg-violet-900/80 shadow-violet-300/50": isError,
     }
   );
 

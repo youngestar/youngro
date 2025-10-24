@@ -2,8 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 import AiChatMessage from "./AIChatMessage";
-import { useChatStore } from "../stores/chat";
+import { useChatStore, type Message } from "../stores/chat";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 export const ChatHistory: React.FC = () => {
   const chatHistoryRef = useRef<HTMLDivElement | null>(null);
@@ -28,7 +29,7 @@ export const ChatHistory: React.FC = () => {
   }, [onBeforeMessageComposed, onTokenLiteral]);
 
   // 根据角色获取显示名
-  const getMessageName = (role: string, t: any) => {
+  const getMessageName = (role: Message["role"], t: TFunction) => {
     switch (role) {
       case "user":
         return t("stage.chat.message.character-name.you");
@@ -47,7 +48,7 @@ export const ChatHistory: React.FC = () => {
       className="flex flex-col relative h-full w-full overflow-y-auto rounded-lg px-2 py-2 space-y-2"
     >
       {/* 普通历史消息 */}
-      {messages.map((message: any, index: number) => (
+      {messages.map((message: Message, index: number) => (
         <AiChatMessage
           key={index}
           name={getMessageName(message.role, t)}

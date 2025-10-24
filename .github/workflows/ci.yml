@@ -5,6 +5,21 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_fail:
+        description: "Force the workflow to fail early (smoke test gates)"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  NEXT_TELEMETRY_DISABLED: 1
 
 jobs:
   lint:
@@ -12,6 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Fail on request (smoke)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.force_fail == 'true' }}
+        run: |
+          echo "Force-fail is enabled. Exiting 1 to test CI gating."
+          exit 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -89,8 +110,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck UI
-        run: pnpm -w -F @repo/ui check-types
+      - name: Typecheck (all packages)
+        run: pnpm -w check-types
 
   build:
     name: Build
@@ -138,11 +159,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Clean web
-        run: pnpm -w -F web exec rimraf .next .output || true
+      - name: Cache Next.js (web)
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: ${{ runner.os }}-nextcache-web-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Cache Next.js (docs)
+        uses: actions/cache@v4
+        with:
+          path: apps/docs/.next/cache
+          key: ${{ runner.os }}-nextcache-docs-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Build UI package
         run: pnpm -w -F @repo/ui build:ui
 
       - name: Build web app
         run: pnpm -w -F web build
+
+      - name: Build docs app
+        run: pnpm -w -F docs build
+
+      - name: Verify web build output
+        run: |
+          test -f apps/web/.next/BUILD_ID && echo "web BUILD_ID present" || (echo "web BUILD_ID missing" && exit 1)
+
+      - name: Verify docs build output
+        run: |
+          test -f apps/docs/.next/BUILD_ID && echo "docs BUILD_ID present" || (echo "docs BUILD_ID missing" && exit 1)

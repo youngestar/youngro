@@ -4,6 +4,7 @@ import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 import { Check } from "lucide-react";
+import { Icon } from "../Icon";
 
 const button = cva(
   " inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
@@ -42,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <button {...props} className={clsx(button({ intent, size }), className)}>
-      {icon && <Check className="mr-2 h-4 w-4" />}
+      {icon && <Icon icon={Check} size="sm" className="mr-2" />}
       {children}
     </button>
   );
