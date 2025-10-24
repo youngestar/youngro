@@ -39,15 +39,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable Corepack & prepare pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
-      - name: Setup pnpm (action fallback)
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: "9"
 
       - name: Verify pnpm
         run: |
@@ -82,15 +75,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable Corepack & prepare pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
-      - name: Setup pnpm (action fallback)
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: "9"
 
       - name: Verify pnpm
         run: |
@@ -125,15 +111,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable Corepack & prepare pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@9 --activate
-
-      - name: Setup pnpm (action fallback)
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: "9"
 
       - name: Verify pnpm
         run: |

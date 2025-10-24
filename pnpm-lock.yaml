@@ -79,6 +79,9 @@ importers:
       '@shikijs/rehype':
         specifier: ^3.12.2
         version: 3.13.0
+      '@youngro/chat-zustand':
+        specifier: workspace:*
+        version: link:../../packages/chat-zustand
       '@youngro/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
