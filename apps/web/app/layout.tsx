@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import I18nProvider from "../src/providers/I18nProvider";
 
 // Sans (variable font)
 const fontSans = localFont({
@@ -41,7 +42,9 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${fontSans.variable} ${fontMono.variable} ${fontCJK.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

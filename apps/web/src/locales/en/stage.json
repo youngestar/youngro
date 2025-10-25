@@ -1,0 +1,13 @@
+{
+  "stage": {
+    "chat": {
+      "message": {
+        "character-name": {
+          "you": "You",
+          "airi": "Airi",
+          "core-system": "System"
+        }
+      }
+    }
+  }
+}

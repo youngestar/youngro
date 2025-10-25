@@ -2,6 +2,7 @@
 
 import styles from "./page.module.css";
 import AiChatMessage from "../../src/components/AIChatMessage";
+import { ChatHistory } from "../../src/components/ChatHistory";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         role="assistant"
       ></AiChatMessage>
       <div className=" bg-primary-100 text-primary-500">Test</div>
+      <ChatHistory />
       <div>
         <h1 className={styles.title}>Welcome to Youngro</h1>
       </div>
