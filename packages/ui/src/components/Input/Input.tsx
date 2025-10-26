@@ -5,13 +5,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 
 const input = cva(
-  "flex h-10 w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm",
+  // Align with chat style: tinted primary background + primary foreground, dark-mode aware
+  "flex h-10 w-full rounded-md px-3 py-2 text-sm font-medium outline-none bg-primary-200/20 dark:bg-primary-400/20 text-primary-500 placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50",
   {
     variants: {
       intent: {
-        default:
-          "border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400",
-        destructive: "border-red-300 focus:ring-red-400",
+        default: "focus-visible:ring-2 focus-visible:ring-primary-400/60",
+        destructive:
+          "focus-visible:ring-2 focus-visible:ring-red-400/70 ring-offset-0",
       },
       size: {
         sm: "h-8 text-sm",

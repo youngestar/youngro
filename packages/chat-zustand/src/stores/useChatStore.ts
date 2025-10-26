@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
 
@@ -21,7 +21,13 @@ export interface ChatState {
 
 export const useChatStore = create<ChatState>()(
   immer((set, get) => ({
-    messages: [],
+    messages: [
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+    ],
     streamingMessage: null,
     sending: false,
     abortController: null,

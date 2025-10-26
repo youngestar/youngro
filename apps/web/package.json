@@ -12,6 +12,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "@youngro/chat-zustand": "workspace:*",
     "@youngro/design-tokens": "workspace:*",
     "@repo/ui": "workspace:*",

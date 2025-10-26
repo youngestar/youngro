@@ -4,24 +4,32 @@ import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 
-const textarea = cva("w-full rounded-md border px-3 py-2 text-sm shadow-sm", {
-  variants: {
-    intent: {
-      default:
-        "border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400",
-      destructive: "border-red-300 focus:ring-red-400",
+// Align default textarea style with InteractiveArea input
+// w-full min-h-[100px] max-h-[300px] rounded-t-xl p-3 font-medium outline-none
+// bg-primary-200/20 dark:bg-primary-400/20 text-primary-500
+// placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50
+const textarea = cva(
+  "w-full min-h-[100px] max-h-[300px] rounded-t-xl p-3 text-sm font-medium outline-none bg-primary-200/20 dark:bg-primary-400/20 text-primary-500 placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50",
+  {
+    variants: {
+      intent: {
+        // default matches InteractiveArea visual by default
+        default: "",
+        destructive:
+          "ring-1 ring-red-300 focus:ring-2 focus:ring-red-400 dark:ring-red-400/60",
+      },
+      size: {
+        sm: "text-sm p-2",
+        md: "text-sm p-3",
+        lg: "text-base p-4",
+      },
     },
-    size: {
-      sm: "text-sm",
-      md: "text-sm",
-      lg: "text-base",
+    defaultVariants: {
+      intent: "default",
+      size: "md",
     },
-  },
-  defaultVariants: {
-    intent: "default",
-    size: "md",
-  },
-});
+  }
+);
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
   VariantProps<typeof textarea>;

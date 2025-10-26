@@ -17,5 +17,6 @@
       "cache": false,
       "persistent": true
     }
-  }
+  },
+  "globalEnv": ["DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL"]
 }

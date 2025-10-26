@@ -5,7 +5,6 @@ import AiChatMessage from "./AIChatMessage";
 import { useChatStore } from "@youngro/chat-zustand";
 import type { BaseMessage } from "@youngro/chat-zustand";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 
 export const ChatHistory: React.FC = () => {
   const chatHistoryRef = useRef<HTMLDivElement | null>(null);
@@ -28,14 +27,15 @@ export const ChatHistory: React.FC = () => {
   }, [messages.length]);
 
   // 根据角色获取显示名
-  const getMessageName = (role: BaseMessage["role"], t: TFunction) => {
+  const getMessageName = (role: BaseMessage["role"]) => {
+    // TODO: i18n
     switch (role) {
       case "user":
-        return t("stage.chat.message.character-name.you");
+        return "user";
       case "assistant":
-        return t("stage.chat.message.character-name.airi");
+        return "assistant";
       case "error":
-        return t("stage.chat.message.character-name.core-system");
+        return "error";
       default:
         return "";
     }
@@ -59,7 +59,7 @@ export const ChatHistory: React.FC = () => {
         return (
           <AiChatMessage
             key={index}
-            name={getMessageName(role, t)}
+            name={getMessageName(role)}
             role={role}
             content={content}
             loading={sending && index === messages.length - 1}

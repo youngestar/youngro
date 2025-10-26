@@ -5,12 +5,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import clsx from "clsx";
 
 const checkbox = cva(
-  "inline-flex items-center justify-center rounded-sm border p-1",
+  // Use native accent color for consistent theming; add focus-visible ring
+  "inline-flex items-center justify-center rounded-sm p-0.5 accent-primary-500 dark:accent-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60",
   {
     variants: {
       intent: {
-        default: "border-slate-300 bg-white",
-        destructive: "border-red-300 bg-white",
+        default: "",
+        destructive:
+          "accent-red-500 focus-visible:ring-red-400/70 dark:accent-red-400",
       },
       size: {
         sm: "h-4 w-4",

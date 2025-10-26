@@ -21,12 +21,16 @@ export const Field: React.FC<FieldProps> = ({
   return (
     <div className={clsx("space-y-1", className)}>
       {label && (
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="block text-sm font-medium text-primary-600 dark:text-primary-300">
           {label}
         </label>
       )}
       {children}
-      {help && <p className="text-xs text-slate-500">{help}</p>}
+      {help && (
+        <p className="text-xs text-primary-400 dark:text-primary-300/70">
+          {help}
+        </p>
+      )}
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
