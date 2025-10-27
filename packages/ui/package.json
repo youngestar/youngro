@@ -10,8 +10,10 @@
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit",
+    "build": "pnpm run build:ui && pnpm run build:css",
     "build:css": "pnpm exec tailwindcss -i ./src/styles.css -o ./dist/ui-tw.css --minify --config ./tailwind.config.js",
-    "build:ui": "tsup src/index.ts --format cjs,esm --dts --outDir dist"
+    "build:ui": "tsup src/index.ts --format cjs,esm --dts --outDir dist",
+    "prepare": "pnpm run build"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

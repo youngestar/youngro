@@ -9,7 +9,7 @@ import clsx from "clsx";
 // bg-primary-200/20 dark:bg-primary-400/20 text-primary-500
 // placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50
 const textarea = cva(
-  "w-full min-h-[100px] max-h-[300px] rounded-t-xl p-3 text-sm font-medium outline-none bg-primary-200/20 dark:bg-primary-400/20 text-primary-500 placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50",
+  "w-full min-h-[100px] max-h-[300px] rounded-t-xl p-3 text-sm font-medium outline-none border-0 bg-primary-200/20 dark:bg-primary-400/20 text-primary-500 placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50",
   {
     variants: {
       intent: {

@@ -10,7 +10,7 @@ import { Icon } from "../Icon";
 // primary -> "发送" button style
 // default -> "清空" button style
 const button = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none",
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-300 dark:focus-visible:ring-primary-500/60",
   {
     variants: {
       intent: {

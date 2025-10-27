@@ -35,7 +35,7 @@ export const useChatStore = create<ChatState>()(
     onTokenLiteral: [],
     onStreamEnd: [],
 
-    send: async (text: string) => {
+    send: async (text: string, options?: { model?: string }) => {
       if (!text) return;
       const id = String(Date.now());
       const userMessage: BaseMessage = {
@@ -62,43 +62,132 @@ export const useChatStore = create<ChatState>()(
         s.abortController = controller;
       });
 
-      // For demo: simple mock streaming that emits chunks
-      try {
-        const chunks = ["Hi", ", this is", " a demo", " of streaming", "."];
-        for (const chunk of chunks) {
-          if (controller.signal.aborted) throw new Error("aborted");
-          // simulate delay
-          await new Promise((r) => setTimeout(r, 200));
-          // append to streaming message
-          set((s) => {
-            if (!s.streamingMessage) return;
-            s.streamingMessage.content += chunk;
-            s.streamingMessage.slices = s.streamingMessage.slices || [];
-            s.streamingMessage.slices.push({ type: "text", text: chunk });
-          });
-          // call hooks
-          get().onTokenLiteral.forEach((cb) => cb(chunk));
+      // Build provider messages from store history (skip error messages)
+      const toProviderMessages = () => {
+        const current = get().messages;
+        const msgs: Array<{
+          role: "system" | "user" | "assistant" | "tool";
+          content: any;
+        }> = [];
+        for (const m of current) {
+          if (m.role === "error") continue;
+          const role =
+            m.role === "system" ||
+            m.role === "user" ||
+            m.role === "assistant" ||
+            m.role === "tool"
+              ? m.role
+              : undefined;
+          if (!role) continue;
+          msgs.push({ role, content: m.content });
         }
+        return msgs;
+      };
 
-        // finish
-        set((s) => {
-          if (
-            s.streamingMessage &&
-            s.streamingMessage.slices &&
-            s.streamingMessage.slices.length > 0
-          ) {
-            s.messages.push(s.streamingMessage as BaseMessage);
-          }
-          s.streamingMessage = null;
-          s.sending = false;
-          s.abortController = null;
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            messages: toProviderMessages(),
+            model: options?.model,
+            stream: true,
+          }),
+          signal: controller.signal,
         });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        }
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("ReadableStream reader unavailable");
+        const decoder = new TextDecoder();
+        let buffer = "";
 
-        get().onStreamEnd.forEach((cb) => cb());
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let idx: number;
+          while ((idx = buffer.indexOf("\n")) !== -1) {
+            const line = buffer.slice(0, idx);
+            buffer = buffer.slice(idx + 1);
+            const s = line.trim();
+            if (!s) continue;
+            try {
+              const obj = JSON.parse(s) as Record<string, unknown>;
+              const t = obj.type as string | undefined;
+              if (t === "text-delta") {
+                const chunk = typeof obj.text === "string" ? obj.text : "";
+                if (!chunk) continue;
+                set((st) => {
+                  if (!st.streamingMessage) return;
+                  st.streamingMessage.content += chunk;
+                  st.streamingMessage.slices = st.streamingMessage.slices || [];
+                  st.streamingMessage.slices.push({
+                    type: "text",
+                    text: chunk,
+                  });
+                });
+                get().onTokenLiteral.forEach((cb) => cb(chunk));
+              } else if (t === "finish") {
+                // push final assistant message
+                set((st) => {
+                  if (
+                    st.streamingMessage &&
+                    st.streamingMessage.slices &&
+                    st.streamingMessage.slices.length > 0
+                  ) {
+                    st.messages.push(st.streamingMessage as BaseMessage);
+                  }
+                  st.streamingMessage = null;
+                  st.sending = false;
+                  st.abortController = null;
+                });
+                get().onStreamEnd.forEach((cb) => cb());
+              } else if (t === "error") {
+                const msg =
+                  (obj.error &&
+                    typeof obj.error === "object" &&
+                    (obj.error as any).message) ||
+                  "error";
+                throw new Error(String(msg));
+              }
+            } catch (e) {
+              // Treat parse/stream error as failure and exit
+              throw e;
+            }
+          }
+        }
+        // Flush remaining buffer if contains a last JSON
+        const last = buffer.trim();
+        if (last) {
+          try {
+            const obj = JSON.parse(last) as Record<string, unknown>;
+            const t = obj.type as string | undefined;
+            if (t === "finish") {
+              set((st) => {
+                if (
+                  st.streamingMessage &&
+                  st.streamingMessage.slices &&
+                  st.streamingMessage.slices.length > 0
+                ) {
+                  st.messages.push(st.streamingMessage as BaseMessage);
+                }
+                st.streamingMessage = null;
+                st.sending = false;
+                st.abortController = null;
+              });
+              get().onStreamEnd.forEach((cb) => cb());
+            }
+          } catch {
+            // ignore
+          }
+        }
       } catch (err) {
         set((s) => {
           s.sending = false;
           s.abortController = null;
+          s.streamingMessage = null;
           s.messages.push({
             id: `err-${id}`,
             role: "error",

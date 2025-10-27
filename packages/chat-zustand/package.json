@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -p .",
     "dev": "vite",
-    "test": "vitest"
+    "test": "vitest",
+    "prepare": "pnpm run build"
   },
   "dependencies": {
     "zustand": "^4.4.0",

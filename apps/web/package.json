@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @youngro/design-tokens build && next dev --turbopack --port 3000",
+    "dev": "pnpm --filter @youngro/design-tokens build && pnpm --filter @youngro/chat-zustand build && pnpm --filter @repo/ui build && next dev --turbopack --port 3000",
     "clean": "pnpm exec rimraf .next .output",
     "build": "next build",
     "start": "next start",
