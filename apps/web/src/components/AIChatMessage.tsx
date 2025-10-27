@@ -1,3 +1,4 @@
+// HMR test: touch from web component to observe compile log
 "use client";
 
 import MarkdownRenderer from "./MarkdownRenderer";
@@ -38,11 +39,10 @@ export default function AiChatMessage({
   );
 
   const textClass = clsx(
-    "prose prose-sm dark:prose-invert max-w-none break-words",
+    "prose dark:prose-invert max-w-none break-words text-xs sm:text-base",
     {
-      "text-base": isUser,
       "text-primary-700 dark:text-primary-200": isAssistant,
-      "text-violet-500 text-sm": isError,
+      "text-violet-500": isError,
     }
   );
 

@@ -23,16 +23,29 @@ const button = cva(
         subtle:
           "bg-slate-100 text-slate-900 hover:bg-slate-200 disabled:opacity-60 disabled:pointer-events-none",
       },
+      // Do not attach spacing directly here to avoid conflicts with iconOnly
       size: {
-        sm: "px-3 py-2",
-        md: "px-4 py-2",
-        lg: "px-5 py-3",
+        sm: "",
+        md: "",
+        lg: "",
       },
       iconOnly: {
-        true: "p-2",
+        // Reset padding and line-height for icon-only to keep it square
+        true: "p-0 leading-none",
         false: "",
       },
     },
+    compoundVariants: [
+      // Spacing when NOT icon-only (text buttons)
+      { size: "sm", iconOnly: false, class: "px-3 py-2" },
+      { size: "md", iconOnly: false, class: "px-4 py-2" },
+      { size: "lg", iconOnly: false, class: "px-5 py-3" },
+
+      // Explicit square sizes for icon-only buttons
+      { size: "sm", iconOnly: true, class: "h-8 w-8" },
+      { size: "md", iconOnly: true, class: "h-9 w-9" },
+      { size: "lg", iconOnly: true, class: "h-10 w-10" },
+    ],
     defaultVariants: {
       intent: "default",
       size: "md",

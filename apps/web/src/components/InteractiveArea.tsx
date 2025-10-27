@@ -3,51 +3,66 @@
 import React, { useCallback, useState } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button } from "@repo/ui";
+import { Textarea, Button, ScrollArea } from "@repo/ui";
 
 export const InteractiveArea: React.FC = () => {
   const { send, cleanup, sending } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
 
-  const handleSend = useCallback(async () => {
+  const handleSend = useCallback(() => {
+    if (isComposing) return;
     const text = messageInput.trim();
-    if (!text || isComposing) return;
-    await send(text);
+    if (!text) return;
+    // 先清空输入，提升交互流畅性；随后异步发送（不 await）
     setMessageInput("");
+    void send(text);
   }, [isComposing, messageInput, send]);
 
   return (
     <div className="flex flex-col items-center pt-4 w-full h-full">
-      <div className="w-full max-h-[85vh] py-4">
-        <div className="flex flex-col h-full w-full overflow-y-auto rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
-          <div className="flex-1 min-h-[40vh]">
-            <ChatHistory />
-          </div>
-          <div className="flex gap-2 p-2">
-            <Textarea
-              placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onCompositionStart={() => setIsComposing(true)}
-              onCompositionEnd={() => setIsComposing(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void handleSend();
-                }
-              }}
-            />
-            <Button
-              intent="primary"
-              disabled={sending || !messageInput.trim()}
-              onClick={() => void handleSend()}
+      <div className="w-full h-[85dvh] py-4">
+        <div className="h-full mx-auto min-w-[30%] max-w-[500px] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
+          <div className="flex flex-col h-full w-full">
+            <ScrollArea
+              variant="textarea"
+              thickness="md"
+              className="flex-1 min-h-[40vh] px-2"
             >
-              发送
-            </Button>
-            <Button intent="default" title="清空历史" onClick={() => cleanup()}>
-              清空
-            </Button>
+              <div className="px-2 py-2">
+                <ChatHistory />
+              </div>
+            </ScrollArea>
+            <div className="flex gap-2 p-2">
+              <Textarea
+                placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
+                value={messageInput}
+                className="text-base"
+                onChange={(e) => setMessageInput(e.target.value)}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={() => setIsComposing(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSend();
+                  }
+                }}
+              />
+              <Button
+                intent="primary"
+                disabled={sending || !messageInput.trim()}
+                onClick={() => void handleSend()}
+              >
+                发送
+              </Button>
+              <Button
+                intent="default"
+                title="清空历史"
+                onClick={() => cleanup()}
+              >
+                清空
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,14 @@
-const tokens = require("./dist/index.cjs") || require("./src/index");
+// Prefer src during development for instant token updates; fallback to dist for safety
+let tokens;
+try {
+  tokens = require("./src/index");
+} catch (e) {
+  try {
+    tokens = require("./dist/index.cjs");
+  } catch (_) {
+    tokens = {};
+  }
+}
 
 module.exports = {
   // Use POSIX-style globs to avoid backslash patterns on Windows which can accidentally match node_modules

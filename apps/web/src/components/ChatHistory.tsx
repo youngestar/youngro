@@ -7,7 +7,7 @@ import type { BaseMessage } from "@youngro/chat-zustand";
 import { useTranslation } from "react-i18next";
 
 export const ChatHistory: React.FC = () => {
-  const chatHistoryRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
 
   const { messages, sending, streamingMessage, registerOnTokenLiteral } =
@@ -16,8 +16,7 @@ export const ChatHistory: React.FC = () => {
   // 自动滚动到底部
   useEffect(() => {
     const scrollToBottom = () => {
-      if (chatHistoryRef.current)
-        chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
+      endRef.current?.scrollIntoView({ block: "end" });
     };
     // 当有新 token 流入时滚动
     registerOnTokenLiteral?.(() => setTimeout(scrollToBottom, 0));
@@ -42,10 +41,7 @@ export const ChatHistory: React.FC = () => {
   };
 
   return (
-    <div
-      ref={chatHistoryRef}
-      className="flex flex-col relative h-full w-full overflow-y-auto rounded-lg px-2 py-2 space-y-2"
-    >
+    <div className="flex flex-col relative w-full rounded-lg space-y-2">
       {/* 普通历史消息 */}
       {messages.map((message: BaseMessage, index: number) => {
         const role: "user" | "assistant" | "error" =
@@ -62,7 +58,6 @@ export const ChatHistory: React.FC = () => {
             name={getMessageName(role)}
             role={role}
             content={content}
-            loading={sending && index === messages.length - 1}
           />
         );
       })}
@@ -76,6 +71,7 @@ export const ChatHistory: React.FC = () => {
           loading={!streamingMessage.content}
         />
       )}
+      <div ref={endRef} />
     </div>
   );
 };

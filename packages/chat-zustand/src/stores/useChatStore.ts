@@ -1,3 +1,4 @@
+// HMR test: trivial comment to verify source-linked hot reload
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
@@ -22,6 +23,101 @@ export interface ChatState {
 export const useChatStore = create<ChatState>()(
   immer((set, get) => ({
     messages: [
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
+      {
+        id: "init",
+        role: "system",
+        content: "Welcome to the chat!",
+      },
       {
         id: "init",
         role: "system",
