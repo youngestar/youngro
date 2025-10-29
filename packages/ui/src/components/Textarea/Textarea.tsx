@@ -34,18 +34,17 @@ const textarea = cva(
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
   VariantProps<typeof textarea>;
 
-export const Textarea: React.FC<TextareaProps> = ({
-  className,
-  intent,
-  size,
-  ...props
-}) => {
-  return (
-    <textarea
-      {...props}
-      className={clsx(textarea({ intent, size }), className)}
-    />
-  );
-};
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, intent, size, ...props }, ref) => {
+    return (
+      <textarea
+        ref={ref}
+        {...props}
+        className={clsx(textarea({ intent, size }), className)}
+      />
+    );
+  }
+);
+Textarea.displayName = "Textarea";
 
 export default Textarea;

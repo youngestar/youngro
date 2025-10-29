@@ -63,7 +63,7 @@ export const ScrollArea = React.forwardRef<
             isContrast
               ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
               : isTextareaTone
-                ? "bg-neutral-200/40 dark:bg-neutral-800/40 hover:bg-neutral-200/60 dark:hover:bg-neutral-800/60"
+                ? "bg-primary-50/50 dark:bg-primary-950/70"
                 : undefined,
             scrollbarClassName
           )}
@@ -74,7 +74,7 @@ export const ScrollArea = React.forwardRef<
               isContrast
                 ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
                 : isTextareaTone
-                  ? "bg-neutral-300/80 dark:bg-neutral-600/80 hover:bg-neutral-400/90 dark:hover:bg-neutral-500/90"
+                  ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
               thumbClassName
             )}
@@ -88,7 +88,7 @@ export const ScrollArea = React.forwardRef<
             isContrast
               ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
               : isTextareaTone
-                ? "bg-neutral-200/40 dark:bg-neutral-800/40 hover:bg-neutral-200/60 dark:hover:bg-neutral-800/60"
+                ? "bg-primary-200/20 dark:bg-primary-400/20 hover:bg-primary-200/30 dark:hover:bg-primary-400/30"
                 : undefined,
             scrollbarClassName
           )}
@@ -99,7 +99,7 @@ export const ScrollArea = React.forwardRef<
               isContrast
                 ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
                 : isTextareaTone
-                  ? "bg-neutral-300/80 dark:bg-neutral-600/80 hover:bg-neutral-400/90 dark:hover:bg-neutral-500/90"
+                  ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
               thumbClassName
             )}
