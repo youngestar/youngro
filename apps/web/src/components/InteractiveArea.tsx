@@ -3,11 +3,12 @@
 import React, { useCallback, useRef, useState } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button, ScrollArea } from "@repo/ui";
+import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
+import styles from "./InteractiveArea.module.css";
+import { Send, Square } from "lucide-react";
 
 export const InteractiveArea: React.FC = () => {
-  const { send, cleanup, cancel, sending, messages, registerOnStreamEnd } =
-    useChatStore();
+  const { send, cancel, sending, registerOnStreamEnd } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -54,7 +55,7 @@ export const InteractiveArea: React.FC = () => {
               <Textarea
                 placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
                 value={messageInput}
-                className="text-base"
+                className={`text-base ${styles.scrollbarHidden}`}
                 ref={textareaRef}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onCompositionStart={() => setIsComposing(true)}
@@ -72,29 +73,22 @@ export const InteractiveArea: React.FC = () => {
                 }}
               />
               <Button
-                intent="primary"
-                disabled={sending || !messageInput.trim()}
-                onClick={() => void handleSend()}
+                intent={sending ? "destructive" : "primary"}
+                iconOnly
+                // 未发送时：输入为空禁用；发送中：始终允许“停止”
+                disabled={!sending && !messageInput.trim()}
+                title={sending ? "停止" : "发送"}
+                aria-label={sending ? "停止" : "发送"}
+                onClick={() => {
+                  if (sending) {
+                    cancel();
+                  } else {
+                    void handleSend();
+                  }
+                }}
               >
-                发送
+                <Icon icon={sending ? Square : Send} />
               </Button>
-              <Button
-                intent="default"
-                title="清空历史"
-                disabled={sending || messages.length === 0}
-                onClick={() => cleanup()}
-              >
-                清空
-              </Button>
-              {sending && (
-                <Button
-                  intent="destructive"
-                  title="停止"
-                  onClick={() => cancel()}
-                >
-                  停止
-                </Button>
-              )}
             </div>
           </div>
         </div>

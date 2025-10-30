@@ -39,6 +39,12 @@ export const ChatHistory: React.FC = () => {
   const { messages, sending, streamingMessage, registerOnTokenLiteral } =
     useChatStore();
 
+  // 仅展示用户可见的消息（隐藏 system 提示）
+  const displayMessages = useMemo(
+    () => messages.filter((m) => m.role !== "system"),
+    [messages]
+  );
+
   // 自动滚动到底部
   // 计算滚动容器（Radix ScrollArea 的 Viewport 或最近的可滚动容器）
   useEffect(() => {
@@ -152,11 +158,12 @@ export const ChatHistory: React.FC = () => {
       // 消息级自动滚动使用瞬时，减少与用户交互的拉扯
       scheduleAutoScroll("auto");
     }
-  }, [messages.length, scheduleAutoScroll]);
+  }, [displayMessages.length, scheduleAutoScroll]);
 
   // 监听消息被清空的场景：重置滚动状态并隐藏“回到底部”按钮，避免残留
   useEffect(() => {
-    if (messages.length === 0) {
+    // 当用户可见的消息为空（例如仅剩 system）时，重置滚动状态并隐藏按钮
+    if (displayMessages.length === 0) {
       // 重置内部状态，防止清空时仍处于“未贴底且被抑制”的错乱状态
       autoScrollPinnedRef.current = true;
       suppressionUntilRef.current = 0;
@@ -166,7 +173,7 @@ export const ChatHistory: React.FC = () => {
       scheduleAutoScroll("auto");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length]);
+  }, [displayMessages.length]);
 
   // token 流时：仅在贴底时跟随
   useEffect(() => {
@@ -218,16 +225,18 @@ export const ChatHistory: React.FC = () => {
     return () => ro.disconnect();
   }, [scheduleAutoScroll]);
 
-  // 根据角色获取显示名
+  // 统一显示名来源（与流式期间一致），避免 assistant 在流式结束后变回英文
+  const ASSISTANT_NAME = t("stage.chat.message.character-name.airi", {
+    defaultValue: "爱丽",
+  });
   const getMessageName = (role: BaseMessage["role"]) => {
-    // TODO: i18n
     switch (role) {
       case "user":
-        return "user";
+        return t("stage.chat.role.user", { defaultValue: "user" });
       case "assistant":
-        return "assistant";
+        return ASSISTANT_NAME;
       case "error":
-        return "error";
+        return t("stage.chat.role.error", { defaultValue: "error" });
       default:
         return "";
     }
@@ -236,7 +245,7 @@ export const ChatHistory: React.FC = () => {
   return (
     <div className="flex flex-col relative w-full rounded-lg space-y-2">
       {/* 普通历史消息 */}
-      {messages.map((message: BaseMessage, index: number) => {
+      {displayMessages.map((message: BaseMessage, index: number) => {
         const role: "user" | "assistant" | "error" =
           message.role === "user" ||
           message.role === "assistant" ||
@@ -258,7 +267,7 @@ export const ChatHistory: React.FC = () => {
       {/* 流式消息（assistant 回复中） */}
       {sending && streamingMessage && (
         <AiChatMessage
-          name={t("stage.chat.message.character-name.airi")}
+          name={ASSISTANT_NAME}
           role="assistant"
           content={streamingMessage.content || ""}
           loading={!streamingMessage.content}

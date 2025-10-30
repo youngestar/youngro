@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { api, normalizeAxiosError } from "../../../src/lib/api";
 import type { Readable } from "node:stream";
-import type { AxiosError } from "axios";
+import type { AxiosError, AxiosProxyConfig, AxiosRequestConfig } from "axios";
 
 export const runtime = "nodejs";
 
@@ -48,8 +48,9 @@ export async function POST(req: Request) {
       readEnv("DEEPSEEK_BASE_URL") || "https://api.deepseek.com"
     ).replace(/\/$/, "");
     if (!apiKey) {
+      // 让前端能直接拿到可读 message
       return NextResponse.json(
-        { error: "Server missing DEEPSEEK_API_KEY" },
+        { message: "Server missing DEEPSEEK_API_KEY" },
         { status: 500 }
       );
     }
@@ -60,10 +61,94 @@ export async function POST(req: Request) {
       messages,
     } as const;
 
+    // ——— 代理/直连候选方案 ———
+    // 支持多端口代理与直连回退：
+    // - OUTBOUND_PROXY_HOST: 默认为 127.0.0.1
+    // - OUTBOUND_PROXY_PROTOCOL: 默认为 http（适配常见本地代理）
+    // - OUTBOUND_PROXY_PORTS: 逗号分隔的端口列表，例如 "7897,7890"
+    // - OUTBOUND_ALLOW_DIRECT: 是否允许直连作为候选，默认 true
+    const proxyHost = (readEnv("OUTBOUND_PROXY_HOST") || "127.0.0.1").trim();
+    const proxyProtocol = (readEnv("OUTBOUND_PROXY_PROTOCOL") || "http").trim();
+    const portsRaw = (readEnv("OUTBOUND_PROXY_PORTS") || "").trim();
+    const allowDirect =
+      (readEnv("OUTBOUND_ALLOW_DIRECT") || "true").trim().toLowerCase() !==
+      "false";
+    const proxyPorts = portsRaw
+      ? portsRaw
+          .split(",")
+          .map((s) => parseInt(s.trim(), 10))
+          .filter((n) => Number.isFinite(n) && n > 0)
+      : [];
+
+    type Candidate =
+      | { type: "proxy"; config: AxiosProxyConfig }
+      | { type: "direct" };
+    const candidates: Candidate[] = [];
+    for (const port of proxyPorts) {
+      candidates.push({
+        type: "proxy",
+        config: { host: proxyHost, port, protocol: proxyProtocol },
+      });
+    }
+    if (allowDirect) candidates.push({ type: "direct" });
+
+    const isRetryableProxyError = (error: unknown) => {
+      const code =
+        typeof error === "object" &&
+        error &&
+        "code" in error &&
+        typeof (error as { code?: unknown }).code === "string"
+          ? (error as { code?: string }).code
+          : undefined;
+      const msg =
+        typeof error === "object" &&
+        error &&
+        "message" in error &&
+        typeof (error as { message?: unknown }).message === "string"
+          ? (error as { message: string }).message.toLowerCase() || ""
+          : "";
+      // 典型本地代理不可达/拒绝错误
+      return (
+        code === "ECONNREFUSED" ||
+        code === "EHOSTUNREACH" ||
+        code === "ETIMEDOUT" ||
+        msg.includes("econnrefused") ||
+        msg.includes("enotfound") ||
+        msg.includes("timed out")
+      );
+    };
+
+    async function tryPost(
+      body: unknown,
+      config: AxiosRequestConfig
+    ): Promise<unknown> {
+      let lastErr: unknown;
+      for (const c of candidates.length
+        ? candidates
+        : [{ type: "direct" } as Candidate]) {
+        try {
+          const cfg: AxiosRequestConfig = {
+            ...config,
+            // 注意：当使用自定义 proxy 时不要设置 baseURL，以避免 axios 误用 baseURL 域的代理规则
+            proxy: c.type === "proxy" ? c.config : false,
+          };
+          const res = await api.post(url, body, cfg);
+          return res as unknown;
+        } catch (err) {
+          // 仅当是代理相关的典型错误才尝试下一个候选
+          if (c.type === "proxy" && isRetryableProxyError(err)) {
+            lastErr = err;
+            continue;
+          }
+          throw err;
+        }
+      }
+      throw lastErr ?? new Error("All candidates failed");
+    }
+
     // 非流式：直接转发 JSON
     if (!wantStream) {
-      const data = await api.post(
-        url,
+      const data = (await tryPost(
         { ...payloadBase, stream: false },
         {
           headers: {
@@ -72,21 +157,21 @@ export async function POST(req: Request) {
           },
           timeout: 60_000,
         }
-      );
+      )) as unknown;
       return NextResponse.json(data);
     }
 
     const payload = { ...payloadBase, stream: true };
 
-    // 使用封装好的 api 实例，以流式响应（SSE）与 DeepSeek 通信
-    const dataStream = await api.post<Readable>(url, payload, {
+    // 使用封装好的 api 实例，以流式响应（SSE）与 DeepSeek 通信（带代理/直连候选）
+    const dataStream = (await tryPost(payload, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       responseType: "stream",
       timeout: 60_000,
-    });
+    })) as Readable;
 
     const nodeStream: Readable = dataStream as unknown as Readable;
     const encoder = new TextEncoder();
@@ -175,8 +260,9 @@ export async function POST(req: Request) {
     });
   } catch (err: unknown) {
     const e = normalizeAxiosError(err as AxiosError);
+    // 扁平化错误结构，方便前端提取 message
     return NextResponse.json(
-      { error: { status: e.status, message: e.message, data: e.data } },
+      { status: e.status || 500, message: e.message, data: e.data },
       { status: e.status || 500 }
     );
   }

@@ -42,7 +42,7 @@ async function createProcessor(langs: BundledLanguage[]): Promise<Processor> {
       dark: "github-dark",
     },
     langs,
-    defaultLanguage: langs[0] || "python",
+    defaultLanguage: langs[0] || "javascript",
   };
 
   const { unified } = unifiedModule;

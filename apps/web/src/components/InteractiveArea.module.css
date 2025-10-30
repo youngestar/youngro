@@ -1,0 +1,13 @@
+.scrollbarHidden {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE 10+ */
+  -ms-overflow-style: none;
+}
+
+.scrollbarHidden::-webkit-scrollbar {
+  /* Chrome/Safari/Edge */
+  width: 0 !important;
+  height: 0 !important;
+  display: none;
+}

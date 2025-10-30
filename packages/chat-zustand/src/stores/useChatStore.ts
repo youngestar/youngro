@@ -24,7 +24,8 @@ export interface ChatState {
 export const useChatStore = create<ChatState>()(
   persist(
     immer((set, get) => ({
-      messages: [],
+      // 初始包含一条系统提示，便于“清空=重置为系统提示”
+      messages: [generateInitialSystemMessage()],
       streamingMessage: null,
       sending: false,
       abortController: null,
@@ -212,11 +213,13 @@ export const useChatStore = create<ChatState>()(
         });
       },
 
+      // 清空 = 重置为仅系统提示
       cleanup: () =>
         set((s) => {
-          s.messages = [];
+          s.messages = [generateInitialSystemMessage()];
           s.streamingMessage = null;
           s.sending = false;
+          s.abortController = null;
         }),
 
       registerOnTokenLiteral: (cb) => {
@@ -244,9 +247,50 @@ export const useChatStore = create<ChatState>()(
       storage: createJSONStorage(() => localStorage),
       // 仅持久化 messages，避免将临时状态（如 sending/streamingMessage/handlers）写入存储
       partialize: (s) => ({ messages: s.messages }),
-      version: 1,
+      version: 2,
+      // 迁移：确保首条为 system，并使用最新系统提示
+      migrate: (persistedState: unknown, prevVersion: number) => {
+        const state = (persistedState as Partial<ChatState>) || {};
+        const msgs = Array.isArray((state as any).messages)
+          ? ([...(state as any).messages] as BaseMessage[])
+          : [];
+
+        // 若无消息或首条非 system，则补上一条最新系统提示
+        const first = msgs[0];
+        if (!first || first.role !== "system") {
+          const sys = generateInitialSystemMessage();
+          (state as any).messages = [sys, ...msgs];
+          return state as ChatState;
+        }
+
+        // 若首条为 system，但内容需要更新，则覆盖其 content
+        const expected = generateSystemPrompt();
+        if (typeof first.content === "string" && first.content !== expected) {
+          const updatedFirst: BaseMessage = { ...first, content: expected };
+          (state as any).messages = [updatedFirst, ...msgs.slice(1)];
+        }
+        return state as ChatState;
+      },
     }
   )
 );
+
+// 单一真源：系统提示（可后续接入设置/人设）
+function generateSystemPrompt(): string {
+  const codeBlockHint =
+    "- For code blocks, specify the language (e.g., ```ts) to enable proper highlighting.";
+  const mathHint =
+    "- Use LaTeX for math (e.g., $x^3$); escape dollar signs when not in math.";
+  return `${codeBlockHint}\n${mathHint}`;
+}
+
+function generateInitialSystemMessage(): BaseMessage {
+  return {
+    id: `system-${Date.now()}`,
+    role: "system",
+    content: generateSystemPrompt(),
+    timestamp: new Date().toISOString(),
+  };
+}
 
 export default useChatStore;
