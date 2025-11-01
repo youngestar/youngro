@@ -39,7 +39,7 @@ export default function AiChatMessage({
   );
 
   const textClass = clsx(
-    "prose dark:prose-invert max-w-none break-words text-xs sm:text-base",
+    "prose stream-prose dark:prose-invert max-w-none break-words text-xs sm:text-base",
     {
       "text-primary-700 dark:text-primary-200": isAssistant,
       "text-violet-500": isError,

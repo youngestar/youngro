@@ -11,6 +11,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scroll safe area: ensure scrollTo/scrollIntoView can reach true visual bottom
+   across Radix ScrollArea viewport and our custom scroll container class. */
+[data-radix-scroll-area-viewport],
+.scroll-viewport {
+  scroll-padding-bottom: 56px; /* matches Back-to-bottom button safe area */
+}
+
+/* Reduce layout jank for streaming markdown by enabling content-visibility
+   and giving an intrinsic fallback size so late layout (e.g., images/math)
+   doesn't cause large reflows while scrolling. */
+.stream-prose {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px; /* fallback height while off-screen */
+}
+
 /* Set base font families so the injected CSS variables actually take effect globally */
 @layer base {
   html {

@@ -5,10 +5,10 @@ import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
 import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
-import { Send, Square } from "lucide-react";
+import { Send } from "lucide-react";
 
 export const InteractiveArea: React.FC = () => {
-  const { send, cancel, sending, registerOnStreamEnd } = useChatStore();
+  const { send, sending, registerOnStreamEnd } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -52,43 +52,44 @@ export const InteractiveArea: React.FC = () => {
               </div>
             </ScrollArea>
             <div className="flex gap-2 p-2">
-              <Textarea
-                placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
-                value={messageInput}
-                className={`text-base ${styles.scrollbarHidden}`}
-                ref={textareaRef}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={() => setIsComposing(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    void handleSend();
-                  }
-                  // 支持 Ctrl/Cmd + Enter 发送
-                  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-                    e.preventDefault();
-                    void handleSend();
-                  }
-                }}
-              />
-              <Button
-                intent={sending ? "destructive" : "primary"}
-                iconOnly
-                // 未发送时：输入为空禁用；发送中：始终允许“停止”
-                disabled={!sending && !messageInput.trim()}
-                title={sending ? "停止" : "发送"}
-                aria-label={sending ? "停止" : "发送"}
-                onClick={() => {
-                  if (sending) {
-                    cancel();
-                  } else {
-                    void handleSend();
-                  }
-                }}
-              >
-                <Icon icon={sending ? Square : Send} />
-              </Button>
+              {/* 左侧：输入区（Textarea + 工具栏） */}
+              <div className="flex-1 flex flex-col">
+                {/* 包裹 Textarea + 工具栏，使得 focus-within 的描边覆盖两者 */}
+                <div className="rounded-xl bg-primary-200/20 dark:bg-primary-400/20 focus-within:ring-2 focus-within:ring-primary-400/40 dark:focus-within:ring-primary-300/40">
+                  <Textarea
+                    placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
+                    value={messageInput}
+                    className={`text-base bg-transparent ${styles.scrollbarHidden}`}
+                    focusStyle="none"
+                    ref={textareaRef}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onCompositionStart={() => setIsComposing(true)}
+                    onCompositionEnd={() => setIsComposing(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        void handleSend();
+                      }
+                    }}
+                  />
+
+                  {/* 工具栏：紧贴底部，描边由外层 focus-within 负责 */}
+                  <div className="flex items-center justify-end px-2 py-2">
+                    <div className="flex gap-1">
+                      <Button
+                        intent="primary"
+                        iconOnly
+                        aria-label="发送"
+                        title="发送"
+                        disabled={sending || !messageInput.trim()}
+                        onClick={() => void handleSend()}
+                      >
+                        <Icon icon={Send} size="sm" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

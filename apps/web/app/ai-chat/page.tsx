@@ -13,7 +13,7 @@ export default function Home() {
       <h1 className={styles.title}>Youngro AI Chat</h1>
       <InteractiveArea />
       {/* 外部清空按钮：位于 InteractiveArea 正下方，略微外移 */}
-      <div className="mx-auto min-w-[30%] max-w-[500px] flex justify-end mt-0.5 pr-1">
+      <div className="mx-auto min-w-[30%] max-w-[500px] flex justify-end mt-0.25 pr-1">
         <Button
           intent="default"
           iconOnly
