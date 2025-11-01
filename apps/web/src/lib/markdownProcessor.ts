@@ -4,6 +4,8 @@ import type { Root as HastRoot } from "hast";
 import type { BundledLanguage } from "shiki";
 
 const processorCache = new Map<string, Promise<Processor>>();
+let cachedFallbackProcessor: Promise<Processor> | null = null;
+let cachedLiteProcessor: Promise<Processor> | null = null;
 const langRegex = /```(.{2,})\s/g;
 
 function extractLangs(markdown: string): BundledLanguage[] {
@@ -82,24 +84,51 @@ function getProcessor(langs: BundledLanguage[]): Promise<Processor> {
 }
 
 const fallback = async () => {
-  const { unified } = await import("unified");
-  const remarkParse = (await import("remark-parse")).default;
-  const remarkMath = (await import("remark-math")).default;
-  const remarkRehype = (await import("remark-rehype")).default;
-  const rehypeKatex = (await import("rehype-katex")).default;
-  const rehypeStringify = (await import("rehype-stringify")).default;
+  if (!cachedFallbackProcessor) {
+    cachedFallbackProcessor = (async () => {
+      const { unified } = await import("unified");
+      const remarkParse = (await import("remark-parse")).default;
+      const remarkMath = (await import("remark-math")).default;
+      const remarkRehype = (await import("remark-rehype")).default;
+      const rehypeKatex = (await import("rehype-katex")).default;
+      const rehypeStringify = (await import("rehype-stringify")).default;
 
-  const remarkRehypePlugin = remarkRehype as unknown as Plugin<
-    [],
-    MdastRoot,
-    HastRoot
-  >;
-  return unified()
-    .use(remarkParse)
-    .use(remarkMath)
-    .use(remarkRehypePlugin)
-    .use([rehypeKatex])
-    .use([rehypeStringify]);
+      const remarkRehypePlugin = remarkRehype as unknown as Plugin<
+        [],
+        MdastRoot,
+        HastRoot
+      >;
+      return unified()
+        .use(remarkParse)
+        .use(remarkMath)
+        .use(remarkRehypePlugin)
+        .use([rehypeKatex])
+        .use([rehypeStringify]);
+    })();
+  }
+  return cachedFallbackProcessor;
+};
+
+// 轻量 processor：不做 KaTeX/Shiki，用于流式期间的降级渲染以减少频繁重排
+const lite = async () => {
+  if (!cachedLiteProcessor) {
+    cachedLiteProcessor = (async () => {
+      const { unified } = await import("unified");
+      const remarkParse = (await import("remark-parse")).default;
+      const remarkRehype = (await import("remark-rehype")).default;
+      const rehypeStringify = (await import("rehype-stringify")).default;
+      const remarkRehypePlugin = remarkRehype as unknown as Plugin<
+        [],
+        MdastRoot,
+        HastRoot
+      >;
+      return unified()
+        .use(remarkParse)
+        .use(remarkRehypePlugin)
+        .use([rehypeStringify]);
+    })();
+  }
+  return cachedLiteProcessor;
 };
 
 export async function processMarkdown(markdown: string): Promise<string> {
@@ -131,4 +160,11 @@ export async function processMarkdownSync(markdown: string): Promise<string> {
   // use a simple fallback synchronous pipeline by calling unified sync processors.
   const fb = await fallback();
   return fb.processSync(markdown).toString();
+}
+
+export async function processMarkdownLite(markdown: string): Promise<string> {
+  // 不做 KaTeX/Shiki 的轻量通路，适合流式更新期间降低抖动
+  const lp = await lite();
+  // lite 管线都为 sync-capable 处理器
+  return lp.processSync(markdown).toString();
 }

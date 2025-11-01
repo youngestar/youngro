@@ -74,6 +74,7 @@ export default function AiChatMessage({
                   key={i}
                   content={part.text || ""}
                   className={textClass}
+                  streaming={false}
                 />
               ) : (
                 <Image
@@ -86,7 +87,11 @@ export default function AiChatMessage({
             )}
           </div>
         ) : (
-          <MarkdownRenderer content={content} className={textClass} />
+          <MarkdownRenderer
+            content={content}
+            className={textClass}
+            streaming={loading}
+          />
         )}
       </div>
     </div>

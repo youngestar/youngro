@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+// KaTeX styles for rendering math (remark-math + rehype-katex)
+import "katex/dist/katex.min.css";
 import I18nProvider from "../src/providers/I18nProvider";
 
 // Sans (variable font)
