@@ -42,8 +42,8 @@ const button = cva(
       { size: "lg", iconOnly: false, class: "px-5 py-3" },
 
       // Explicit square sizes for icon-only buttons
-      { size: "sm", iconOnly: true, class: "h-8 w-8" },
-      { size: "md", iconOnly: true, class: "h-9 w-9" },
+      { size: "sm", iconOnly: true, class: "h-6 w-6" },
+      { size: "md", iconOnly: true, class: "h-8 w-8" },
       { size: "lg", iconOnly: true, class: "h-10 w-10" },
     ],
     defaultVariants: {
