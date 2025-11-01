@@ -8,6 +8,7 @@ import { Trash2 } from "lucide-react";
 
 export default function Home() {
   const { cleanup, sending, messages } = useChatStore();
+
   return (
     <div className="p-4">
       <h1 className={styles.title}>Youngro AI Chat</h1>

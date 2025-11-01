@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Settings } from "lucide-react";
+import useTurnToPage from "../../src/hooks/useTurnToPage";
+import { Button, Icon } from "@repo/ui";
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
+  const turnTo = useTurnToPage();
+
   return (
     <div
       style={{
@@ -14,7 +21,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
     >
       {/* Header */}
       <div className="w-full bg-[var(--background)]/80 backdrop-blur px-3 py-3">
-        <div className="mx-auto flex max-w-screen-2xl items-center gap-2">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2">
           <Link
             href="/"
             className="outline-none inline-flex items-center gap-2 text-xl font-semibold"
@@ -29,6 +36,18 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
               YOUNGRO
             </span>
           </Link>
+
+          <div>
+            <Button
+              intent="default"
+              iconOnly
+              title="设置"
+              aria-label="设置"
+              onClick={() => turnTo("/settings")}
+            >
+              <Icon icon={Settings} />
+            </Button>
+          </div>
         </div>
       </div>
 

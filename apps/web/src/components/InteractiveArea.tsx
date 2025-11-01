@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * 交互区（聊天主容器）
+ * - 负责布局：上方为消息历史（可滚动），下方为输入区（Textarea + 发送按钮）。
+ * - 负责输入发送流程：组合输入法期间不发、Enter 发送（Shift+Enter 换行）。
+ * - 处理焦点体验：发送后保持焦点；流结束时自动聚焦输入框。
+ */
+
 import React, { useCallback, useRef, useState } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
@@ -8,12 +15,14 @@ import styles from "./InteractiveArea.module.css";
 import { Send } from "lucide-react";
 
 export const InteractiveArea: React.FC = () => {
+  // 从聊天状态管理（Zustand）获取发送函数、状态与回调注册
   const { send, sending, registerOnStreamEnd } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const handleSend = useCallback(() => {
+    // 处于输入法组合阶段或正在发送中，直接忽略
     if (isComposing || sending) return;
     const text = messageInput.trim();
     if (!text) return;
@@ -39,7 +48,7 @@ export const InteractiveArea: React.FC = () => {
   return (
     <div className="flex flex-col items-center pt-4 w-full h-full">
       <div className="w-full h-[85dvh] py-4">
-        <div className="h-full mx-auto min-w-[30%] max-w-[500px] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
+        <div className="h-full mx-auto min-w-[30%] max-w-[600px] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
           <div className="flex flex-col h-full w-full">
             <ScrollArea
               variant="textarea"
@@ -66,6 +75,7 @@ export const InteractiveArea: React.FC = () => {
                     onCompositionStart={() => setIsComposing(true)}
                     onCompositionEnd={() => setIsComposing(false)}
                     onKeyDown={(e) => {
+                      // Enter 发送；Shift+Enter 换行（保留默认行为）
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         void handleSend();

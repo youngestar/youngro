@@ -1,4 +1,5 @@
 .scrollbarHidden {
+  /* 隐藏滚动条视觉（不影响滚动行为） */
   /* Firefox */
   scrollbar-width: none;
   /* IE 10+ */

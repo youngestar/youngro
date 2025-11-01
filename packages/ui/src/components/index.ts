@@ -31,3 +31,5 @@ export { BrandLogo } from "./BrandLogo";
 export type { BrandLogoProps } from "./BrandLogo";
 export { ScrollArea } from "./ScrollArea";
 export type { ScrollAreaProps } from "./ScrollArea";
+export { IconItem } from "./Menu/IconItem";
+export type { IconItemProps } from "./Menu/IconItem";

@@ -1,6 +1,13 @@
 // HMR test: touch from web component to observe compile log
 "use client";
 
+/**
+ * 单条聊天消息气泡
+ * - 支持三种角色：user / assistant / error（决定配色与对齐）。
+ * - content 支持纯文本（Markdown 渲染）或图文混排（text / image_url 数组）。
+ * - loading 为真时展示占位内容（流式开头尚无文本）。
+ */
+
 import MarkdownRenderer from "./MarkdownRenderer";
 import clsx from "clsx";
 import Image from "next/image";

@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * MarkdownRenderer（安全渲染 Markdown 为 HTML）
+ * - 优先使用异步处理（含高亮等增强），失败时回退为同步基础处理。
+ * - 注入前使用 DOMPurify 进行 XSS 清洗。
+ */
+
 import React from "react";
 import DOMPurify from "dompurify";
 import { processMarkdown, processMarkdownSync } from "../lib/markdownProcessor";
@@ -39,7 +45,8 @@ export default function MarkdownRenderer({
     };
   }, [content]);
 
-  if (html === null) return <div className={className}>{/* loading */}</div>;
+  if (html === null)
+    return <div className={className}>{/* loading 占位 */}</div>;
 
   return (
     <div className={className} dangerouslySetInnerHTML={{ __html: html }} />

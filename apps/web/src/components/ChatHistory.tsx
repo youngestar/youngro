@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * ChatHistory（消息历史列表）
+ * - 仅渲染用户可见的消息（过滤 system）。
+ * - 在 assistant 正在流式回复时，额外渲染一条“进行中”的消息。
+ * - 集成自动滚动 Hook：提供“回到底部”按钮与底部哨兵位。
+ */
+
 import React, { useMemo } from "react";
 import AiChatMessage from "./AIChatMessage";
 import { useChatStore } from "@youngro/chat-zustand";
@@ -11,6 +18,7 @@ export const ChatHistory: React.FC = () => {
   const { messages, sending, streamingMessage } = useChatStore();
 
   // 仅展示用户可见的消息（隐藏 system 提示）
+  // 过滤隐藏 system 消息，避免在 UI 中暴露系统提示词
   const displayMessages = useMemo(
     () => messages.filter((m) => m.role !== "system"),
     [messages]
