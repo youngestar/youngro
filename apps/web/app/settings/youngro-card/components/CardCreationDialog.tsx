@@ -146,6 +146,7 @@ export function CardCreationDialog({
           <div className="space-y-4">
             <Field label={"名称（必填）"}>
               <Input
+                tone="plain"
                 value={values.name}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, name: e.target.value }))
@@ -159,6 +160,7 @@ export function CardCreationDialog({
             </Field>
             <Field label="昵称（可选）">
               <Input
+                tone="plain"
                 value={values.nickname ?? ""}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, nickname: e.target.value }))
@@ -168,6 +170,7 @@ export function CardCreationDialog({
             </Field>
             <Field label={"描述（必填）"}>
               <Textarea
+                tone="plain"
                 value={values.description}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, description: e.target.value }))
@@ -185,6 +188,7 @@ export function CardCreationDialog({
             </Field>
             <Field label="创作者备注（可选）">
               <Textarea
+                tone="plain"
                 value={values.notes ?? ""}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, notes: e.target.value }))
@@ -199,6 +203,7 @@ export function CardCreationDialog({
           <div className="space-y-4">
             <Field label={"性格 (Personality)（必填）"}>
               <Textarea
+                tone="plain"
                 value={values.personality}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, personality: e.target.value }))
@@ -216,6 +221,7 @@ export function CardCreationDialog({
             </Field>
             <Field label={"场景 (Scenario)（必填）"}>
               <Textarea
+                tone="plain"
                 value={values.scenario}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, scenario: e.target.value }))
@@ -231,6 +237,7 @@ export function CardCreationDialog({
             </Field>
             <Field label="问候语 (每行一条)">
               <Textarea
+                tone="plain"
                 value={values.greetings.join("\n")}
                 onChange={(e) =>
                   setValues((v) => ({
@@ -252,6 +259,7 @@ export function CardCreationDialog({
           <div className="space-y-4">
             <Field label={"系统提示 (System Prompt)（必填）"}>
               <Textarea
+                tone="plain"
                 value={values.systemPrompt}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, systemPrompt: e.target.value }))
@@ -270,6 +278,7 @@ export function CardCreationDialog({
             </Field>
             <Field label={"历史后提示 (Post History Instructions)（必填）"}>
               <Textarea
+                tone="plain"
                 value={values.postHistoryInstructions}
                 onChange={(e) =>
                   setValues((v) => ({
@@ -290,6 +299,7 @@ export function CardCreationDialog({
             </Field>
             <Field label={"版本（必填）"}>
               <Input
+                tone="plain"
                 value={values.version}
                 onChange={(e) =>
                   setValues((v) => ({ ...v, version: e.target.value }))

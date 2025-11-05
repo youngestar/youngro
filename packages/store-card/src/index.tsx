@@ -1,5 +1,6 @@
 import * as React from "react";
 import { create } from "zustand";
+import { z } from "zod";
 
 // ----- Shared domain types (migrated from app layer) -----
 export interface YoungroExtension {
@@ -331,4 +332,166 @@ export function useYoungroCards() {
   const [state, actions] = ctx;
   const activeCard = state.cards[state.activeCardId];
   return { ...state, activeCard, ...actions };
+}
+
+// ---------------- Templates & Composition utilities -----------------
+
+function cleanText(s: string) {
+  return s
+    .replace(/[\s\u00A0]+/g, " ")
+    .replace(/\s+([,.!?;:])/g, "$1")
+    .trim();
+}
+
+function trimTo(s: string, n: number) {
+  if (s.length <= n) return s;
+  return s.slice(0, Math.max(0, n - 1)).trim() + "…";
+}
+
+function dedupeLines(lines: string[]) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const l of lines.map((x) => cleanText(x)).filter(Boolean)) {
+    if (seen.has(l)) continue;
+    seen.add(l);
+    out.push(l);
+  }
+  return out;
+}
+
+export const DEFAULT_POST_HISTORY_INSTRUCTIONS =
+  "在完整阅读对话历史后再回答；优先准确与简洁；信息不足时先澄清。";
+
+export function composeDescription(input: {
+  name: string;
+  personality?: string;
+  scenario?: string;
+  tags?: string[];
+  description?: string;
+}) {
+  if (input.description && input.description.trim())
+    return cleanText(input.description);
+  const traits = (input.personality || "")
+    .split(/[，,。\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  const traitText = traits.length ? traits.join("、") : "专业、可靠";
+  const tagText =
+    input.tags && input.tags.length
+      ? `，擅长${input.tags.slice(0, 3).join("、")}`
+      : "";
+  const scene = input.scenario ? `，场景：${trimTo(input.scenario, 60)}` : "";
+  return cleanText(
+    `${input.name} 是一位${traitText}的 AI 助手${tagText}${scene}。`
+  );
+}
+
+export function composeSystemPrompt(input: {
+  name: string;
+  personality?: string;
+  scenario?: string;
+  systemPrompt?: string;
+}) {
+  const blocks = [
+    `你的身份：${cleanText(input.name)}。`,
+    input.personality
+      ? `人设/风格：${trimTo(cleanText(input.personality), 220)}`
+      : null,
+    input.scenario
+      ? `工作场景：${trimTo(cleanText(input.scenario), 220)}`
+      : null,
+    "语言与风格：使用简洁、礼貌、专业的中文回答；必要时分点阐述。",
+    "能力与工具：如需外部信息，先澄清再选择检索/函数；不得编造。",
+  ].filter(Boolean) as string[];
+
+  if (input.systemPrompt && input.systemPrompt.trim()) {
+    blocks.push(`自定义补充：${trimTo(cleanText(input.systemPrompt), 600)}`);
+  }
+  return dedupeLines(blocks).join("\n");
+}
+
+export function composePostHistoryInstructions(
+  defaults: string | undefined,
+  user: string | undefined
+) {
+  const parts = [defaults || DEFAULT_POST_HISTORY_INSTRUCTIONS, user || ""]
+    .map((x) => x.trim())
+    .filter(Boolean);
+  return dedupeLines(parts).join("\n");
+}
+
+export type { YoungroCard as TYoungroCard };
+
+// Derive a runtime-ready system prompt from a card.
+// Merge base systemPrompt with description/personality/scenario and post-history instructions.
+export function getRuntimeSystemPrompt(card: BaseCard | YoungroCard): string {
+  const parts: string[] = [];
+  if (card.systemPrompt) parts.push(cleanText(card.systemPrompt));
+  if (card.description) parts.push(cleanText(card.description));
+  if (card.personality)
+    parts.push(`人设/风格：${trimTo(cleanText(card.personality), 220)}`);
+  if (card.scenario)
+    parts.push(`工作场景：${trimTo(cleanText(card.scenario), 220)}`);
+  if (card.postHistoryInstructions)
+    parts.push(cleanText(card.postHistoryInstructions));
+  return dedupeLines(parts).join("\n");
+}
+
+// ---------------- Schema & import parsing -----------------
+
+const BaseCardSchema = z.object({
+  name: z.string().min(1, "name is required"),
+  version: z.string().optional(),
+  description: z.string().optional(),
+  creator: z.string().optional(),
+  notes: z.string().optional(),
+  personality: z.string().optional(),
+  scenario: z.string().optional(),
+  greetings: z.array(z.string()).optional(),
+  systemPrompt: z.string().optional(),
+  postHistoryInstructions: z.string().optional(),
+  messageExample: z.any().optional(),
+  tags: z.array(z.string()).optional(),
+  extensions: z.record(z.unknown()).optional(),
+});
+
+const CCV3DataSchema = z.object({
+  name: z.string().min(1, "data.name is required"),
+  character_version: z.string().optional(),
+  description: z.string().optional(),
+  creator: z.string().optional(),
+  creator_notes: z.string().optional(),
+  creator_notes_multilingual: z.unknown().optional(),
+  personality: z.string().optional(),
+  scenario: z.string().optional(),
+  first_mes: z.string().optional(),
+  alternate_greetings: z.array(z.string()).optional(),
+  group_only_greetings: z.array(z.string()).optional(),
+  system_prompt: z.string().optional(),
+  post_history_instructions: z.string().optional(),
+  mes_example: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  extensions: z.record(z.unknown()).optional(),
+});
+
+const CCV3Schema = z.object({ data: CCV3DataSchema });
+
+export function parseImportedCard(
+  json: unknown
+): BaseCard | CCV3CharacterCardV3 {
+  // Try CCV3 first
+  const cc = CCV3Schema.safeParse(json);
+  if (cc.success) return cc.data as CCV3CharacterCardV3;
+  // Fallback to BaseCard
+  const bc = BaseCardSchema.safeParse(json);
+  if (bc.success) return bc.data as BaseCard;
+  // Compose error message
+  const err = cc.error ?? bc.error;
+  const issues =
+    err?.issues?.map(
+      (i: { path: (string | number)[]; message: string }) =>
+        `${i.path.join(".")}: ${i.message}`
+    ) ?? [];
+  throw new Error(`无效的卡片 JSON：\n${issues.join("\n")}`);
 }

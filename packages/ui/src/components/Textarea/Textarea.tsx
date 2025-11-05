@@ -9,10 +9,16 @@ import clsx from "clsx";
 // bg-primary-200/20 dark:bg-primary-400/20 text-primary-500
 // placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50
 const textarea = cva(
-  // Base keeps focus visuals neutral; variants decide the focus style
-  "w-full min-h-[100px] max-h-[300px] rounded-t-xl p-2 text-sm font-medium outline-none border-0 bg-primary-200/20 dark:bg-primary-400/20 text-primary-500 placeholder-primary-400 dark:text-primary-300/50 dark:placeholder-primary-300/50 shadow-none ring-0 focus:shadow-none focus:ring-0 focus:ring-offset-0 focus:ring-inset focus:outline-none",
+  // Structural base; tone defines the visual style
+  "w-full min-h-[100px] max-h-[300px] rounded-t-xl p-2 text-sm font-medium outline-none shadow-none ring-0 focus:shadow-none focus:ring-0 focus:ring-offset-0 focus:ring-inset focus:outline-none",
   {
     variants: {
+      tone: {
+        tinted:
+          "bg-primary-200/20 dark:bg-primary-400/20 text-primary-600 placeholder-primary-400 dark:text-primary-300/70 dark:placeholder-primary-300/50 border-0",
+        plain:
+          "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 border border-neutral-200 dark:border-neutral-700",
+      },
       intent: {
         // default matches InteractiveArea visual by default
         default: "",
@@ -33,6 +39,7 @@ const textarea = cva(
       },
     },
     defaultVariants: {
+      tone: "tinted",
       intent: "default",
       size: "md",
       focusStyle: "brand",
@@ -52,6 +59,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
       className,
+      tone,
       intent,
       size,
       focusStyle,
@@ -158,7 +166,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         onInput={handleInput}
         onChange={handleChange}
         style={style}
-        className={clsx(textarea({ intent, size, focusStyle }), className)}
+        className={clsx(
+          textarea({ tone, intent, size, focusStyle }),
+          className
+        )}
       />
     );
   }

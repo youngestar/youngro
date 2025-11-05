@@ -8,6 +8,7 @@ interface Props {
   name: string;
   description?: string;
   isActive: boolean;
+  isSelected?: boolean;
   version: string;
   consciousnessModel?: string;
   voiceModel?: string;
@@ -20,6 +21,7 @@ export function CardListItem({
   name,
   description,
   isActive,
+  isSelected,
   version,
   consciousnessModel,
   voiceModel,
@@ -30,7 +32,12 @@ export function CardListItem({
   return (
     <div
       onClick={onSelect}
-      className="relative min-h-[120px] cursor-pointer overflow-hidden rounded-xl border-2 border-neutral-100 bg-neutral-200/50 transition-all hover:shadow md:hover:shadow-neutral-300 dark:border-neutral-800/25 dark:bg-neutral-800/50"
+      className={
+        "relative min-h-[120px] cursor-pointer overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-all hover:shadow md:hover:shadow-neutral-300 dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
+        (isSelected
+          ? "border-primary-300 ring-2 ring-primary-300/50 dark:border-primary-700"
+          : "border-neutral-100")
+      }
     >
       <div className="flex h-full flex-col justify-between rounded-lg bg-white p-5 transition-all hover:text-primary-600/80 dark:bg-neutral-900 dark:hover:text-primary-300/80">
         <div className="flex items-start justify-between gap-2">

@@ -20,12 +20,28 @@ export function SimpleModal({
   footer,
   widthClassName = "max-w-xl",
 }: SimpleModalProps) {
+  // 监听 ESC 键关闭
+  React.useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === "Esc") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
   if (!open) return null;
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       aria-modal="true"
       role="dialog"
+      onClick={(e) => {
+        // 点击遮罩（空白处）关闭，仅当点击目标是遮罩本身时触发
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         className={`w-full ${widthClassName} overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900`}

@@ -1,6 +1,6 @@
-# Turborepo starter
+# youngro Monorepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+本仓库基于 Turborepo 与 pnpm 搭建，当前已采用“单向依赖分层”并启用 ESLint 边界规则来约束包之间的引用。
 
 ## Using this example
 
@@ -12,25 +12,55 @@ npx create-turbo@latest
 
 ## What's inside?
 
-This Turborepo includes the following packages/apps:
+当前包含以下应用与包：
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `docs`: 基于 [Next.js](https://nextjs.org/) 的文档应用
+- `web`: 基于 [Next.js](https://nextjs.org/) 的 Web 应用
+- `@repo/ui`: 共享 UI 组件库（只从 `dist` 作为公共入口导出）
+- `@repo/eslint-config`: 共享 ESLint 配置（已包含依赖边界与 import 约束）
+- `@repo/typescript-config`: 共享 TypeScript 配置
+- `@youngro/store-card`: 领域 Store 与类型定义
+- `@youngro/feature-youngro-card`: 领域 Feature（UI 组合逻辑）
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 ### Utilities
 
-This Turborepo has some additional tools already setup for you:
+- [TypeScript](https://www.typescriptlang.org/): 静态类型检查
+- [ESLint](https://eslint.org/): 代码规范（含依赖边界）
+- [Prettier](https://prettier.io): 代码格式化
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 架构与依赖边界
+
+分层模型采用自上而下单向依赖：
+
+```mermaid
+flowchart TD
+  lib[lib] --> store[store]
+  store --> feature[feature]
+  feature --> ui[ui]
+  ui --> app[app]
+
+  app -.can.-> feature
+  app -.can.-> store
+  app -.can.-> lib
+```
+
+约束原则：
+
+- 依赖方向：`lib → store → feature → ui → app`（单向，不可反向依赖）
+- 只允许通过包“公共入口”导入，禁止跨包深层导入他包的 `src/` 或 `dist/`
+- `@repo/ui` 等包仅从 exports 显式暴露的入口导入
+
+对应规则（已在 `@repo/eslint-config` 启用）：
+
+- `boundaries/element-types`：限制包层级依赖方向
+- `no-restricted-imports`：禁止导入 `@youngro/**/src/**` 与 `@youngro/**/dist/**`（`@repo/**` 同理）
+- `import/no-cycle`、`import/no-extraneous-dependencies`：导入卫生
+
+## 运行与开发
 
 ### Build
 

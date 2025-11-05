@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "zustand": "^4.4.0",
-    "immer": "^10.0.0"
+    "immer": "^10.0.0",
+    "@youngro/store-card": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",

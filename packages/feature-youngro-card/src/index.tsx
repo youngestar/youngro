@@ -66,39 +66,54 @@ export function CardDetailsPanel({
       {tab === "details" ? (
         <div className="space-y-4">
           <Field label="名称">
-            <Input value={card.name} readOnly />
+            <Input value={card.name} readOnly tone="plain" />
           </Field>
           {card.nickname ? (
             <Field label="昵称">
-              <Input value={card.nickname} readOnly />
+              <Input value={card.nickname} readOnly tone="plain" />
             </Field>
           ) : null}
           <Field label="版本">
-            <Input value={card.version} readOnly />
+            <Input value={card.version} readOnly tone="plain" />
           </Field>
           {card.description ? (
             <Field label="描述">
-              <Textarea value={card.description} readOnly rows={3} />
+              <Textarea
+                value={card.description}
+                readOnly
+                rows={3}
+                tone="plain"
+              />
             </Field>
           ) : null}
           {card.notes ? (
             <Field label="创作者备注">
-              <Textarea value={card.notes} readOnly rows={3} />
+              <Textarea value={card.notes} readOnly rows={3} tone="plain" />
             </Field>
           ) : null}
           {card.systemPrompt ? (
             <Field label="系统提示">
-              <Textarea value={card.systemPrompt} readOnly rows={6} />
+              <Textarea
+                value={card.systemPrompt}
+                readOnly
+                rows={6}
+                tone="plain"
+              />
             </Field>
           ) : null}
           {card.personality ? (
             <Field label="性格">
-              <Textarea value={card.personality} readOnly rows={3} />
+              <Textarea
+                value={card.personality}
+                readOnly
+                rows={3}
+                tone="plain"
+              />
             </Field>
           ) : null}
           {card.scenario ? (
             <Field label="场景">
-              <Textarea value={card.scenario} readOnly rows={3} />
+              <Textarea value={card.scenario} readOnly rows={3} tone="plain" />
             </Field>
           ) : null}
           {card.tags && card.tags.length ? (
@@ -122,22 +137,31 @@ export function CardDetailsPanel({
             <Input
               value={youngro?.modules?.consciousness?.model ?? "-"}
               readOnly
+              tone="plain"
             />
           </Field>
           <Field label="语音模型">
-            <Input value={youngro?.modules?.speech?.model ?? "-"} readOnly />
+            <Input
+              value={youngro?.modules?.speech?.model ?? "-"}
+              readOnly
+              tone="plain"
+            />
           </Field>
           <Field label="语音音色">
-            <Input value={youngro?.modules?.speech?.voice_id ?? "-"} readOnly />
+            <Input
+              value={youngro?.modules?.speech?.voice_id ?? "-"}
+              readOnly
+              tone="plain"
+            />
           </Field>
           {youngro?.modules?.vrm?.url ? (
             <Field label="VRM 模型 URL">
-              <Input value={youngro.modules.vrm.url} readOnly />
+              <Input value={youngro.modules.vrm.url} readOnly tone="plain" />
             </Field>
           ) : null}
           {youngro?.modules?.live2d?.url ? (
             <Field label="Live2D 模型 URL">
-              <Input value={youngro.modules.live2d.url} readOnly />
+              <Input value={youngro.modules.live2d.url} readOnly tone="plain" />
             </Field>
           ) : null}
         </div>

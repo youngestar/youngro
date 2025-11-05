@@ -1,5 +1,6 @@
 // HMR test: trivial comment to verify source-linked hot reload
 import { create } from "zustand";
+import { getRuntimeSystemPrompt } from "@youngro/store-card";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
@@ -19,6 +20,8 @@ export interface ChatState {
   cleanup: () => void;
   registerOnTokenLiteral: (cb: (s: string) => void) => () => void;
   registerOnStreamEnd: (cb: () => void) => () => void;
+  // sync system prompt from active Youngro card
+  applyActiveCardSystemPrompt: () => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -241,6 +244,27 @@ export const useChatStore = create<ChatState>()(
             s.onStreamEnd = s.onStreamEnd.filter((fn) => fn !== cb);
           });
       },
+
+      // 将首条 system 消息更新为当前激活的 Youngro 卡片的系统提示（若存在）
+      applyActiveCardSystemPrompt: () => {
+        const prompt = generateSystemPrompt();
+        set((s) => {
+          const first = s.messages[0];
+          if (!first || first.role !== "system") {
+            s.messages = [
+              {
+                id: `system-${Date.now()}`,
+                role: "system",
+                content: prompt,
+                timestamp: new Date().toISOString(),
+              },
+              ...s.messages,
+            ];
+          } else {
+            first.content = prompt;
+          }
+        });
+      },
     })),
     {
       name: "youngro.chat.history.v1",
@@ -275,13 +299,42 @@ export const useChatStore = create<ChatState>()(
   )
 );
 
-// 单一真源：系统提示（可后续接入设置/人设）
+// 从 localStorage 读取激活的 Youngro 卡片（若有）
+function getActiveYoungroCardFromStorage():
+  | (Record<string, unknown> & {
+      systemPrompt?: string;
+      postHistoryInstructions?: string;
+      name?: string;
+      description?: string;
+      personality?: string;
+      scenario?: string;
+    })
+  | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const rawCards = window.localStorage.getItem("youngro-cards");
+    const activeId =
+      window.localStorage.getItem("youngro-card-active-id") || "";
+    if (!rawCards || !activeId) return null;
+    const map = JSON.parse(rawCards) as Record<string, any>;
+    return map[activeId] || null;
+  } catch {
+    return null;
+  }
+}
+
+// 单一真源：系统提示（优先使用激活 Youngro 卡片，否则使用通用提示）
 function generateSystemPrompt(): string {
-  const codeBlockHint =
+  const fallbackCodeBlockHint =
     "- For code blocks, specify the language (e.g., ```ts) to enable proper highlighting.";
-  const mathHint =
+  const fallbackMathHint =
     "- Use LaTeX for math (e.g., $x^3$); escape dollar signs when not in math.";
-  return `${codeBlockHint}\n${mathHint}`;
+  const header = `${fallbackCodeBlockHint}\n${fallbackMathHint}`;
+
+  const active = getActiveYoungroCardFromStorage();
+  const base = active ? getRuntimeSystemPrompt(active as any) : "";
+  const tail = base.trim();
+  return tail ? `${header}\n${tail}` : header;
 }
 
 function generateInitialSystemMessage(): BaseMessage {

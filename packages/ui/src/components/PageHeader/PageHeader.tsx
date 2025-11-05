@@ -35,7 +35,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         left: "env(safe-area-inset-left, 0px)",
       }}
       className={clsx(
-        "sticky inset-x-0 top-0 z-[99] w-full bg-background/80 backdrop-blur pb-4 pt-6",
+        "sticky inset-x-0 top-0 z-1 w-full bg-background/80 backdrop-blur pb-4 pt-6",
         className
       )}
     >

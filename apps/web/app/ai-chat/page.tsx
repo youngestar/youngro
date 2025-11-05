@@ -1,13 +1,26 @@
 "use client";
 
-import styles from "./page.module.css";
 import InteractiveArea from "../../src/components/InteractiveArea";
 import { Button, Icon } from "@repo/ui";
 import { useChatStore } from "@youngro/chat-zustand";
 import { Trash2 } from "lucide-react";
+import React from "react";
 
 export default function Home() {
-  const { cleanup, sending, messages } = useChatStore();
+  const { cleanup, sending, messages, applyActiveCardSystemPrompt } =
+    useChatStore();
+
+  // 监听 Youngro 卡片激活事件，实时刷新系统提示
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => applyActiveCardSystemPrompt();
+    window.addEventListener("youngro-card-activated", handler as EventListener);
+    return () =>
+      window.removeEventListener(
+        "youngro-card-activated",
+        handler as EventListener
+      );
+  }, [applyActiveCardSystemPrompt]);
 
   return (
     <div className="p-4">
