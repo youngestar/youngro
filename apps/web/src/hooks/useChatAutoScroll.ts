@@ -138,16 +138,17 @@ export function useChatAutoScroll() {
     }
   }, [sending, showBackToBottom, scheduleAutoScroll]);
 
-  // 监听消息被清空的场景：重置滚动状态并隐藏“回到底部”按钮
+  // 监听消息被清空或仅剩 system 场景：重置滚动状态并隐藏“回到底部”按钮
   useEffect(() => {
-    if (messages.length === 0) {
+    const onlySystem = messages.length === 1 && messages[0]?.role === "system";
+    if (messages.length === 0 || onlySystem) {
       autoScrollPinnedRef.current = true;
       suppressionUntilRef.current = 0;
       lastScrollTopRef.current = null;
       setShowBackToBottom(false);
       scheduleAutoScroll("auto");
     }
-  }, [messages.length, scheduleAutoScroll]);
+  }, [messages.length, scheduleAutoScroll, messages]);
 
   // token 流时：仅在贴底时跟随
   useEffect(() => {

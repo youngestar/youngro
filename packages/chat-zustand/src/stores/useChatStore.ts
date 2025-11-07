@@ -4,6 +4,18 @@ import { getRuntimeSystemPrompt } from "@youngro/store-card";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
+// Emotion/Delay tokens integration
+// Lazy import style: use require-like dynamic to avoid type resolution issues if package build not yet run.
+// For type safety, declare a minimal interface.
+// Local import to source (avoid relying on built types during dev):
+// NOTE: Adjust relative path if package structure changes.
+import {
+  createStreamTokenizer,
+  stripTokens,
+  type Token as EmotionToken,
+} from "../../../emotion-tokens/src/index";
+const ENABLE_TOKEN_PARSE = true; // future: externalize via settings/feature flag
+const streamTokenizer = createStreamTokenizer();
 
 export interface ChatState {
   messages: BaseMessage[];
@@ -118,19 +130,35 @@ export const useChatStore = create<ChatState>()(
                 const obj = JSON.parse(s) as Record<string, unknown>;
                 const t = obj.type as string | undefined;
                 if (t === "text-delta") {
-                  const chunk = typeof obj.text === "string" ? obj.text : "";
-                  if (!chunk) continue;
-                  set((st) => {
-                    if (!st.streamingMessage) return;
-                    st.streamingMessage.content += chunk;
-                    st.streamingMessage.slices =
-                      st.streamingMessage.slices || [];
-                    st.streamingMessage.slices.push({
-                      type: "text",
-                      text: chunk,
+                  const rawChunk = typeof obj.text === "string" ? obj.text : "";
+                  if (!rawChunk) continue;
+                  let visible = rawChunk;
+                  let newTokens: EmotionToken[] = [];
+                  if (ENABLE_TOKEN_PARSE) {
+                    const { textDelta, tokens } =
+                      streamTokenizer.ingest(rawChunk);
+                    visible = textDelta;
+                    newTokens = tokens;
+                    // (Future) dispatch tokens to emotion/delay queues here
+                    // e.g., emotionQueue.add(tokens.filter(t => t.kind==='emote'))
+                    //       delayQueue.add(tokens.filter(t => t.kind==='delay'))
+                  }
+                  // 强力兜底：再次剥离可能残留的标记（防止上游逻辑失效或旧数据混入）
+                  if (visible) visible = stripTokens(visible);
+                  if (visible) {
+                    set((st) => {
+                      if (!st.streamingMessage) return;
+                      st.streamingMessage.content += visible;
+                      st.streamingMessage.slices =
+                        st.streamingMessage.slices || [];
+                      st.streamingMessage.slices.push({
+                        type: "text",
+                        text: visible,
+                      });
                     });
-                  });
-                  get().onTokenLiteral.forEach((cb) => cb(chunk));
+                    get().onTokenLiteral.forEach((cb) => cb(visible));
+                  }
+                  // 不再把 token 原文注入 slices，避免 UI 误渲染；后续若需调试可加独立调试队列。
                 } else if (t === "finish") {
                   // push final assistant message
                   set((st) => {
@@ -139,6 +167,12 @@ export const useChatStore = create<ChatState>()(
                       st.streamingMessage.slices &&
                       st.streamingMessage.slices.length > 0
                     ) {
+                      // 在入列前做一次彻底清洗，双保险（仅对字符串内容）
+                      if (typeof st.streamingMessage.content === "string") {
+                        st.streamingMessage.content = stripTokens(
+                          st.streamingMessage.content
+                        );
+                      }
                       st.messages.push({
                         ...(st.streamingMessage as BaseMessage),
                         timestamp: new Date().toISOString(),
@@ -212,6 +246,21 @@ export const useChatStore = create<ChatState>()(
         set((s) => {
           s.sending = false;
           s.abortController = null;
+          // ensure flush remaining buffered plain text (if any)
+          if (ENABLE_TOKEN_PARSE && s.streamingMessage) {
+            const { textDelta } = streamTokenizer.flush();
+            if (textDelta) {
+              const cleaned = stripTokens(textDelta);
+              s.streamingMessage.content += cleaned;
+              s.streamingMessage.slices = s.streamingMessage.slices || [];
+              s.streamingMessage.slices.push({ type: "text", text: cleaned });
+            }
+            if (typeof s.streamingMessage.content === "string") {
+              s.streamingMessage.content = stripTokens(
+                s.streamingMessage.content
+              );
+            }
+          }
           s.streamingMessage = null;
         });
       },
@@ -271,8 +320,8 @@ export const useChatStore = create<ChatState>()(
       storage: createJSONStorage(() => localStorage),
       // 仅持久化 messages，避免将临时状态（如 sending/streamingMessage/handlers）写入存储
       partialize: (s) => ({ messages: s.messages }),
-      version: 2,
-      // 迁移：确保首条为 system，并使用最新系统提示
+      version: 3,
+      // 迁移：确保首条为 system，并使用最新系统提示；并清洗历史消息中的控制标记
       migrate: (persistedState: unknown, prevVersion: number) => {
         const state = (persistedState as Partial<ChatState>) || {};
         const msgs = Array.isArray((state as any).messages)
@@ -289,10 +338,19 @@ export const useChatStore = create<ChatState>()(
 
         // 若首条为 system，但内容需要更新，则覆盖其 content
         const expected = generateSystemPrompt();
+        let arr: BaseMessage[] = msgs;
         if (typeof first.content === "string" && first.content !== expected) {
           const updatedFirst: BaseMessage = { ...first, content: expected };
-          (state as any).messages = [updatedFirst, ...msgs.slice(1)];
+          arr = [updatedFirst, ...msgs.slice(1)];
         }
+        // 清洗所有字符串消息中的控制标记（向后兼容旧版本存量数据）
+        const cleaned = arr.map((m) => {
+          if (typeof m.content === "string") {
+            return { ...m, content: stripTokens(m.content) } as BaseMessage;
+          }
+          return m;
+        });
+        (state as any).messages = cleaned;
         return state as ChatState;
       },
     }
