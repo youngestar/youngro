@@ -176,52 +176,68 @@ const MAX_BUFFER = 4096; // safety cap; tokens are short so this is generous
 
 export function createStreamTokenizer(): StreamTokenizer {
   let buffer = "";
-  // We only emit completed tokens when END is seen.
+  // Incremental scan: emit visible text in every ingest; keep only incomplete token prefix in buffer.
   function ingest(chunk: string): StreamTokenizerResult {
     if (!chunk) return { textDelta: "", tokens: [] };
     buffer += chunk;
     if (buffer.length > MAX_BUFFER) {
-      // Fallback: if buffer grows too large, flush everything sans tokens already parsed.
       const { text, tokens } = parseTokens(buffer);
       buffer = "";
       return { textDelta: text, tokens };
     }
 
-    // Strategy:
-    // 1. Find last complete token end position.
-    // 2. Parse only the prefix that contains complete tokens.
-    // 3. Keep the remainder (possible partial token) in buffer.
-    const lastEndIdx = buffer.lastIndexOf(TOKEN_END);
-    if (lastEndIdx === -1) {
-      // No completed token yet; but we must be careful not to output partial token start.
-      // If buffer contains TOKEN_START but no end, withhold everything after that start.
-      const startIdx = buffer.lastIndexOf(TOKEN_START);
-      if (startIdx === -1) {
-        // No token start at all: safe to flush whole buffer as plain text
-        const out = buffer;
-        buffer = "";
-        return { textDelta: out, tokens: [] };
-      } else {
-        // Emit only content before startIdx as plain text; keep remainder
-        const visible = buffer.slice(0, startIdx);
-        buffer = buffer.slice(startIdx); // keep partial token start
-        return { textDelta: stripTokens(visible), tokens: [] };
+    const tokens: Token[] = [];
+    const visibleParts: string[] = [];
+    let lastPos = 0;
+    ANY_TOKEN_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = ANY_TOKEN_RE.exec(buffer))) {
+      const raw = m[0];
+      const start = m.index;
+      const end = start + raw.length;
+      // push visible text before token
+      if (start > lastPos) visibleParts.push(buffer.slice(lastPos, start));
+      // build token
+      if (m[1]) {
+        const name = m[1]!;
+        const emote: EmoteToken = { kind: "emote", raw, start, end, name };
+        if ((KNOWN_EMOTIONS as readonly string[]).includes(name)) {
+          emote.known = name as KnownEmotion;
+        }
+        tokens.push(emote);
+      } else if (m[2]) {
+        tokens.push({
+          kind: "delay",
+          raw,
+          start,
+          end,
+          seconds: parseFloat(m[2]!),
+        });
+      } else if (m[3]) {
+        tokens.push({ kind: "motion", raw, start, end, name: m[3]! });
       }
+      lastPos = end;
+    }
+    // tail after last token
+    const tail = buffer.slice(lastPos);
+    if (tail) {
+      const startIdx = tail.lastIndexOf(TOKEN_START);
+      const hasEnd = tail.indexOf(TOKEN_END, startIdx + 2) !== -1;
+      if (startIdx !== -1 && !hasEnd) {
+        // keep partial token from startIdx; emit text before it
+        if (startIdx > 0) visibleParts.push(tail.slice(0, startIdx));
+        buffer = tail.slice(startIdx);
+      } else {
+        // no partial token, emit all
+        visibleParts.push(tail);
+        buffer = "";
+      }
+    } else {
+      buffer = "";
     }
 
-    // We have at least one token end; define parseBoundary as position after that end
-    const parseBoundary = lastEndIdx + TOKEN_END.length;
-    const completedSegment = buffer.slice(0, parseBoundary);
-    const remainder = buffer.slice(parseBoundary);
-    const { text, tokens } = parseTokens(completedSegment);
-    // Only emit user-visible text produced BEFORE the last token end.
-    // If remainder begins with plain text (i.e., not a token start), we should NOT emit it yet
-    // because its leading characters could conceptually belong to a token if next chunk starts with '|>'.
-    // However since a token cannot close without a preceding '<|', a following '|>' alone cannot form a token.
-    // So it's safe to emit the remainder's leading plain text until a new '<|' appears.
-    // Simplicity: we hold remainder entirely until next chunk to avoid edge complexity.
-    buffer = remainder; // keep for next ingest
-    return { textDelta: text, tokens };
+    const textDelta = stripTokens(visibleParts.join(""));
+    return { textDelta, tokens };
   }
 
   function flush(): StreamTokenizerResult {

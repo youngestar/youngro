@@ -20,6 +20,8 @@ export function SimpleModal({
   footer,
   widthClassName = "max-w-xl",
 }: SimpleModalProps) {
+  // 记录按下是否发生在遮罩自身（用于避免“内按下，外松开”导致误关闭）
+  const downOnOverlayRef = React.useRef(false);
   // 监听 ESC 键关闭
   React.useEffect(() => {
     if (!open) return;
@@ -38,9 +40,18 @@ export function SimpleModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       aria-modal="true"
       role="dialog"
+      // 采用 Pointer 事件记录“按下是否在遮罩上”，从而仅在真点击遮罩时关闭
+      onPointerDown={(e) => {
+        downOnOverlayRef.current = e.target === e.currentTarget;
+      }}
       onClick={(e) => {
-        // 点击遮罩（空白处）关闭，仅当点击目标是遮罩本身时触发
-        if (e.target === e.currentTarget) onClose();
+        // 仅当按下与抬起都发生在遮罩自身时才关闭，
+        // 避免“在内容内按下，拖出到遮罩松开”被误判为外部点击。
+        if (e.target === e.currentTarget && downOnOverlayRef.current) {
+          onClose();
+        }
+        // 重置状态，避免影响后续交互
+        downOnOverlayRef.current = false;
       }}
     >
       <div
