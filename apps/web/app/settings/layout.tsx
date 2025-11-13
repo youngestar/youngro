@@ -14,13 +14,15 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
     >
       {/* Header */}
       <div className="w-full bg-[var(--background)]/80 backdrop-blur px-3 py-3">
-        <div className="mx-auto flex max-w-screen-2xl items-center gap-2">
+        <div className="mx-auto flex 2xl:max-w-screen-2xl items-center gap-2">
           <HeaderLink href="/" title="YOUNGRO" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="mx-auto max-w-screen-2xl px-3 py-3">{children}</div>
+      <div className="mx-auto 2xl:max-w-screen-2xl px-3 xl:px-4 py-0 flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }

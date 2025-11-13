@@ -5,7 +5,8 @@ import { Button } from "@repo/ui";
 
 interface SimpleModalProps {
   open: boolean;
-  title?: string;
+  // allow string or JSX so callers can pass styled title nodes
+  title?: React.ReactNode;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
@@ -58,7 +59,9 @@ export function SimpleModal({
         className={`w-full ${widthClassName} overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900`}
       >
         <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
-          <h2 className="text-base font-semibold">{title}</h2>
+          <h2 className="from-primary-500 to-primary-400 bg-gradient-to-r bg-clip-text text-transparent text-2xl">
+            {title}
+          </h2>
           <button
             aria-label="Close"
             onClick={onClose}

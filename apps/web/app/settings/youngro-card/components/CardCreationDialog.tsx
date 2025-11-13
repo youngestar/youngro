@@ -1,9 +1,16 @@
 "use client";
 
 import React from "react";
-import { Button, Field, Input, Textarea } from "@repo/ui";
+import { Button, Field, Input, Textarea, Icon } from "@repo/ui";
 import { SimpleModal } from "./SimpleModal";
-import { User, Brain, Settings as SettingsIcon, Eye } from "lucide-react";
+import {
+  User,
+  Brain,
+  Settings as SettingsIcon,
+  Eye,
+  Undo2,
+} from "lucide-react";
+import { CardDetailsPanel } from "@youngro/feature-youngro-card";
 
 export interface CardCreationValues {
   name: string;
@@ -44,6 +51,9 @@ export function CardCreationDialog({
     "identity"
   );
   const [error, setError] = React.useState<string>("");
+  const [previewTab, setPreviewTab] = React.useState<"details" | "modules">(
+    "details"
+  );
 
   const nameInvalid = values.name.trim().length === 0;
   const versionInvalid = !/^(?:\d+\.)+\d+$/.test(values.version.trim());
@@ -100,19 +110,26 @@ export function CardCreationDialog({
     <SimpleModal
       open={open}
       onClose={onClose}
-      title="新建卡片"
+      title={
+        <span className="from-primary-500 to-primary-400 bg-gradient-to-r bg-clip-text text-transparent text-2xl">
+          新建卡片
+        </span>
+      }
       widthClassName="max-w-5xl"
       footer={
         <div className="flex w-full items-center justify-between">
           {/* 进度提示 */}
           <ProgressHint values={values} versionInvalid={versionInvalid} />
-          <div className="flex items-center gap-2">
+          <div className="ml-auto mr-1 flex flex-row gap-2">
             <Button onClick={onClose} intent="default">
+              <Icon icon={Undo2} size="sm" className="mr-2" />
               取消
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={nameInvalid || versionInvalid || submitting}
+              intent="primary"
+              icon
             >
               创建
             </Button>
@@ -129,38 +146,40 @@ export function CardCreationDialog({
           }
         }}
       >
-        {/* 顶部胶囊式标签 + 渐变横幅 */}
-        <div className="rounded-xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-white p-3 dark:border-neutral-800 dark:from-neutral-950 dark:to-neutral-900">
-          <div className="mb-2 flex items-center gap-2">
-            {(
-              [
-                { id: "identity", label: "身份", icon: User },
-                { id: "behavior", label: "行为", icon: Brain },
-                { id: "settings", label: "设置", icon: SettingsIcon },
-              ] as const
-            ).map((t) => {
-              const Icon = t.icon;
-              const active = tab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setTab(t.id as typeof tab)}
-                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
-                    active
-                      ? "bg-neutral-900 text-white shadow-sm dark:bg-neutral-100 dark:text-black"
-                      : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                  }`}
-                  role="tab"
-                  aria-selected={active}
-                >
-                  <Icon size={14} />
-                  {t.label}
-                </button>
-              );
-            })}
+        {/*Dialog tabs*/}
+        <div>
+          <div className="border-b border-neutral-200 dark:border-neutral-700">
+            <div className="flex justify-center -mb-px sm:justify-start space-x-1">
+              {(
+                [
+                  { id: "identity", label: "身份", icon: User },
+                  { id: "behavior", label: "行为", icon: Brain },
+                  { id: "settings", label: "设置", icon: SettingsIcon },
+                ] as const
+              ).map((t) => {
+                const Icon = t.icon;
+                const active = tab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id as typeof tab)}
+                    className={`px-4 py-2 text-sm font-medium ${
+                      active
+                        ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-500 dark:border-primary-400"
+                        : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                    }`}
+                    role="tab"
+                    aria-selected={active}
+                  >
+                    <div className="flex items-center gap-1">
+                      <Icon size={14} />
+                      {t.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          {/* 轻量进度条 */}
-          <InlineProgress values={values} versionInvalid={versionInvalid} />
         </div>
 
         {error ? (
@@ -371,55 +390,32 @@ export function CardCreationDialog({
           </div>
           {/* 右侧预览 */}
           <div className="hidden min-h-full flex-col gap-3 md:flex">
-            <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-              <Eye size={14} /> 卡片预览
-            </div>
-            <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-500/10 via-fuchsia-500/10 to-rose-500/10 px-4 py-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black">
-                  {(values.nickname || values.name || "?")
-                    .slice(0, 1)
-                    .toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">
-                    {values.name || "未命名卡片"}
-                    {values.nickname ? (
-                      <span className="ml-2 rounded-full bg-neutral-900/5 px-2 py-0.5 text-xs text-neutral-700 dark:bg-neutral-100/10 dark:text-neutral-200">
-                        {values.nickname}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
-                    v{values.version || "1.0.0"}
-                  </div>
-                </div>
+            <div className="flex items-center justify-between gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+              <div className="flex items-center gap-2">
+                <Eye size={14} />
+                <span>卡片预览</span>
               </div>
-              <div className="space-y-3 px-4 py-4 text-sm">
-                <section>
-                  <h4 className="mb-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                    描述
-                  </h4>
-                  <p className="whitespace-pre-wrap text-neutral-800 dark:text-neutral-200">
-                    {values.description || "（暂无描述）"}
-                  </p>
-                </section>
-                <section>
-                  <h4 className="mb-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                    性格
-                  </h4>
-                  <p className="whitespace-pre-wrap text-neutral-800 dark:text-neutral-200">
-                    {values.personality || "（未填写）"}
-                  </p>
-                </section>
-                <section>
-                  <h4 className="mb-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                    系统提示
-                  </h4>
-                  <pre className="max-h-48 overflow-auto rounded-md bg-neutral-50 p-3 text-xs text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100">
-                    {values.systemPrompt || "（未填写）"}
-                  </pre>
-                </section>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+              <div className="px-4 py-3">
+                {/* 使用 feature-youngro-card 中的 CardDetailsPanel 作为真实预览 */}
+                <CardDetailsPanel
+                  card={{
+                    name: values.name || "未命名卡片",
+                    version: values.version || "1.0.0",
+                    nickname: values.nickname || undefined,
+                    description: values.description || undefined,
+                    notes: values.notes || undefined,
+                    systemPrompt: values.systemPrompt || undefined,
+                    personality: values.personality || undefined,
+                    scenario: values.scenario || undefined,
+                    tags: [],
+                    extensions: { youngro: {} },
+                  }}
+                  tab={previewTab}
+                  onChangeTab={(t) => setPreviewTab(t as "details" | "modules")}
+                />
               </div>
             </div>
           </div>
@@ -445,24 +441,6 @@ function countCompletion(values: CardCreationValues, versionInvalid: boolean) {
     total: checks.length,
     percent: Math.round((done / checks.length) * 100),
   };
-}
-
-function InlineProgress({
-  values,
-  versionInvalid,
-}: {
-  values: CardCreationValues;
-  versionInvalid: boolean;
-}) {
-  const { percent } = countCompletion(values, versionInvalid);
-  return (
-    <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-      <div
-        className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-rose-500 transition-all"
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
 }
 
 function ProgressHint({

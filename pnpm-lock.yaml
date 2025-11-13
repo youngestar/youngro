@@ -300,6 +300,9 @@ importers:
       '@youngro/store-card':
         specifier: workspace:*
         version: link:../store-card
+      lucide-react:
+        specifier: ^0.546.0
+        version: 0.546.0(react@19.1.0)
       react:
         specifier: '>=18'
         version: 19.1.0

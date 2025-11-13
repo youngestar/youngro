@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Field, Input, Textarea } from "@repo/ui";
+import { Eye, SlidersHorizontal } from "lucide-react";
 
 export type CardDetailsTab = "details" | "modules";
 
@@ -38,29 +39,46 @@ export function CardDetailsPanel({
   const youngro = card.extensions?.youngro;
   return (
     <div>
-      <div className="mb-4 flex items-center gap-3">
-        <button
-          className={`rounded px-3 py-1 text-sm ${
-            tab === "details"
-              ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black"
-              : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-          }`}
-          onClick={() => onChangeTab?.("details")}
-          type="button"
-        >
-          详情
-        </button>
-        <button
-          className={`rounded px-3 py-1 text-sm ${
-            tab === "modules"
-              ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black"
-              : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-          }`}
-          onClick={() => onChangeTab?.("modules")}
-          type="button"
-        >
-          模块
-        </button>
+      <div>
+        <div className="border-b border-neutral-200 dark:border-neutral-700">
+          <div
+            className="flex justify-center -mb-px sm:justify-start space-x-1"
+            role="tablist"
+          >
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                tab === "details"
+                  ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-500 dark:border-primary-400"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+              }`}
+              onClick={() => onChangeTab?.("details")}
+              role="tab"
+              aria-selected={tab === "details"}
+              type="button"
+            >
+              <div className="flex items-center gap-1">
+                <Eye size={14} />
+                详情
+              </div>
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                tab === "modules"
+                  ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-500 dark:border-primary-400"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+              }`}
+              onClick={() => onChangeTab?.("modules")}
+              role="tab"
+              aria-selected={tab === "modules"}
+              type="button"
+            >
+              <div className="flex items-center gap-1">
+                <SlidersHorizontal size={14} />
+                模块
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
 
       {tab === "details" ? (

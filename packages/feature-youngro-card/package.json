@@ -16,6 +16,8 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w",
+    "dev": "pnpm run build:watch",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "lint": "echo 'no lint for feature-youngro-card yet'"
   },
@@ -25,7 +27,8 @@
   },
   "dependencies": {
     "@youngro/store-card": "workspace:*",
-    "@repo/ui": "workspace:*"
+    "@repo/ui": "workspace:*",
+    "lucide-react": "^0.546.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

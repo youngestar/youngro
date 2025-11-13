@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { Button } from "@repo/ui";
+// import { Button } from "@repo/ui";
+import { Ghost, Mic, CheckCircle2, PlayCircle, Trash2 } from "lucide-react";
+import { IconButton } from "./IconButton";
 
 interface Props {
   id: string;
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export function CardListItem({
+  id,
   name,
   description,
   isActive,
@@ -31,9 +34,18 @@ export function CardListItem({
 }: Props) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-selected={isSelected}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       onClick={onSelect}
       className={
-        "relative min-h-[120px] cursor-pointer overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-all hover:shadow md:hover:shadow-neutral-300 dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
+        "relative min-h-[120px] cursor-pointer overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 hover:shadow md:hover:shadow-neutral-300 dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
         (isSelected
           ? "border-primary-300 ring-2 ring-primary-300/50 dark:border-primary-700"
           : "border-neutral-100")
@@ -43,8 +55,12 @@ export function CardListItem({
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate text-lg font-normal">{name}</h3>
           {isActive ? (
-            <div className="shrink-0 rounded-md bg-primary-100 p-1 text-primary-600 dark:bg-primary-900/40 dark:text-primary-400">
-              ✔
+            <div
+              className="shrink-0 rounded-md bg-primary-100 p-1 text-primary-600 dark:bg-primary-900/40 dark:text-primary-400"
+              aria-label="已激活"
+              title="已激活"
+            >
+              <CheckCircle2 className="h-4 w-4" />
             </div>
           ) : null}
         </div>
@@ -62,38 +78,37 @@ export function CardListItem({
           <div className="flex items-center gap-2">
             {consciousnessModel ? (
               <div className="flex items-center gap-1">
-                <span>👻</span>
+                <Ghost className="h-3.5 w-3.5" aria-hidden />
                 <span>{consciousnessModel}</span>
               </div>
             ) : null}
             {voiceModel ? (
               <div className="flex items-center gap-1">
-                <span>🎙️</span>
+                <Mic className="h-3.5 w-3.5" aria-hidden />
                 <span>{voiceModel}</span>
               </div>
             ) : null}
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-2 px-2 py-1.5">
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onActivate();
-          }}
+      <div className="flex items-center justify-end gap-1.5 px-2 py-1.5">
+        <IconButton
+          ariaLabel={isActive ? "已激活" : "激活"}
+          title={isActive ? "已激活" : "激活"}
           disabled={isActive}
+          onClick={onActivate}
         >
-          {isActive ? "已激活" : "激活"}
-        </Button>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          intent="destructive"
-        >
-          删除
-        </Button>
+          {isActive ? (
+            <CheckCircle2 className="h-5 w-5 text-primary-500 dark:text-primary-400" />
+          ) : (
+            <PlayCircle className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+          )}
+        </IconButton>
+        {id !== "default" ? (
+          <IconButton ariaLabel="删除" title="删除" onClick={onDelete}>
+            <Trash2 className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+          </IconButton>
+        ) : null}
       </div>
     </div>
   );
