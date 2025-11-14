@@ -27,8 +27,6 @@ jobs:
 
             - name: Setup pnpm (action)
               uses: pnpm/action-setup@v4
-              with:
-                  version: 9
 
             - name: Verify pnpm
               run: pnpm -v
@@ -61,8 +59,6 @@ jobs:
 
             - name: Setup pnpm (action)
               uses: pnpm/action-setup@v4
-              with:
-                  version: 9
 
             - name: Verify pnpm
               run: pnpm -v
