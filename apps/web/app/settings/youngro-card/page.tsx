@@ -1,9 +1,10 @@
 "use client";
 
-import { PageHeader } from "@repo/ui";
+import { PageHeader, Icon, Button } from "@repo/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { SearchX } from "lucide-react";
 import {
   YoungroCardProvider,
   useYoungroCards,
@@ -49,6 +50,9 @@ function Content() {
     }
     return arr;
   }, [entries, sort]);
+
+  const hasQuery = search.trim().length > 0;
+  const hasResults = sorted.length > 0;
 
   const [createOpen, setCreateOpen] = React.useState(false);
   const [detailId, setDetailId] = React.useState<string | null>(null);
@@ -103,6 +107,13 @@ function Content() {
     downloadJson(cards, "youngro-cards.json");
   };
 
+  const handleExportCard = (id: string) => {
+    const card = cards[id];
+    if (!card) return alert("未找到该卡片");
+    const safeName = (card.name || id).replace(/[^\w-]+/g, "_");
+    downloadJson(card, `youngro-card-${safeName}.json`);
+  };
+
   const selectedCard = detailId ? cards[detailId] : null;
 
   return (
@@ -128,11 +139,11 @@ function Content() {
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+        <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] auto-rows-[minmax(120px,auto)] gap-4">
           <FileInput onFiles={handleImport} />
           <CreateCardTile onClick={handleCreate} />
 
-          {sorted.length > 0 ? (
+          {hasResults &&
             sorted.map(([id, card]) => {
               const y = (card.extensions as { youngro: YoungroExtension })
                 .youngro;
@@ -151,20 +162,39 @@ function Content() {
                     setDetailId(id);
                   }}
                   onActivate={() => setActiveCard(id)}
+                  onExport={() => handleExportCard(id)}
                   onDelete={() => {
                     setDeleteId(id);
                   }}
                 />
               );
-            })
-          ) : (
-            <div className="col-span-full rounded-xl border border-neutral-200 bg-neutral-50/50 p-8 text-center text-neutral-600 dark:border-neutral-700/30 dark:bg-neutral-900/50 dark:text-neutral-300">
-              {search.trim()
-                ? "未找到匹配的卡片，请调整搜索关键词。"
-                : "暂无卡片"}
+            })}
+
+          {hasQuery && !hasResults && (
+            <div className="h-full min-h-[120px] rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 text-center text-neutral-600 dark:border-neutral-700/30 dark:bg-neutral-900/50 dark:text-neutral-300">
+              <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-200/60 text-neutral-500 dark:bg-neutral-800/60 dark:text-neutral-400">
+                <Icon icon={SearchX} size="sm" />
+              </div>
+              <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100">
+                无匹配结果
+              </div>
+              <div className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                调整关键词，或清除搜索条件后重试
+              </div>
+              <div className="mt-3">
+                <Button size="sm" onClick={() => setSearch("")}>
+                  清除搜索
+                </Button>
+              </div>
             </div>
           )}
         </div>
+
+        {!hasQuery && !hasResults && (
+          <div className="mt-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+            暂无卡片
+          </div>
+        )}
 
         <CardCreationDialog
           open={createOpen}

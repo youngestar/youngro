@@ -35,7 +35,7 @@ export function FileInput({ onFiles }: { onFiles: (files: FileList) => void }) {
       onDragEnter={onDragOver}
       onDragLeave={onDragLeave}
       className={
-        "flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white/60 p-6 text-center transition-all dark:bg-black/30 " +
+        "flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white/60 p-6 text-center transition-all dark:bg-black/30 " +
         (dragOver
           ? "border-primary-400 bg-primary-50/60 dark:border-primary-700 dark:bg-primary-900/20"
           : "border-neutral-200 hover:border-primary-300 hover:bg-white/80 dark:border-neutral-700 dark:hover:border-primary-700 dark:hover:bg-black/40")

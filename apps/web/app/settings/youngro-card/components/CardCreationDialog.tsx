@@ -10,7 +10,7 @@ import {
   Eye,
   Undo2,
 } from "lucide-react";
-import { CardDetailsPanel } from "@youngro/feature-youngro-card";
+import { CardListItem } from "./CardListItem";
 
 export interface CardCreationValues {
   name: string;
@@ -51,9 +51,7 @@ export function CardCreationDialog({
     "identity"
   );
   const [error, setError] = React.useState<string>("");
-  const [previewTab, setPreviewTab] = React.useState<"details" | "modules">(
-    "details"
-  );
+  // 右侧预览改为使用 CardListItem，无需内部 tab
 
   const nameInvalid = values.name.trim().length === 0;
   const versionInvalid = !/^(?:\d+\.)+\d+$/.test(values.version.trim());
@@ -189,8 +187,8 @@ export function CardCreationDialog({
         ) : null}
 
         {/* 表单 + 右侧预览 */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr,0.8fr]">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr),minmax(0,420px)]">
+          <div className="min-w-0 space-y-4">
             {tab === "identity" && (
               <div className="space-y-4">
                 <Field label={"名称（必填）"}>
@@ -231,7 +229,7 @@ export function CardCreationDialog({
                         : undefined
                     }
                   />
-                  <CharCounter value={values.description} limit={400} />
+                  <CharCounter value={values.description} limit={2000} />
                   {values.description.trim() === "" && (
                     <p className="mt-1 text-xs text-red-600">描述为必填项</p>
                   )}
@@ -389,7 +387,7 @@ export function CardCreationDialog({
             )}
           </div>
           {/* 右侧预览 */}
-          <div className="hidden min-h-full flex-col gap-3 md:flex">
+          <div className="hidden min-h-full min-w-0 flex-col gap-3 md:flex">
             <div className="flex items-center justify-between gap-2 text-sm text-neutral-600 dark:text-neutral-300">
               <div className="flex items-center gap-2">
                 <Eye size={14} />
@@ -397,25 +395,25 @@ export function CardCreationDialog({
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900 md:max-w-[420px]">
               <div className="px-4 py-3">
-                {/* 使用 feature-youngro-card 中的 CardDetailsPanel 作为真实预览 */}
-                <CardDetailsPanel
-                  card={{
-                    name: values.name || "未命名卡片",
-                    version: values.version || "1.0.0",
-                    nickname: values.nickname || undefined,
-                    description: values.description || undefined,
-                    notes: values.notes || undefined,
-                    systemPrompt: values.systemPrompt || undefined,
-                    personality: values.personality || undefined,
-                    scenario: values.scenario || undefined,
-                    tags: [],
-                    extensions: { youngro: {} },
-                  }}
-                  tab={previewTab}
-                  onChangeTab={(t) => setPreviewTab(t as "details" | "modules")}
-                />
+                {/* 以 CardListItem 作为视觉预览，禁用交互 */}
+                <div className="pointer-events-none w-full">
+                  <CardListItem
+                    id="preview"
+                    name={values.name || "未命名卡片"}
+                    description={values.description || undefined}
+                    version={values.version || "1.0.0"}
+                    isActive={false}
+                    isSelected={false}
+                    consciousnessModel={undefined}
+                    voiceModel={undefined}
+                    onSelect={() => {}}
+                    onActivate={() => {}}
+                    onDelete={() => {}}
+                    onExport={() => {}}
+                  />
+                </div>
               </div>
             </div>
           </div>

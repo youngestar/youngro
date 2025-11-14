@@ -2,7 +2,14 @@
 
 import React from "react";
 // import { Button } from "@repo/ui";
-import { Ghost, Mic, CheckCircle2, PlayCircle, Trash2 } from "lucide-react";
+import {
+  Ghost,
+  Mic,
+  CheckCircle2,
+  PlayCircle,
+  Trash2,
+  Download,
+} from "lucide-react";
 import { IconButton } from "./IconButton";
 
 interface Props {
@@ -17,6 +24,7 @@ interface Props {
   onSelect: () => void;
   onActivate: () => void;
   onDelete: () => void;
+  onExport: () => void;
 }
 
 export function CardListItem({
@@ -31,6 +39,7 @@ export function CardListItem({
   onSelect,
   onActivate,
   onDelete,
+  onExport,
 }: Props) {
   return (
     <div
@@ -45,13 +54,17 @@ export function CardListItem({
       }}
       onClick={onSelect}
       className={
-        "relative min-h-[120px] cursor-pointer overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 hover:shadow md:hover:shadow-neutral-300 dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
+        // Outer container mimicking AIRI: group, overlay gradient, subtle hover shadow
+        "group relative flex min-h-[120px] cursor-pointer flex-col overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-all duration-400 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 hover:shadow-[0_4px_4px_rgba(220,220,220,0.4)] active:shadow-[0_0_0_rgba(220,220,220,0.25)] dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
+        // Selection state prefers border tint like AIRI
         (isSelected
-          ? "border-primary-300 ring-2 ring-primary-300/50 dark:border-primary-700"
-          : "border-neutral-100")
+          ? "border-primary-400 dark:border-primary-600"
+          : "border-neutral-100") +
+        // Gradient sweep overlay on hover (before pseudo)
+        " before:content-[''] before:absolute before:inset-0 before:z-0 before:h-full before:w-1/4 before:opacity-0 before:transition-all before:duration-400 before:ease-in-out before:bg-gradient-to-r before:from-primary-500/0 before:to-primary-500/0 group-hover:before:opacity-100 group-hover:before:from-primary-500/20 group-hover:before:via-primary-500/10 group-hover:before:to-transparent dark:before:from-primary-400/0 dark:before:to-primary-400/0 dark:group-hover:before:from-primary-400/20 dark:group-hover:before:via-primary-400/10 dark:group-hover:before:to-transparent"
       }
     >
-      <div className="flex h-full flex-col justify-between rounded-lg bg-white p-5 transition-all hover:text-primary-600/80 dark:bg-neutral-900 dark:hover:text-primary-300/80">
+      <div className="relative z-[1] flex min-w-0 flex-1 flex-col justify-between gap-3 overflow-hidden rounded-lg bg-white p-5 transition-colors dark:bg-neutral-900 group-hover:text-primary-600/80 dark:group-hover:text-primary-300/80 after:content-[''] after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(circle_at_1px_1px,_rgba(226,232,240,0.8)_1px,_transparent_0)] after:[background-size:10px_10px] after:[mask-image:linear-gradient(165deg,white_30%,transparent_50%)] group-hover:after:bg-[radial-gradient(circle_at_1px_1px,_rgba(147,197,253,0.5)_1px,_transparent_0)] dark:group-hover:after:bg-[radial-gradient(circle_at_1px_1px,_rgba(191,219,254,0.2)_1px,_transparent_0)]">
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate text-lg font-normal">{name}</h3>
           {isActive ? (
@@ -66,7 +79,7 @@ export function CardListItem({
         </div>
 
         {description ? (
-          <p className="min-h-[40px] flex-1 text-sm text-neutral-500 line-clamp-3 dark:text-neutral-400">
+          <p className="min-h-[40px] flex-1 break-words text-sm text-neutral-500 line-clamp-3 dark:text-neutral-400">
             {description}
           </p>
         ) : (
@@ -91,7 +104,11 @@ export function CardListItem({
           </div>
         </div>
       </div>
+      {/* Actions outside inner panel, like AIRI */}
       <div className="flex items-center justify-end gap-1.5 px-2 py-1.5">
+        <IconButton ariaLabel="导出" title="导出" onClick={onExport}>
+          <Download className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+        </IconButton>
         <IconButton
           ariaLabel={isActive ? "已激活" : "激活"}
           title={isActive ? "已激活" : "激活"}
