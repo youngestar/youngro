@@ -2,14 +2,19 @@
   "name": "@youngro/design-tokens",
   "version": "0.0.0",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "exports": {
     ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./styles/*": "./styles/*",
+    "./dist": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./styles/*": "./styles/*"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
