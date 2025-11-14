@@ -38,7 +38,7 @@ jobs:
                   key: ci-test-pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
             - name: Install deps (workspace)
-              run: pnpm install --frozen-lockfile
+              run: pnpm install --frozen-lockfile --ignore-scripts
 
             - name: Lint
               run: pnpm -w lint --if-present
