@@ -2,7 +2,7 @@
   "name": "@youngro/icons",
   "version": "0.0.0",
   "private": true,
-  "main": "dist/index.js",
+  "main": "src/generated/index.tsx",
   "type": "module",
   "scripts": {
     "build": "node ./src/build-icons.mjs",
@@ -13,7 +13,17 @@
     "src"
   ],
   "exports": {
-    "./react": "./dist/react/index.js",
-    "./": "./dist/index.js"
+    ".": {
+      "import": "./src/generated/index.tsx",
+      "default": "./src/generated/index.tsx"
+    },
+    "./react": {
+      "import": "./src/generated/index.tsx",
+      "default": "./src/generated/index.tsx"
+    },
+    "./dist": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   }
 }
