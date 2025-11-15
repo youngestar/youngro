@@ -1,0 +1,18 @@
+/* Stage background derived tokens for wave and cross patterns */
+:root {
+  /* Wave color (light): soften primary */
+  --stage-wave-color: color-mix(in srgb, hsl(var(--primary-50) / 1) 80%, white);
+
+  /* Cross grid (light) */
+  --stage-cross-color: hsl(var(--primary-250) / 0.2);
+  --stage-cross-size: 50px;
+  --stage-cross-line: 2px;
+}
+
+.dark {
+  /* Wave color (dark) */
+  --stage-wave-color: hsl(var(--primary-400) / 1);
+
+  /* Cross grid (dark) */
+  --stage-cross-color: hsl(var(--primary-400) / 0.35);
+}

@@ -1,0 +1,13 @@
+@keyframes wave-animation {
+  from {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-250px);
+  }
+}
+
+.wave-colored-area {
+  mask-repeat: repeat-x;
+  -webkit-mask-repeat: repeat-x;
+}

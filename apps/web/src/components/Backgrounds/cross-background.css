@@ -1,0 +1,65 @@
+/* Cross background driven by CSS variables (design tokens). */
+.cross-background-container {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+
+  /* Base variables (can be overridden per page/route). */
+  /* Base surface color: may be hex or HSL triple, so don't wrap in hsl(). */
+  --cross-base: var(--background, #ffffff);
+  /* Prefer centralized stage variable, fallback to primary scale. */
+  --cross-color: var(
+    --stage-cross-color,
+    hsl(var(--primary-200, 200 70% 50%) / 0.2)
+  );
+  /* Grid size controls density (prefer centralized variable). */
+  --cross-size: var(--stage-cross-size, 50px);
+  --cross-line: var(--stage-cross-line, 2px);
+  --cross-half: calc(var(--cross-size) / 2);
+
+  background-color: var(--cross-base);
+  background:
+    radial-gradient(
+      circle,
+      transparent 20%,
+      var(--cross-base) 20%,
+      var(--cross-base) 80%,
+      transparent 80%,
+      transparent
+    ),
+    radial-gradient(
+        circle,
+        transparent 20%,
+        var(--cross-base) 20%,
+        var(--cross-base) 80%,
+        transparent 80%,
+        transparent
+      )
+      var(--cross-half) var(--cross-half),
+    linear-gradient(
+        var(--cross-color) var(--cross-line),
+        transparent var(--cross-line)
+      )
+      0 -1px,
+    linear-gradient(
+        90deg,
+        var(--cross-color) var(--cross-line),
+        var(--cross-base) var(--cross-line)
+      ) -1px
+      0;
+  background-size:
+    var(--cross-size) var(--cross-size),
+    var(--cross-size) var(--cross-size),
+    var(--cross-half) var(--cross-half),
+    var(--cross-half) var(--cross-half);
+}
+
+.dark .cross-background-container {
+  /* Dark overrides: keep one paint declaration, just tweak variables. */
+  --cross-base: var(--background, #0a0a0a);
+  /* If centralized variable exists, it will win; otherwise fallback to primary scale. */
+  --cross-color: var(
+    --stage-cross-color,
+    hsl(var(--primary-400, 200 80% 68%) / 0.35)
+  );
+}
