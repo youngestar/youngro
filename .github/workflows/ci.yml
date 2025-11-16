@@ -154,7 +154,18 @@ jobs:
         run: pnpm -w -F @repo/ui build:ui || echo 'UI package build optional'
 
       - name: Build web app
+        env:
+          NODE_OPTIONS: --trace-uncaught --unhandled-rejections=strict
         run: pnpm -w -F web build
+
+      - name: Build web app (fallback without Shiki)
+        if: failure()
+        env:
+          DISABLE_SHIKI: "1"
+          NODE_OPTIONS: --trace-uncaught --unhandled-rejections=strict
+        run: |
+          echo "Primary web build failed; retrying with DISABLE_SHIKI=1 for diagnostics"
+          pnpm -w -F web build
 
       - name: Build docs app
         run: pnpm -w -F docs build

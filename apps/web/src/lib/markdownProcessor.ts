@@ -6,6 +6,16 @@ import type { BundledLanguage } from "shiki";
 const processorCache = new Map<string, Promise<Processor>>();
 const langRegex = /```(.{2,})\s/g;
 
+// Allow disabling Shiki highlighting during build/CI via env flag.
+// Any of these env vars set to '1' will force the fallback pipeline:
+// - DISABLE_SHIKI
+// - NEXT_DISABLE_SHIKI
+// - MARKDOWN_NO_SHIKI
+const SHIKI_DISABLED =
+  process.env.DISABLE_SHIKI === "1" ||
+  process.env.NEXT_DISABLE_SHIKI === "1" ||
+  process.env.MARKDOWN_NO_SHIKI === "1";
+
 function extractLangs(markdown: string): BundledLanguage[] {
   const matches = markdown.matchAll(langRegex);
   const langs = new Set<BundledLanguage>();
@@ -104,6 +114,12 @@ const fallback = async () => {
 
 export async function processMarkdown(markdown: string): Promise<string> {
   try {
+    // If Shiki is disabled via env, always use fallback (no syntax highlighting).
+    if (SHIKI_DISABLED) {
+      const fb = await fallback();
+      return fb.processSync(markdown).toString();
+    }
+
     // fast path when there are no fences
     if (!/`{3,}/.test(markdown)) {
       const fb = await fallback();
