@@ -7,7 +7,11 @@ import { Settings } from "lucide-react";
 import useTurnToPage from "../../src/hooks/useTurnToPage";
 import { Button, Icon } from "@repo/ui";
 import CrossBackground from "../../src/components/Backgrounds/CrossBackground";
-import AnimatedWave from "../../src/components/Widgets/AnimatedWave";
+import dynamic from "next/dynamic";
+const AnimatedWave = dynamic(
+  () => import("../../src/components/Widgets/AnimatedWave"),
+  { ssr: false }
+);
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
   const turnTo = useTurnToPage();

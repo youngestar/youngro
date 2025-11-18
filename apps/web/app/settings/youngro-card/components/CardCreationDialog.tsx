@@ -48,7 +48,7 @@ export function CardCreationDialog({
   }));
   const [submitting, setSubmitting] = React.useState(false);
   const [tab, setTab] = React.useState<"identity" | "behavior" | "settings">(
-    "identity"
+    "identity",
   );
   const [error, setError] = React.useState<string>("");
   // 右侧预览改为使用 CardListItem，无需内部 tab

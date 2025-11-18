@@ -33,13 +33,13 @@ describe("SimpleModal outside click safeguard", () => {
         <div data-testid="content" style={{ padding: 20 }}>
           Content
         </div>
-      </SimpleModal>
+      </SimpleModal>,
     );
 
     const overlay = container.querySelector('[role="dialog"]')
       ?.parentElement as HTMLElement; // parent div is overlay
     const content = overlay.querySelector(
-      '[data-testid="content"]'
+      '[data-testid="content"]',
     ) as HTMLElement;
 
     // Simulate pointerdown inside content
@@ -69,7 +69,7 @@ describe("SimpleModal outside click safeguard", () => {
         <div data-testid="content" style={{ padding: 20 }}>
           Content
         </div>
-      </SimpleModal>
+      </SimpleModal>,
     );
 
     const overlay = container.querySelector('[role="dialog"]')

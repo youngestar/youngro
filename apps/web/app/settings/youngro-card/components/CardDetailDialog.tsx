@@ -127,7 +127,7 @@ export function CardDetailDialog({
                   </h2>
                   <RichBox text={value} />
                 </div>
-              ) : null
+              ) : null,
             )}
           </div>
         )}

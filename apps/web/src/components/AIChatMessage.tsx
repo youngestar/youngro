@@ -42,7 +42,7 @@ export default function AiChatMessage({
       "bg-primary-50/80 dark:bg-primary-900/80 shadow-primary-300/50":
         isAssistant,
       "bg-violet-50/80 dark:bg-violet-900/80 shadow-violet-300/50": isError,
-    }
+    },
   );
 
   const textClass = clsx(
@@ -50,7 +50,7 @@ export default function AiChatMessage({
     {
       "text-primary-700 dark:text-primary-200": isAssistant,
       "text-violet-500": isError,
-    }
+    },
   );
 
   const wrapperClass = clsx({
@@ -89,7 +89,7 @@ export default function AiChatMessage({
                   src={part.image_url?.url as string}
                   className="max-w-full rounded-lg"
                 />
-              )
+              ),
             )}
           </div>
         ) : (

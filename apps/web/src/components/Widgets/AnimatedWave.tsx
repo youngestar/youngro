@@ -76,11 +76,14 @@ export function AnimatedWave({
           className="wave-colored-area colored-area"
           style={{
             background: fillColor,
-            height: fullHeight,
+            height: `${fullHeight}px`,
             WebkitMaskImage: maskImage,
             maskImage: maskImage,
             width: "200vw",
-            animation: `wave-animation ${duration}s linear infinite`,
+            animationName: "wave-animation",
+            animationDuration: `${duration}s`,
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
             animationDirection:
               movementDirection === "left" ? "normal" : "reverse",
             willChange: "transform",

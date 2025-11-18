@@ -31,7 +31,7 @@ api.interceptors.request.use(
     // config.headers['x-request-id'] = crypto.randomUUID?.() || Date.now().toString()
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // 统一响应拦截：直接返回 data；错误归一化
@@ -40,7 +40,7 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     const normalized = normalizeAxiosError(error);
     return Promise.reject(normalized);
-  }
+  },
 );
 
 // 简化方法（保持类型友好）：
@@ -51,7 +51,7 @@ export function get<T = unknown>(url: string, config?: AxiosRequestConfig) {
 export function post<T = unknown, B = unknown>(
   url: string,
   body?: B,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ) {
   return api.post<T>(url, body, config);
 }
@@ -59,7 +59,7 @@ export function post<T = unknown, B = unknown>(
 export function put<T = unknown, B = unknown>(
   url: string,
   body?: B,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ) {
   return api.put<T>(url, body, config);
 }
@@ -67,7 +67,7 @@ export function put<T = unknown, B = unknown>(
 export function patch<T = unknown, B = unknown>(
   url: string,
   body?: B,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ) {
   return api.patch<T>(url, body, config);
 }

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
         { error: "messages is required and must be a non-empty array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       // 让前端能直接拿到可读 message
       return NextResponse.json(
         { message: "Server missing DEEPSEEK_API_KEY" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
 
     async function tryPost(
       body: unknown,
-      config: AxiosRequestConfig
+      config: AxiosRequestConfig,
     ): Promise<unknown> {
       let lastErr: unknown;
       for (const c of candidates.length
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${apiKey}`,
           },
           timeout: 60_000,
-        }
+        },
       )) as unknown;
       return NextResponse.json(data);
     }
@@ -263,7 +263,7 @@ export async function POST(req: Request) {
     // 扁平化错误结构，方便前端提取 message
     return NextResponse.json(
       { status: e.status || 500, message: e.message, data: e.data },
-      { status: e.status || 500 }
+      { status: e.status || 500 },
     );
   }
 }

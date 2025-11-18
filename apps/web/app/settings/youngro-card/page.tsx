@@ -31,7 +31,7 @@ function Content() {
 
   const [search, setSearch] = React.useState("");
   const [sort, setSort] = React.useState<"nameAsc" | "nameDesc" | "recent">(
-    "recent"
+    "recent",
   );
   const entries = Object.entries(cards).filter(([, card]) => {
     const q = search.trim().toLowerCase();
@@ -214,7 +214,7 @@ function Content() {
             });
             const postHistoryInstructions = composePostHistoryInstructions(
               DEFAULT_POST_HISTORY_INSTRUCTIONS,
-              v.postHistoryInstructions
+              v.postHistoryInstructions,
             );
 
             addCard({

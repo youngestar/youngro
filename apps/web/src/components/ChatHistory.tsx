@@ -21,7 +21,7 @@ export const ChatHistory: React.FC = () => {
   // 过滤隐藏 system 消息，避免在 UI 中暴露系统提示词
   const displayMessages = useMemo(
     () => messages.filter((m) => m.role !== "system"),
-    [messages]
+    [messages],
   );
 
   const { endRef, scrollToBottom, showBackToBottom } = useChatAutoScroll();

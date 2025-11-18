@@ -1,25 +1,48 @@
 "use client";
 
-import { Button, BrandLogo } from "@repo/ui";
+import { IconStatusItem, PageHeader } from "@repo/ui";
 import styles from "./page.module.css";
+import { modulesList } from "../../../src/data/settings/modules";
+import { useRouter } from "next/navigation";
 
-// useTurnToPage imported from src/hooks
+export default function SettingsModulesPage() {
+  const router = useRouter();
 
-export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <BrandLogo
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-        />
-        <Button>Open alert</Button>
-        <Button>TurnToPage button</Button>
-      </main>
-    </div>
+    <section className={styles.page}>
+      <PageHeader
+        title="模块"
+        subtitle="Modules"
+        showBackButton
+        onBack={() => router.back()}
+      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {modulesList.map((module, index) => {
+          const ModuleIcon = module.icon;
+          return (
+            <IconStatusItem
+              key={module.id}
+              href={module.href}
+              title={module.name}
+              description={module.description}
+              icon={
+                ModuleIcon ? (
+                  <ModuleIcon className="h-full w-full" />
+                ) : undefined
+              }
+              iconColorClassName={module.iconColorClassName}
+              iconImageSrc={module.iconImageSrc}
+              configured={module.configured}
+              className={styles.moduleCard}
+              style={{ animationDelay: `${index * 60}ms` }}
+            />
+          );
+        })}
+      </div>
+
+      <div className={styles.layerIcon} aria-hidden>
+        <div className="i-solar-layers-bold-duotone" />
+      </div>
+    </section>
   );
 }

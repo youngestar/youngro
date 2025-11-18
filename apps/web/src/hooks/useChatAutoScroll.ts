@@ -30,7 +30,7 @@ export function useChatAutoScroll() {
       if (!node) return null;
       // 优先找 Radix Viewport
       const viewport = node.closest(
-        "[data-radix-scroll-area-viewport], .scroll-viewport"
+        "[data-radix-scroll-area-viewport], .scroll-viewport",
       ) as HTMLElement | null;
       if (viewport) return viewport;
       // 退化为一般可滚动祖先
@@ -56,7 +56,7 @@ export function useChatAutoScroll() {
           endRef.current?.scrollIntoView({ block: "end", behavior });
         }
       },
-    []
+    [],
   );
 
   // 使用 rAF 合帧，保证布局稳定后再滚动
@@ -68,7 +68,7 @@ export function useChatAutoScroll() {
         });
       });
     },
-    [scrollToBottom]
+    [scrollToBottom],
   );
 
   // 监听滚动，基于阈值判断是否贴底

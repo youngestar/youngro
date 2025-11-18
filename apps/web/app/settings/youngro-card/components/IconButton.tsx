@@ -37,7 +37,7 @@ export function IconButton({
         "rounded-lg p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400",
         "hover:bg-neutral-200 dark:hover:bg-neutral-700/50",
         "disabled:opacity-60 disabled:cursor-not-allowed",
-        className
+        className,
       )}
     >
       {children}
