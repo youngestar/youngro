@@ -33,7 +33,7 @@ const input = cva(
       intent: "default",
       size: "md",
     },
-  }
+  },
 );
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &

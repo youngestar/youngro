@@ -44,7 +44,7 @@ const textarea = cva(
       size: "md",
       focusStyle: "brand",
     },
-  }
+  },
 );
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
@@ -72,7 +72,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       style,
       ...props
     },
-    ref
+    ref,
   ) => {
     const innerRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -168,11 +168,11 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         style={style}
         className={clsx(
           textarea({ tone, intent, size, focusStyle }),
-          className
+          className,
         )}
       />
     );
-  }
+  },
 );
 Textarea.displayName = "Textarea";
 

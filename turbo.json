@@ -19,5 +19,11 @@
       "persistent": true
     }
   },
-  "globalEnv": ["DEEPSEEK_API_KEY", "DEEPSEEK_BASE_URL"]
+  "globalEnv": [
+    "DEEPSEEK_API_KEY",
+    "DEEPSEEK_BASE_URL",
+    "DISABLE_SHIKI",
+    "NEXT_DISABLE_SHIKI",
+    "MARKDOWN_NO_SHIKI"
+  ]
 }

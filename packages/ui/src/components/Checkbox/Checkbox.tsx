@@ -24,7 +24,7 @@ const checkbox = cva(
       intent: "default",
       size: "md",
     },
-  }
+  },
 );
 
 export type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> &

@@ -1,0 +1,135 @@
+/* IconStatusItem.css
+ * React adaptation of AIRI's IconStatusItem.vue styling.
+ * Provides gradient overlay, dotted masked background, floating right icon, and configured indicator.
+ */
+
+.ui-icon-status-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-icon-status-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 25%;
+  height: 100%;
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+  mask-image: linear-gradient(120deg, white 100%);
+  /* Use CSS variables with fallbacks to avoid hardcoded RGBA */
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary-500, 215 100% 57%) / 0),
+    hsl(var(--primary-500, 215 100% 57%) / 0)
+  );
+}
+
+.dark .ui-icon-status-item::before {
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary-400, 215 100% 67%) / 0),
+    hsl(var(--primary-400, 215 100% 67%) / 0)
+  );
+}
+
+.ui-icon-status-item:hover::before,
+.ui-icon-status-item._hover::before {
+  width: 50%;
+  opacity: 1;
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary-500, 215 100% 57%) / 0.2),
+    hsl(var(--primary-500, 215 100% 57%) / 0)
+  );
+}
+
+.dark .ui-icon-status-item:hover::before,
+.dark .ui-icon-status-item._hover::before {
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary-400, 215 100% 67%) / 0.2),
+    hsl(var(--primary-400, 215 100% 67%) / 0)
+  );
+}
+
+.ui-icon-status-item-link {
+  position: relative;
+}
+
+.ui-icon-status-item-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  transition: all 0.4s ease-in-out;
+  /* Dotted background simulation - uses currentColor (set via Tailwind classes) */
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 10px 10px;
+  mask-image: linear-gradient(165deg, white 30%, transparent 50%);
+}
+/* Base and hover colors for ::after will be controlled via Tailwind classes on the link using currentColor */
+
+.ui-icon-status-item-title,
+.ui-icon-status-item-description,
+.ui-icon-status-item-icon,
+.ui-icon-status-item-icon-color,
+.ui-icon-status-item-icon-image {
+  transition: all 0.4s ease-in-out;
+}
+
+.ui-icon-status-item:hover .ui-icon-status-item-title,
+.ui-icon-status-item._hover .ui-icon-status-item-title {
+  color: hsl(var(--primary-600, 215 100% 47%));
+}
+
+.dark .ui-icon-status-item:hover .ui-icon-status-item-title,
+.dark .ui-icon-status-item._hover .ui-icon-status-item-title {
+  color: hsl(var(--primary-300, 215 100% 67%));
+}
+
+.ui-icon-status-item:hover .ui-icon-status-item-description,
+.ui-icon-status-item._hover .ui-icon-status-item-description {
+  color: hsl(var(--primary-600, 215 100% 47%));
+  opacity: 0.8;
+}
+
+.dark .ui-icon-status-item:hover .ui-icon-status-item-description,
+.dark .ui-icon-status-item._hover .ui-icon-status-item-description {
+  color: hsl(var(--primary-300, 215 100% 67%));
+  opacity: 0.8;
+}
+
+.ui-icon-status-item-icon,
+.ui-icon-status-item-icon-color,
+.ui-icon-status-item-icon-image {
+  opacity: 0.5;
+  position: absolute;
+  right: 0;
+  transform: translateY(0.5rem);
+  width: 4rem; /* size-16 */
+  height: 4rem;
+  filter: grayscale(100%);
+}
+/* Icon colors will be driven by Tailwind classes on the icon wrapper using currentColor */
+.ui-icon-status-item:hover .ui-icon-status-item-icon,
+.ui-icon-status-item._hover .ui-icon-status-item-icon,
+.ui-icon-status-item:hover .ui-icon-status-item-icon-color,
+.ui-icon-status-item._hover .ui-icon-status-item-icon-color {
+  transform: translateY(0.5rem) scale(1.2);
+}
+
+.ui-icon-status-item-configured-dot {
+  width: 1rem; /* size-4 */
+  height: 1rem;
+  border-radius: 9999px;
+  transition: transform 0.2s ease;
+}
+/* Configured dot colors/borders now applied via Tailwind classes in markup */
+.ui-icon-status-item:hover .ui-icon-status-item-configured-dot,
+.ui-icon-status-item._hover .ui-icon-status-item-configured-dot {
+  transform: scale(1.05);
+}

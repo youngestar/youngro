@@ -45,7 +45,7 @@ export const HeaderLink: React.FC<HeaderLinkProps> = ({
       href={href}
       className={clsx(
         "inline-flex items-center gap-2 px-2 text-2xl outline-none text-nowrap",
-        className
+        className,
       )}
       {...rest}
     >

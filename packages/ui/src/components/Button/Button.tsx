@@ -51,7 +51,7 @@ const button = cva(
       size: "md",
       iconOnly: false,
     },
-  }
+  },
 );
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &

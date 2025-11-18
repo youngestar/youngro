@@ -12,7 +12,7 @@ export const Card = React.forwardRef<
       ref={ref}
       className={clsx(
         "rounded-lg border bg-card text-card-foreground shadow-sm",
-        className
+        className,
       )}
       {...props}
     />

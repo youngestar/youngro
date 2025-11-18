@@ -170,7 +170,7 @@ export const useChatStore = create<ChatState>()(
                       // 在入列前做一次彻底清洗，双保险（仅对字符串内容）
                       if (typeof st.streamingMessage.content === "string") {
                         st.streamingMessage.content = stripTokens(
-                          st.streamingMessage.content
+                          st.streamingMessage.content,
                         );
                       }
                       st.messages.push({
@@ -257,7 +257,7 @@ export const useChatStore = create<ChatState>()(
             }
             if (typeof s.streamingMessage.content === "string") {
               s.streamingMessage.content = stripTokens(
-                s.streamingMessage.content
+                s.streamingMessage.content,
               );
             }
           }
@@ -353,8 +353,8 @@ export const useChatStore = create<ChatState>()(
         (state as any).messages = cleaned;
         return state as ChatState;
       },
-    }
-  )
+    },
+  ),
 );
 
 // 从 localStorage 读取激活的 Youngro 卡片（若有）

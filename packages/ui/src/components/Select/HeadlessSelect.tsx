@@ -65,7 +65,7 @@ const trigger = cva(
       size: "md",
       tone: "plain",
     },
-  }
+  },
 );
 
 // Use a z-index higher than the sticky PageHeader (which is z-[99]) so the
@@ -88,7 +88,7 @@ const content = cva(
     defaultVariants: {
       size: "md",
     },
-  }
+  },
 );
 
 const item = cva(
@@ -112,7 +112,7 @@ const item = cva(
     defaultVariants: {
       size: "md",
     },
-  }
+  },
 );
 
 export type HeadlessSelectVariantProps = VariantProps<typeof trigger>;
@@ -145,7 +145,7 @@ export const HeadlessSelect: React.FC<
           trigger({ size, tone }),
           fullWidth && "w-full",
           className,
-          triggerClassName
+          triggerClassName,
         )}
         aria-label="Select"
       >

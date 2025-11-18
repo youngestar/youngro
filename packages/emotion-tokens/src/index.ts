@@ -141,7 +141,7 @@ export function nextToken(input: string, from = 0): Token | null {
 export function sliceWithoutTokens(
   input: string,
   start: number,
-  end?: number
+  end?: number,
 ): string {
   return stripTokens(input.slice(start, end));
 }

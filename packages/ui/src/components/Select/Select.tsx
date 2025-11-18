@@ -37,7 +37,7 @@ const select = cva(
       tone: "tinted",
       vsize: "md",
     },
-  }
+  },
 );
 
 export interface SelectProps

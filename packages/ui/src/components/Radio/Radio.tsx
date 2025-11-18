@@ -22,7 +22,7 @@ const radio = cva(
       intent: "default",
       size: "md",
     },
-  }
+  },
 );
 
 export type RadioProps = React.InputHTMLAttributes<HTMLInputElement> &

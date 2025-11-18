@@ -35,5 +35,7 @@ export { IconItem } from "./Menu";
 export type { IconItemProps } from "./Menu";
 export { HeaderLink } from "./HeaderLink";
 export type { HeaderLinkProps } from "./HeaderLink";
+export { IconStatusItem } from "./IconStatusItem";
+export type { IconStatusItemProps } from "./IconStatusItem";
 export { PageHeader } from "./PageHeader";
 export type { PageHeaderProps } from "./PageHeader";

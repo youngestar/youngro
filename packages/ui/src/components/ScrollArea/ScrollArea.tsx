@@ -36,7 +36,7 @@ export const ScrollArea = React.forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const isContrast = variant === "contrast";
     const isTextareaTone = variant === "textarea";
@@ -65,7 +65,7 @@ export const ScrollArea = React.forwardRef<
               : isTextareaTone
                 ? "bg-primary-50/50 dark:bg-primary-950/70"
                 : undefined,
-            scrollbarClassName
+            scrollbarClassName,
           )}
         >
           <ScrollAreaPrimitive.Thumb
@@ -76,7 +76,7 @@ export const ScrollArea = React.forwardRef<
                 : isTextareaTone
                   ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
-              thumbClassName
+              thumbClassName,
             )}
           />
         </ScrollAreaPrimitive.Scrollbar>
@@ -90,7 +90,7 @@ export const ScrollArea = React.forwardRef<
               : isTextareaTone
                 ? "bg-primary-200/20 dark:bg-primary-400/20 hover:bg-primary-200/30 dark:hover:bg-primary-400/30"
                 : undefined,
-            scrollbarClassName
+            scrollbarClassName,
           )}
         >
           <ScrollAreaPrimitive.Thumb
@@ -101,14 +101,14 @@ export const ScrollArea = React.forwardRef<
                 : isTextareaTone
                   ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
-              thumbClassName
+              thumbClassName,
             )}
           />
         </ScrollAreaPrimitive.Scrollbar>
         <ScrollAreaPrimitive.Corner />
       </ScrollAreaPrimitive.Root>
     );
-  }
+  },
 );
 ScrollArea.displayName = "ScrollArea";
 
