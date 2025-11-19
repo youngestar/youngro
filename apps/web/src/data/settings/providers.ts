@@ -27,6 +27,15 @@ export interface ProviderMeta {
 
 export const chatProviders: ProviderMeta[] = [
   {
+    id: "deepseek",
+    category: "chat",
+    localizedName: "DeepSeek",
+    localizedDescription: "高性价比推理与通用对话模型",
+    icon: MessageSquare,
+    iconColorClassName: "text-indigo-500 dark:text-indigo-400",
+    configured: false,
+  },
+  {
     id: "openrouter",
     category: "chat",
     localizedName: "OpenRouter",

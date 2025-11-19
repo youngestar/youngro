@@ -3,17 +3,23 @@
 import { PageHeader, IconStatusItem } from "@repo/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
-import {
-  chatProviders,
-  audioSpeechProviders,
-  audioTranscriptionProviders,
-} from "../../../src/data/settings/providers";
-import type { ProviderMeta } from "../../../src/data/settings/providers";
+// Metadata retained only if future localization merges are needed
 import { MessageSquare, User, Mic } from "lucide-react";
 import useScrollToHash from "../../../src/hooks/useScrollToHash";
+import {
+  useProvidersStore,
+  useProvidersHydrate,
+} from "../../../src/store/providersStore";
 
 export default function ProvidersPage() {
   const router = useRouter();
+  useProvidersHydrate();
+
+  const chat = useProvidersStore((s) => s.getProvidersByCategory("chat"));
+  const speech = useProvidersStore((s) => s.getProvidersByCategory("speech"));
+  const transcription = useProvidersStore((s) =>
+    s.getProvidersByCategory("transcription")
+  );
   useScrollToHash({
     auto: true,
     offset: 16,
@@ -62,17 +68,17 @@ export default function ProvidersPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-2">
-          {chatProviders.map((provider: ProviderMeta) => {
-            const Icon = provider.icon;
+          {chat.map((ps) => {
+            const Icon = ps.meta.icon;
             return (
               <IconStatusItem
-                key={provider.id}
-                href={`/settings/providers/${provider.category}/${provider.id}`}
-                title={provider.localizedName || "Unknown"}
-                description={provider.localizedDescription}
+                key={ps.meta.id}
+                href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                title={ps.meta.localizedName || "Unknown"}
+                description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
-                iconColorClassName={provider.iconColorClassName}
-                configured={provider.configured}
+                iconColorClassName={ps.meta.iconColorClassName}
+                configured={ps.configured}
               />
             );
           })}
@@ -93,17 +99,17 @@ export default function ProvidersPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {audioSpeechProviders.map((provider: ProviderMeta) => {
-            const Icon = provider.icon;
+          {speech.map((ps) => {
+            const Icon = ps.meta.icon;
             return (
               <IconStatusItem
-                key={provider.id}
-                href={`/settings/providers/${provider.category}/${provider.id}`}
-                title={provider.localizedName || "Unknown"}
-                description={provider.localizedDescription}
+                key={ps.meta.id}
+                href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                title={ps.meta.localizedName || "Unknown"}
+                description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
-                iconColorClassName={provider.iconColorClassName}
-                configured={provider.configured}
+                iconColorClassName={ps.meta.iconColorClassName}
+                configured={ps.configured}
               />
             );
           })}
@@ -127,17 +133,17 @@ export default function ProvidersPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {audioTranscriptionProviders.map((provider: ProviderMeta) => {
-            const Icon = provider.icon;
+          {transcription.map((ps) => {
+            const Icon = ps.meta.icon;
             return (
               <IconStatusItem
-                key={provider.id}
-                href={`/settings/providers/${provider.category}/${provider.id}`}
-                title={provider.localizedName || "Unknown"}
-                description={provider.localizedDescription}
+                key={ps.meta.id}
+                href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                title={ps.meta.localizedName || "Unknown"}
+                description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
-                iconColorClassName={provider.iconColorClassName}
-                configured={provider.configured}
+                iconColorClassName={ps.meta.iconColorClassName}
+                configured={ps.configured}
               />
             );
           })}

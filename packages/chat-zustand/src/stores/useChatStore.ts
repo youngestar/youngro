@@ -27,7 +27,10 @@ export interface ChatState {
   onStreamEnd: Array<() => void>;
 
   // actions
-  send: (text: string, options?: { model?: string }) => Promise<void>;
+  send: (
+    text: string,
+    options?: { model?: string; providerId?: string }
+  ) => Promise<void>;
   cancel: () => void;
   cleanup: () => void;
   registerOnTokenLiteral: (cb: (s: string) => void) => () => void;
@@ -48,7 +51,10 @@ export const useChatStore = create<ChatState>()(
       onTokenLiteral: [],
       onStreamEnd: [],
 
-      send: async (text: string, options?: { model?: string }) => {
+      send: async (
+        text: string,
+        options?: { model?: string; providerId?: string }
+      ) => {
         if (!text) return;
         const id = String(Date.now());
         const userMessage: BaseMessage = {
@@ -105,6 +111,7 @@ export const useChatStore = create<ChatState>()(
               messages: toProviderMessages(),
               model: options?.model,
               stream: true,
+              providerId: options?.providerId,
             }),
             signal: controller.signal,
           });

@@ -7,12 +7,13 @@
  * - 处理焦点体验：发送后保持焦点；流结束时自动聚焦输入框。
  */
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
 import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send } from "lucide-react";
+import { useProvidersStore, useProvidersHydrate } from "../store/providersStore";
 
 export const InteractiveArea: React.FC = () => {
   // 从聊天状态管理（Zustand）获取发送函数、状态与回调注册
@@ -21,17 +22,31 @@ export const InteractiveArea: React.FC = () => {
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Provider/model selection state (需在 handleSend 使用，提前声明避免引用次序错误)
+  useProvidersHydrate();
+  const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
+  const fetchModels = useProvidersStore((s) => s.fetchModels);
+  const [selectedProvider, setSelectedProvider] = useState<string>("deepseek");
+  const providerState = useProvidersStore((s) => s.getProvider(selectedProvider));
+  const models = useMemo(
+    () => providerState?.resources.items ?? [],
+    [providerState?.resources.items]
+  );
+  const [selectedModel, setSelectedModel] = useState<string>("");
+
   const handleSend = useCallback(() => {
     // 处于输入法组合阶段或正在发送中，直接忽略
     if (isComposing || sending) return;
     const text = messageInput.trim();
     if (!text) return;
+    // 没有模型尚未准备好，避免发空或默认模型不期望情况
+    const modelToUse = selectedModel || models[0]?.id || undefined;
     // 先清空输入，提升交互流畅性；随后异步发送（不 await）
     setMessageInput("");
-    void send(text);
+    void send(text, { model: modelToUse, providerId: selectedProvider });
     // 发送后保持焦点在输入框
     textareaRef.current?.focus();
-  }, [isComposing, sending, messageInput, send]);
+  }, [isComposing, sending, messageInput, send, selectedModel, selectedProvider, models]);
 
   // 流完成时自动聚焦输入框
   React.useEffect(() => {
@@ -44,6 +59,19 @@ export const InteractiveArea: React.FC = () => {
   }, [registerOnStreamEnd]);
 
   // 本地持久化已下沉到 store（persist），组件侧无需处理
+
+  // Fetch models when provider changes
+  useEffect(() => {
+    if (selectedProvider) void fetchModels(selectedProvider);
+  }, [selectedProvider, fetchModels]);
+
+  // Auto select first model when models list updates
+  useEffect(() => {
+    if (models.length && !selectedModel) {
+      const first = models[0];
+      if (first) setSelectedModel(first.id);
+    }
+  }, [models, selectedModel]);
 
   return (
     <div className="flex flex-col items-center pt-4 w-full h-full">
@@ -60,7 +88,36 @@ export const InteractiveArea: React.FC = () => {
                 <ChatHistory />
               </div>
             </ScrollArea>
-            <div className="flex gap-2 p-2">
+            <div className="flex flex-col gap-2 p-2">
+              <div className="flex gap-2">
+                <select
+                  className="flex-1 rounded-md border px-2 py-1 text-sm bg-white dark:bg-neutral-800"
+                  value={selectedProvider}
+                  onChange={(e) => {
+                    setSelectedProvider(e.target.value);
+                    setSelectedModel("");
+                  }}
+                >
+                  {providers.map((p) => (
+                    <option key={p.meta.id} value={p.meta.id}>
+                      {p.meta.localizedName || p.meta.id}
+                      {p.configured ? "" : " (未配置)"}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="flex-1 rounded-md border px-2 py-1 text-sm bg-white dark:bg-neutral-800"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  disabled={models.length === 0}
+                >
+                  {models.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {/* 左侧：输入区（Textarea + 工具栏） */}
               <div className="flex-1 flex flex-col">
                 {/* 包裹 Textarea + 工具栏，使得 focus-within 的描边覆盖两者 */}
@@ -91,7 +148,7 @@ export const InteractiveArea: React.FC = () => {
                         iconOnly
                         aria-label="发送"
                         title="发送"
-                        disabled={sending || !messageInput.trim()}
+                        disabled={sending || !messageInput.trim() || (!selectedModel && models.length === 0)}
                         onClick={() => void handleSend()}
                       >
                         <Icon icon={Send} size="sm" />
