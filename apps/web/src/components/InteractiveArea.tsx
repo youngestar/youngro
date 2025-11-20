@@ -2,54 +2,73 @@
 
 /**
  * 交互区（聊天主容器）
- * - 负责布局：上方为消息历史（可滚动），下方为输入区（Textarea + 发送按钮）。
- * - 负责输入发送流程：组合输入法期间不发、Enter 发送（Shift+Enter 换行）。
- * - 处理焦点体验：发送后保持焦点；流结束时自动聚焦输入框。
+ * - 上方显示消息历史，下方提供输入与发送。
  */
 
-import React, { useCallback, useRef, useState, useEffect, useMemo } from "react";
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
 import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send } from "lucide-react";
-import { useProvidersStore, useProvidersHydrate } from "../store/providersStore";
+import {
+  useProvidersStore,
+  useProvidersHydrate,
+} from "../store/providersStore";
 
 export const InteractiveArea: React.FC = () => {
-  // 从聊天状态管理（Zustand）获取发送函数、状态与回调注册
   const { send, sending, registerOnStreamEnd } = useChatStore();
   const [messageInput, setMessageInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Provider/model selection state (需在 handleSend 使用，提前声明避免引用次序错误)
   useProvidersHydrate();
   const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const fetchModels = useProvidersStore((s) => s.fetchModels);
   const [selectedProvider, setSelectedProvider] = useState<string>("deepseek");
-  const providerState = useProvidersStore((s) => s.getProvider(selectedProvider));
+  const providerState = useProvidersStore((s) =>
+    s.getProvider(selectedProvider)
+  );
   const models = useMemo(
     () => providerState?.resources.items ?? [],
     [providerState?.resources.items]
   );
+  const providerConfig = useMemo(() => {
+    const cfg = providerState?.config;
+    return cfg ? { ...cfg } : undefined;
+  }, [providerState?.config]);
   const [selectedModel, setSelectedModel] = useState<string>("");
 
   const handleSend = useCallback(() => {
-    // 处于输入法组合阶段或正在发送中，直接忽略
     if (isComposing || sending) return;
     const text = messageInput.trim();
     if (!text) return;
-    // 没有模型尚未准备好，避免发空或默认模型不期望情况
     const modelToUse = selectedModel || models[0]?.id || undefined;
-    // 先清空输入，提升交互流畅性；随后异步发送（不 await）
     setMessageInput("");
-    void send(text, { model: modelToUse, providerId: selectedProvider });
-    // 发送后保持焦点在输入框
+    void send(text, {
+      model: modelToUse,
+      providerId: selectedProvider,
+      providerConfig,
+    });
     textareaRef.current?.focus();
-  }, [isComposing, sending, messageInput, send, selectedModel, selectedProvider, models]);
+  }, [
+    isComposing,
+    sending,
+    messageInput,
+    send,
+    selectedModel,
+    selectedProvider,
+    models,
+    providerConfig,
+  ]);
 
-  // 流完成时自动聚焦输入框
-  React.useEffect(() => {
+  useEffect(() => {
     const unsub = registerOnStreamEnd?.(() => {
       queueMicrotask(() => textareaRef.current?.focus());
     });
@@ -58,14 +77,10 @@ export const InteractiveArea: React.FC = () => {
     };
   }, [registerOnStreamEnd]);
 
-  // 本地持久化已下沉到 store（persist），组件侧无需处理
-
-  // Fetch models when provider changes
   useEffect(() => {
     if (selectedProvider) void fetchModels(selectedProvider);
   }, [selectedProvider, fetchModels]);
 
-  // Auto select first model when models list updates
   useEffect(() => {
     if (models.length && !selectedModel) {
       const first = models[0];
@@ -118,9 +133,7 @@ export const InteractiveArea: React.FC = () => {
                   ))}
                 </select>
               </div>
-              {/* 左侧：输入区（Textarea + 工具栏） */}
               <div className="flex-1 flex flex-col">
-                {/* 包裹 Textarea + 工具栏，使得 focus-within 的描边覆盖两者 */}
                 <div className="rounded-xl bg-primary-200/20 dark:bg-primary-400/20 focus-within:ring-2 focus-within:ring-primary-400/40 dark:focus-within:ring-primary-300/40">
                   <Textarea
                     placeholder="输入消息，按 Enter 发送（Shift+Enter 换行）"
@@ -132,7 +145,6 @@ export const InteractiveArea: React.FC = () => {
                     onCompositionStart={() => setIsComposing(true)}
                     onCompositionEnd={() => setIsComposing(false)}
                     onKeyDown={(e) => {
-                      // Enter 发送；Shift+Enter 换行（保留默认行为）
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         void handleSend();
@@ -140,7 +152,6 @@ export const InteractiveArea: React.FC = () => {
                     }}
                   />
 
-                  {/* 工具栏：紧贴底部，描边由外层 focus-within 负责 */}
                   <div className="flex items-center justify-end px-2 py-2">
                     <div className="flex gap-1">
                       <Button
@@ -148,7 +159,11 @@ export const InteractiveArea: React.FC = () => {
                         iconOnly
                         aria-label="发送"
                         title="发送"
-                        disabled={sending || !messageInput.trim() || (!selectedModel && models.length === 0)}
+                        disabled={
+                          sending ||
+                          !messageInput.trim() ||
+                          (!selectedModel && models.length === 0)
+                        }
                         onClick={() => void handleSend()}
                       >
                         <Icon icon={Send} size="sm" />

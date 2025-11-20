@@ -23,7 +23,8 @@ interface PostBody {
   messages: ChatMessage[];
   model?: string;
   stream?: boolean;
-  providerId?: string; // new field
+  providerId?: string;
+  providerConfig?: Record<string, unknown>;
 }
 
 export async function POST(req: Request) {
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
       model,
       stream: wantStream,
       providerId,
+      providerConfig,
     }: PostBody = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -45,8 +47,9 @@ export async function POST(req: Request) {
     // Select adapter (only deepseek for now)
     const effectiveProviderId = providerId || "deepseek";
     const adapter = getChatAdapter(effectiveProviderId) || deepseekAdapter;
-    // Validate config (no client-provided config yet, rely on env inside adapter)
-    const validation = await adapter.validateConfig({});
+    const validation = await adapter.validateConfig(
+      (providerConfig as Record<string, unknown>) || {}
+    );
     if (!validation.valid) {
       return NextResponse.json(
         { message: `Provider config invalid: ${validation.errors.join(", ")}` },
@@ -66,7 +69,7 @@ export async function POST(req: Request) {
     // Use adapter streaming API
     const streamIterable = adapter.chatStream(
       messages.map((m) => ({ role: m.role, content: m.content })),
-      { model },
+      { model, ...(providerConfig as Record<string, unknown>) },
       { signal: undefined }
     );
     const encoder = new TextEncoder();

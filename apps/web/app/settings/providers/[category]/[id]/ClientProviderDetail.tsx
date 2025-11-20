@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Field, Input } from "@repo/ui";
 import ProviderPageHeader from "../../../../../src/components/ProviderPageHeader";
 import {
   useProvidersStore,
@@ -8,7 +9,9 @@ import {
   SpeechProviderConfig,
   TranscriptionProviderConfig,
 } from "../../../../../src/store/providersStore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+const EMPTY_ERRORS: string[] = [];
 
 export default function ClientProviderDetail({
   category,
@@ -26,6 +29,11 @@ export default function ClientProviderDetail({
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [extraField, setExtraField] = useState(""); // voiceId / modelId dynamic placeholder
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
+  const [testStatus, setTestStatus] = useState<
+    "idle" | "testing" | "success" | "error"
+  >("idle");
+  const [lastValidatedAt, setLastValidatedAt] = useState<number | null>(null);
 
   useEffect(() => {
     if (providerState) {
@@ -46,8 +54,30 @@ export default function ClientProviderDetail({
           (c as ChatProviderConfig).defaultModel ||
           ""
       );
+      if (providerState.configured) {
+        setLastValidatedAt(Date.now());
+        setTestStatus("success");
+      }
     }
   }, [providerState]);
+
+  const validateErrors = providerState?.validateErrors ?? EMPTY_ERRORS;
+
+  const fieldErrors = useMemo(() => {
+    const map: Record<string, string | undefined> = {};
+    for (const err of validateErrors) {
+      if (err.toLowerCase().includes("apikey") || err.includes("API Key")) {
+        map.apiKey = err;
+      } else if (err.toLowerCase().includes("base url")) {
+        map.baseUrl = err;
+      } else if (err.includes("Voice") || err.includes("voiceId")) {
+        map.extra = err;
+      } else if (err.includes("Model")) {
+        map.extra = err;
+      }
+    }
+    return map;
+  }, [validateErrors]);
 
   if (!providerState || providerState.meta.category !== category) return null;
   const meta = providerState.meta;
@@ -55,7 +85,6 @@ export default function ClientProviderDetail({
 
   const configured = providerState.configured;
   const validating = providerState.validating;
-  const validateErrors = providerState.validateErrors;
   const models = providerState.resources.items;
   const modelsStatus = providerState.resources.status;
 
@@ -66,7 +95,7 @@ export default function ClientProviderDetail({
         ? "Model ID"
         : "Default Model (可选)";
 
-  async function onSave() {
+  function saveConfig() {
     setConfig(meta.id, {
       apiKey: apiKey || undefined,
       baseUrl: baseUrl || undefined,
@@ -76,8 +105,29 @@ export default function ClientProviderDetail({
           ? { modelId: extraField || undefined }
           : { defaultModel: extraField || undefined }),
     });
-    await validate(meta.id);
-    await fetchModels(meta.id, true);
+    setSaveStatus("saved");
+    setTimeout(() => setSaveStatus("idle"), 2_000);
+  }
+
+  async function testConnection() {
+    setTestStatus("testing");
+    const ok = await validate(meta.id);
+    if (ok) {
+      setTestStatus("success");
+      setLastValidatedAt(Date.now());
+      await fetchModels(meta.id, true);
+    } else {
+      setTestStatus("error");
+    }
+  }
+
+  function resetConfig() {
+    setApiKey("");
+    setBaseUrl("");
+    setExtraField("");
+    setConfig(meta.id, {});
+    setSaveStatus("idle");
+    setTestStatus("idle");
   }
 
   return (
@@ -89,69 +139,139 @@ export default function ClientProviderDetail({
       />
 
       <section className="rounded-lg border p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">配置</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-medium">凭证配置</h2>
+            <p className="text-xs text-neutral-500">
+              输入 DeepSeek 的 API Key 与可选 Base URL，可使用代理地址（需以 /
+              结尾）。
+            </p>
+          </div>
           <span
             className={`text-sm px-2 py-1 rounded-md border ${configured ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-neutral-500/10 text-neutral-500"}`}
           >
             {configured ? "已配置" : "未配置"}
           </span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">
-            <span>API Key</span>
-            <input
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="API Key"
+            help="从 DeepSeek 控制台复制的密钥，保留本地存储。"
+            error={fieldErrors.apiKey}
+          >
+            <Input
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-..."
-              className="rounded-md border px-2 py-1 bg-background"
+              type="password"
+              tone="plain"
+              intent={fieldErrors.apiKey ? "destructive" : "default"}
             />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span>Base URL</span>
-            <input
+          </Field>
+          <Field
+            label="Base URL"
+            help='可选，默认直连官方接口；自建代理需以 "/" 结尾。'
+            error={fieldErrors.baseUrl}
+          >
+            <Input
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="https://api.example.com/v1/"
-              className="rounded-md border px-2 py-1 bg-background"
+              placeholder="https://api.deepseek.com/v1/"
+              tone="plain"
+              intent={fieldErrors.baseUrl ? "destructive" : "default"}
             />
-          </label>
-          <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-            <span>{extraLabel}</span>
-            <input
+          </Field>
+        </div>
+        <div className="grid gap-4">
+          <Field
+            label={extraLabel}
+            help={
+              meta.category === "chat"
+                ? "可设定默认模型，在聊天页自动选中"
+                : "留空则使用平台默认配置"
+            }
+            error={fieldErrors.extra}
+          >
+            <Input
               value={extraField}
               onChange={(e) => setExtraField(e.target.value)}
               placeholder={extraLabel}
-              className="rounded-md border px-2 py-1 bg-background"
+              tone="plain"
+              intent={fieldErrors.extra ? "destructive" : "default"}
             />
-          </label>
+          </Field>
         </div>
-        <div className="flex items-center gap-3">
-          <button
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="button" onClick={saveConfig} intent="default" size="md">
+            保存
+          </Button>
+          <Button
             type="button"
-            onClick={onSave}
-            disabled={validating}
-            className="inline-flex items-center rounded-md border px-3 py-1 text-sm bg-primary-500/10 hover:bg-primary-500/20 transition-colors"
+            onClick={testConnection}
+            intent="primary"
+            size="md"
+            disabled={testStatus === "testing" || validating}
           >
-            {validating ? "验证中..." : "保存并验证"}
-          </button>
-          {validateErrors.length > 0 && (
-            <ul className="text-xs text-rose-500 space-y-0.5">
+            {testStatus === "testing" || validating
+              ? "验证中..."
+              : "验证并拉取模型"}
+          </Button>
+          <Button
+            type="button"
+            onClick={resetConfig}
+            intent="default"
+            size="md"
+          >
+            清空
+          </Button>
+          {saveStatus === "saved" && (
+            <span className="text-xs text-primary-600 dark:text-primary-400">
+              已保存（本地）
+            </span>
+          )}
+          {testStatus === "success" && (
+            <span className="text-xs text-emerald-600 dark:text-emerald-400">
+              验证成功
+              {lastValidatedAt
+                ? ` · ${new Date(lastValidatedAt).toLocaleTimeString()}`
+                : ""}
+            </span>
+          )}
+          {testStatus === "error" && (
+            <span className="text-xs text-rose-500">
+              验证失败，请检查输入。
+            </span>
+          )}
+        </div>
+        {validateErrors.length > 0 && (
+          <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+            <p className="font-medium">校验未通过：</p>
+            <ul className="list-disc pl-4">
               {validateErrors.map((err, i) => (
                 <li key={i}>{err}</li>
               ))}
             </ul>
-          )}
-          {validateErrors.length === 0 && configured && !validating && (
-            <span className="text-xs text-emerald-600 dark:text-emerald-400">
-              验证通过
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </section>
 
-      <section className="rounded-lg border p-4 space-y-2">
-        <h2 className="text-lg font-medium">模型列表 (占位)</h2>
+      <section className="rounded-lg border p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-medium">模型列表</h2>
+            <p className="text-xs text-neutral-500">
+              验证成功后将自动同步可用模型，可在聊天页选择。
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => fetchModels(meta.id, true)}
+            intent="default"
+            size="md"
+          >
+            重新加载
+          </Button>
+        </div>
         {modelsStatus === "loading" && (
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
             加载中...
@@ -172,13 +292,6 @@ export default function ClientProviderDetail({
             ))}
           </ul>
         )}
-        <button
-          type="button"
-          onClick={() => fetchModels(meta.id, true)}
-          className="inline-flex items-center rounded-md border px-3 py-1 text-sm bg-neutral-500/10 hover:bg-neutral-500/20 transition-colors"
-        >
-          重新加载
-        </button>
       </section>
     </div>
   );

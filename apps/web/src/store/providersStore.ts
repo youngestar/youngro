@@ -302,20 +302,18 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
             apiKey: (st.config as ChatProviderConfig).apiKey,
             baseUrl: (st.config as ChatProviderConfig).baseUrl,
           };
-            const models = await adapter.listModels(cfg);
-            items = models.map((m) => ({
-              id: m.id,
-              name: m.name,
-              provider: id,
-              description: m.description,
-            }));
+          const models = await adapter.listModels(cfg);
+          items = models.map((m) => ({
+            id: m.id,
+            name: m.name,
+            provider: id,
+            description: m.description,
+          }));
         }
       }
       // Fallback if adapter unavailable or not chat category
       if (items.length === 0) {
-        items = [
-          { id: "default", name: "默认模型", provider: id },
-        ];
+        items = [{ id: "default", name: "默认模型", provider: id }];
       }
       set((s) => {
         const cur = s.registry[id]!;

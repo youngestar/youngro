@@ -6,12 +6,14 @@ export async function generateStaticParams() {
   return allProviders.map((p) => ({ category: p.category, id: p.id }));
 }
 
-export default function ProviderDetail({
+export default async function ProviderDetail({
   params,
 }: {
-  params: { category: string; id: string };
+  params?: Promise<{ category: string; id: string }>;
 }) {
-  const { category, id } = params;
+  const resolved = await params;
+  if (!resolved) return notFound();
+  const { category, id } = resolved;
   const exists = allProviders.some(
     (p) => p.id === id && p.category === category
   );

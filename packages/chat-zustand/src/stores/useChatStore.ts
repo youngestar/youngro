@@ -4,6 +4,7 @@ import { getRuntimeSystemPrompt } from "@youngro/store-card";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
+import { consumeNDJSONStream, classifyError } from "../stream/ndjsonParser";
 // Emotion/Delay tokens integration
 // Lazy import style: use require-like dynamic to avoid type resolution issues if package build not yet run.
 // For type safety, declare a minimal interface.
@@ -29,7 +30,11 @@ export interface ChatState {
   // actions
   send: (
     text: string,
-    options?: { model?: string; providerId?: string }
+    options?: {
+      model?: string;
+      providerId?: string;
+      providerConfig?: Record<string, unknown>;
+    }
   ) => Promise<void>;
   cancel: () => void;
   cleanup: () => void;
@@ -53,7 +58,11 @@ export const useChatStore = create<ChatState>()(
 
       send: async (
         text: string,
-        options?: { model?: string; providerId?: string }
+        options?: {
+          model?: string;
+          providerId?: string;
+          providerConfig?: Record<string, unknown>;
+        }
       ) => {
         if (!text) return;
         const id = String(Date.now());
@@ -102,8 +111,11 @@ export const useChatStore = create<ChatState>()(
           }
           return msgs;
         };
+        const maxAttempts = 2; // total tries = 1 + retries
+        let attempt = 0;
+        let receivedAnyDelta = false;
 
-        try {
+        const runStream = async (): Promise<void> => {
           const res = await fetch("/api/chat", {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -112,6 +124,7 @@ export const useChatStore = create<ChatState>()(
               model: options?.model,
               stream: true,
               providerId: options?.providerId,
+              providerConfig: options?.providerConfig,
             }),
             signal: controller.signal,
           });
@@ -120,103 +133,46 @@ export const useChatStore = create<ChatState>()(
           }
           const reader = res.body?.getReader();
           if (!reader) throw new Error("ReadableStream reader unavailable");
-          const decoder = new TextDecoder();
-          let buffer = "";
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            let idx: number;
-            while ((idx = buffer.indexOf("\n")) !== -1) {
-              const line = buffer.slice(0, idx);
-              buffer = buffer.slice(idx + 1);
-              const s = line.trim();
-              if (!s) continue;
-              try {
-                const obj = JSON.parse(s) as Record<string, unknown>;
-                const t = obj.type as string | undefined;
-                if (t === "text-delta") {
-                  const rawChunk = typeof obj.text === "string" ? obj.text : "";
-                  if (!rawChunk) continue;
-                  let visible = rawChunk;
-                  let newTokens: EmotionToken[] = [];
-                  if (ENABLE_TOKEN_PARSE) {
-                    const { textDelta, tokens } =
-                      streamTokenizer.ingest(rawChunk);
-                    visible = textDelta;
-                    newTokens = tokens;
-                    // (Future) dispatch tokens to emotion/delay queues here
-                    // e.g., emotionQueue.add(tokens.filter(t => t.kind==='emote'))
-                    //       delayQueue.add(tokens.filter(t => t.kind==='delay'))
-                  }
-                  // 强力兜底：再次剥离可能残留的标记（防止上游逻辑失效或旧数据混入）
-                  if (visible) visible = stripTokens(visible);
-                  if (visible) {
-                    set((st) => {
-                      if (!st.streamingMessage) return;
-                      st.streamingMessage.content += visible;
-                      st.streamingMessage.slices =
-                        st.streamingMessage.slices || [];
-                      st.streamingMessage.slices.push({
-                        type: "text",
-                        text: visible,
-                      });
-                    });
-                    get().onTokenLiteral.forEach((cb) => cb(visible));
-                  }
-                  // 不再把 token 原文注入 slices，避免 UI 误渲染；后续若需调试可加独立调试队列。
-                } else if (t === "finish") {
-                  // push final assistant message
-                  set((st) => {
-                    if (
-                      st.streamingMessage &&
-                      st.streamingMessage.slices &&
-                      st.streamingMessage.slices.length > 0
-                    ) {
-                      // 在入列前做一次彻底清洗，双保险（仅对字符串内容）
-                      if (typeof st.streamingMessage.content === "string") {
-                        st.streamingMessage.content = stripTokens(
-                          st.streamingMessage.content,
-                        );
-                      }
-                      st.messages.push({
-                        ...(st.streamingMessage as BaseMessage),
-                        timestamp: new Date().toISOString(),
-                      });
-                    }
-                    st.streamingMessage = null;
-                    st.sending = false;
-                    st.abortController = null;
-                  });
-                  get().onStreamEnd.forEach((cb) => cb());
-                } else if (t === "error") {
-                  const msg =
-                    (obj.error &&
-                      typeof obj.error === "object" &&
-                      (obj.error as any).message) ||
-                    "error";
-                  throw new Error(String(msg));
-                }
-              } catch (e) {
-                // Treat parse/stream error as failure and exit
-                throw e;
-              }
-            }
-          }
-          // Flush remaining buffer if contains a last JSON
-          const last = buffer.trim();
-          if (last) {
-            try {
-              const obj = JSON.parse(last) as Record<string, unknown>;
+          await consumeNDJSONStream(reader, {
+            abortSignal: controller.signal,
+            onChunk: (obj) => {
               const t = obj.type as string | undefined;
-              if (t === "finish") {
+              if (t === "text-delta") {
+                const rawChunk = typeof obj.text === "string" ? obj.text : "";
+                if (!rawChunk) return;
+                receivedAnyDelta = true;
+                let visible = rawChunk;
+                if (ENABLE_TOKEN_PARSE) {
+                  const { textDelta } = streamTokenizer.ingest(rawChunk);
+                  visible = textDelta;
+                }
+                if (visible) visible = stripTokens(visible);
+                if (visible) {
+                  set((st) => {
+                    if (!st.streamingMessage) return;
+                    st.streamingMessage.content += visible;
+                    st.streamingMessage.slices =
+                      st.streamingMessage.slices || [];
+                    st.streamingMessage.slices.push({
+                      type: "text",
+                      text: visible,
+                    });
+                  });
+                  get().onTokenLiteral.forEach((cb) => cb(visible));
+                }
+              } else if (t === "finish") {
                 set((st) => {
                   if (
                     st.streamingMessage &&
                     st.streamingMessage.slices &&
                     st.streamingMessage.slices.length > 0
                   ) {
+                    if (typeof st.streamingMessage.content === "string") {
+                      st.streamingMessage.content = stripTokens(
+                        st.streamingMessage.content
+                      );
+                    }
                     st.messages.push({
                       ...(st.streamingMessage as BaseMessage),
                       timestamp: new Date().toISOString(),
@@ -227,23 +183,52 @@ export const useChatStore = create<ChatState>()(
                   st.abortController = null;
                 });
                 get().onStreamEnd.forEach((cb) => cb());
+              } else if (t === "error") {
+                const msg =
+                  typeof obj.error === "string"
+                    ? obj.error
+                    : (obj.error as { message?: unknown })?.message;
+                throw new Error(String(msg || "error"));
               }
-            } catch {
-              // ignore
-            }
-          }
-        } catch (err) {
-          set((s) => {
-            s.sending = false;
-            s.abortController = null;
-            s.streamingMessage = null;
-            s.messages.push({
-              id: `err-${id}`,
-              role: "error",
-              content: (err as Error).message,
-              timestamp: new Date().toISOString(),
-            });
+            },
+            onError: (err) => {
+              throw err instanceof Error ? err : new Error(String(err));
+            },
+            onFinish: () => {
+              // no-op; completion handled via chunks
+            },
           });
+        };
+
+        while (true) {
+          try {
+            await runStream();
+            break;
+          } catch (err) {
+            const category = classifyError(err);
+            const canRetry =
+              category === "transient" &&
+              attempt < maxAttempts &&
+              !receivedAnyDelta &&
+              !controller.signal.aborted;
+            if (!canRetry) {
+              set((s) => {
+                s.sending = false;
+                s.abortController = null;
+                s.streamingMessage = null;
+                s.messages.push({
+                  id: `err-${id}`,
+                  role: "error",
+                  content: (err as Error).message,
+                  timestamp: new Date().toISOString(),
+                });
+              });
+              break;
+            }
+            attempt += 1;
+            const backoffMs = 300 * attempt;
+            await new Promise((r) => setTimeout(r, backoffMs));
+          }
         }
       },
 
@@ -264,7 +249,7 @@ export const useChatStore = create<ChatState>()(
             }
             if (typeof s.streamingMessage.content === "string") {
               s.streamingMessage.content = stripTokens(
-                s.streamingMessage.content,
+                s.streamingMessage.content
               );
             }
           }
@@ -360,8 +345,8 @@ export const useChatStore = create<ChatState>()(
         (state as any).messages = cleaned;
         return state as ChatState;
       },
-    },
-  ),
+    }
+  )
 );
 
 // 从 localStorage 读取激活的 Youngro 卡片（若有）

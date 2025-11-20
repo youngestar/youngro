@@ -12,6 +12,16 @@
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-prettier": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
+    "@types/react": "19.1.0"
+  },
   "exports": {
     ".": {
       "import": "./src/generated/index.tsx",
@@ -25,5 +35,6 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
-  }
+  },
+  "types": "src/generated/index.d.ts"
 }

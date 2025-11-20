@@ -12,6 +12,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@youngro/icons": "workspace:*",
     "@repo/ui": "workspace:*",
     "@shikijs/rehype": "^3.12.2",
     "@youngro/chat-zustand": "workspace:*",

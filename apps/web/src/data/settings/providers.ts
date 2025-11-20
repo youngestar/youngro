@@ -1,4 +1,7 @@
+import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
+import { DeepseekIcon } from "@youngro/icons";
+
 import {
   MessageSquare,
   MessageSquareQuote,
@@ -14,12 +17,14 @@ import {
 
 export type ProviderCategory = "chat" | "speech" | "transcription";
 
+type ProviderIcon = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
+
 export interface ProviderMeta {
   id: string;
   category: ProviderCategory;
   localizedName: string;
   localizedDescription?: string;
-  icon?: LucideIcon;
+  icon?: ProviderIcon;
   iconColorClassName?: string;
   iconImageSrc?: string;
   configured?: boolean;
@@ -31,7 +36,7 @@ export const chatProviders: ProviderMeta[] = [
     category: "chat",
     localizedName: "DeepSeek",
     localizedDescription: "高性价比推理与通用对话模型",
-    icon: MessageSquare,
+    icon: DeepseekIcon,
     iconColorClassName: "text-indigo-500 dark:text-indigo-400",
     configured: false,
   },

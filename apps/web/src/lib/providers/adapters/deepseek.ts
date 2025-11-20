@@ -47,7 +47,9 @@ export const deepseekAdapter: ChatProviderAdapter = {
       errors.push("Base URL 必须是 http/https 绝对地址");
     return { valid: errors.length === 0, errors };
   },
-  async listModels(_config: ProviderAdapterConfig): Promise<ProviderModelInfo[]> {
+  async listModels(
+    _config: ProviderAdapterConfig
+  ): Promise<ProviderModelInfo[]> {
     void _config; // reserved for future dynamic fetch
     // Future: call remote listing; now static
     return DEEPSEEK_MODELS;
