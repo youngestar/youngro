@@ -43,11 +43,12 @@ async function build() {
       "@svgr/plugin-prettier",
     ];
 
-    const tsxComponent = await transform(
+    let tsxComponent = await transform(
       svg,
       {
         icon: true,
         typescript: true,
+        ref: true,
         expandProps: "end",
         jsxRuntime: "automatic",
         prettier: false,
@@ -55,6 +56,22 @@ async function build() {
       },
       { componentName: compName }
     );
+    // Post-process the generated TSX to provide a named export + default export,
+    // inject title/aria-friendly handling, and add displayName + explicit forwardRef generics.
+    const innerName = `${compName}Inner`;
+    // rename the inner const e.g. `const Icon =` -> `const IconInner =`
+    tsxComponent = tsxComponent.replace(new RegExp(`const ${compName} =`), `const ${innerName} =`);
+
+    // inject title rendering right after opening <svg ...>
+    tsxComponent = tsxComponent.replace(/<svg([^>]*?)>/, `<svg$1>{props.title ? <title>{props.title}</title> : null}`);
+
+    // replace ForwardRef default export with named forwardRef export + default
+    // use explicit generic for forwardRef: forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(Inner)
+    tsxComponent = tsxComponent.replace(
+      /const ForwardRef = forwardRef\([^\)]+\);\s*export default ForwardRef;?/,
+      `export const ${compName} = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
+    );
+
     const genPath = new URL("./" + compName + ".tsx", generatedDir);
     await fs.writeFile(genPath, tsxComponent.trim() + "\n", "utf8");
 
@@ -63,6 +80,7 @@ async function build() {
       {
         icon: true,
         typescript: false,
+        ref: true,
         expandProps: "end",
         jsxRuntime: "automatic",
         prettier: false,
@@ -70,8 +88,23 @@ async function build() {
       },
       { componentName: compName }
     );
+    // apply same postprocessing to JS output
+    let jsOut = jsComponent;
+    jsOut = jsOut.replace(
+      new RegExp(`const ${compName} =`),
+      `const ${innerName} =`
+    );
+    jsOut = jsOut.replace(
+      new RegExp(`forwardRef\\(${compName}\\)`),
+      `forwardRef(${innerName})`
+    );
+    // replace ForwardRef default export with named forwardRef export + default and add displayName
+    jsOut = jsOut.replace(
+      /const ForwardRef = forwardRef\([^\)]+\);\s*export default ForwardRef;?/,
+      `export const ${compName} = forwardRef(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
+    );
     const distPath = new URL("./" + compName + ".js", distReactDir);
-    await fs.writeFile(distPath, jsComponent.trim() + "\n", "utf8");
+    await fs.writeFile(distPath, jsOut.trim() + "\n", "utf8");
 
     exports.push({ name: compName });
   }
@@ -105,7 +138,7 @@ async function build() {
     "",
     ...exports.map(
       (e) =>
-        `export declare const ${e.name}: React.FC<React.SVGProps<SVGSVGElement>>;`
+        `export declare const ${e.name}: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement> & React.RefAttributes<SVGSVGElement>>;`
     ),
     "",
     "declare const _default: {",
@@ -116,6 +149,10 @@ async function build() {
   ];
   const dtsPath = new URL("./index.d.ts", generatedDir);
   await fs.writeFile(dtsPath, dtsLines.join("\n"), "utf8");
+
+  // also write type declarations to dist for consumers
+  const distDtsPath = new URL("./index.d.ts", distReactDir);
+  await fs.writeFile(distDtsPath, dtsLines.join("\n"), "utf8");
 
   const distImportLines = exports.map(
     (e) => `import ${e.name} from './${e.name}.js';`

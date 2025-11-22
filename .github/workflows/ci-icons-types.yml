@@ -1,0 +1,38 @@
+name: CI — Icons build + Type-check
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    icons-and-types:
+        name: Icons build and TypeScript check
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node and PNPM
+              uses: pnpm/action-setup@v2
+              with:
+                  node-version: "18"
+                  pnpm-version: "8"
+
+            - name: Install workspace dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build icons package
+              run: pnpm --filter @youngro/icons --parallel run build
+
+            - name: Run web TypeScript check
+              run: pnpm --filter "apps/web..." run typecheck || pnpm --filter apps/web run typecheck || pnpm --filter web run typecheck || pnpm --filter "apps/web" run typecheck
+              # Notes: different workspace may use different scripts/filters; try common variants.
+
+            - name: Upload build artifacts (optional)
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: icons-dist
+                  path: packages/youngro-icons/dist

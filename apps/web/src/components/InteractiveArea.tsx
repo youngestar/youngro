@@ -96,43 +96,14 @@ export const InteractiveArea: React.FC = () => {
             <ScrollArea
               variant="textarea"
               thickness="md"
-              className="flex-1 min-h-[40vh] px-2"
-              viewportClassName="scroll-viewport"
+              className="flex-1 min-h-[40vh] px-2 [&_[data-orientation=horizontal]]:!hidden"
+              viewportClassName="scroll-viewport !overflow-x-hidden"
             >
-              <div className="px-2 py-2">
+              <div className="px-2 py-2 max-w-full">
                 <ChatHistory />
               </div>
             </ScrollArea>
             <div className="flex flex-col gap-2 p-2">
-              <div className="flex gap-2">
-                <select
-                  className="flex-1 rounded-md border px-2 py-1 text-sm bg-white dark:bg-neutral-800"
-                  value={selectedProvider}
-                  onChange={(e) => {
-                    setSelectedProvider(e.target.value);
-                    setSelectedModel("");
-                  }}
-                >
-                  {providers.map((p) => (
-                    <option key={p.meta.id} value={p.meta.id}>
-                      {p.meta.localizedName || p.meta.id}
-                      {p.configured ? "" : " (未配置)"}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="flex-1 rounded-md border px-2 py-1 text-sm bg-white dark:bg-neutral-800"
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  disabled={models.length === 0}
-                >
-                  {models.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="flex-1 flex flex-col">
                 <div className="rounded-xl bg-primary-200/20 dark:bg-primary-400/20 focus-within:ring-2 focus-within:ring-primary-400/40 dark:focus-within:ring-primary-300/40">
                   <Textarea

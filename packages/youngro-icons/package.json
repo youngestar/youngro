@@ -2,7 +2,7 @@
   "name": "@youngro/icons",
   "version": "0.0.0",
   "private": true,
-  "main": "src/generated/index.tsx",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "node ./src/build-icons.mjs",
@@ -20,21 +20,21 @@
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-prettier": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
-    "@types/react": "19.1.0"
+    "@types/react": "18.3.3"
   },
   "exports": {
     ".": {
-      "import": "./src/generated/index.tsx",
-      "default": "./src/generated/index.tsx"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./react": {
-      "import": "./src/generated/index.tsx",
-      "default": "./src/generated/index.tsx"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./dist": {
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
-  "types": "src/generated/index.d.ts"
+  "types": "dist/index.d.ts"
 }

@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Brain,
-  Cog,
+  Ghost,
   Gamepad2,
   Headphones,
   MessageCircle,
@@ -27,6 +27,14 @@ export interface SettingsModuleEntry {
 }
 
 export const modulesList: SettingsModuleEntry[] = [
+  {
+    id: "consciousness",
+    name: "意识控制",
+    description: "配置人格、语气和行为模式。",
+    icon: Ghost,
+    iconColorClassName: "text-neutral-500",
+    href: "/settings/modules/consciousness",
+  },
   {
     id: "speech",
     name: "语音合成",
@@ -60,14 +68,6 @@ export const modulesList: SettingsModuleEntry[] = [
     icon: Waves,
     iconColorClassName: "text-neutral-500",
     href: "/settings/modules/memory-long-term",
-  },
-  {
-    id: "consciousness",
-    name: "意识控制",
-    description: "配置人格、语气和行为模式。",
-    icon: Cog,
-    iconColorClassName: "text-neutral-500",
-    href: "/settings/modules/consciousness",
   },
   {
     id: "messaging-discord",

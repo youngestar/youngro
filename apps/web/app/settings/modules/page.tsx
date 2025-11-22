@@ -2,11 +2,12 @@
 
 import { IconStatusItem, PageHeader } from "@repo/ui";
 import styles from "./page.module.css";
-import { modulesList } from "../../../src/data/settings/modules";
 import { useRouter } from "next/navigation";
+import { useModulesList } from "../../../src/hooks/useModulesList";
 
 export default function SettingsModulesPage() {
   const router = useRouter();
+  const { modulesList } = useModulesList();
 
   return (
     <section className={styles.page}>
@@ -19,6 +20,7 @@ export default function SettingsModulesPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {modulesList.map((module, index) => {
           const ModuleIcon = module.icon;
+
           return (
             <IconStatusItem
               key={module.id}

@@ -1,25 +1,21 @@
 "use client";
 
-import { Button, BrandLogo } from "@repo/ui";
-import styles from "./page.module.css";
+import { PageHeader } from "@repo/ui";
+import { ClientConsciousnessPage } from "./ClientConsciousnessPage";
+import { useRouter } from "next/navigation";
 
-// useTurnToPage imported from src/hooks
+export default function ConsciousnessPage() {
+  const router = useRouter();
 
-export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <BrandLogo
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-        />
-        <Button>Open alert</Button>
-        <Button>TurnToPage button</Button>
-      </main>
+    <div className="flex flex-col gap-6 p-6">
+      <PageHeader
+        title="意识模块"
+        subtitle="consciousness"
+        showBackButton
+        onBack={() => router.back()}
+      />
+      <ClientConsciousnessPage />
     </div>
   );
 }
