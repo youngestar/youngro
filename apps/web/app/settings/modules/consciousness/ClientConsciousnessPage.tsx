@@ -31,7 +31,6 @@ export function ClientConsciousnessPage() {
     modelSearchQuery,
     setActiveProvider,
     setActiveModel,
-    setCustomModelName,
     setModelSearchQuery,
   } = useConsciousnessStore();
 

@@ -110,6 +110,17 @@ export default function ClientProviderDetail({
   }
 
   async function testConnection() {
+    // Sync local state to store before validating
+    setConfig(meta.id, {
+      apiKey: apiKey || undefined,
+      baseUrl: baseUrl || undefined,
+      ...(meta.category === "speech"
+        ? { voiceId: extraField || undefined }
+        : meta.category === "transcription"
+          ? { modelId: extraField || undefined }
+          : { defaultModel: extraField || undefined }),
+    });
+
     setTestStatus("testing");
     const ok = await validate(meta.id);
     if (ok) {
@@ -131,14 +142,14 @@ export default function ClientProviderDetail({
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="flex flex-col p-6">
       <ProviderPageHeader
         title={meta.localizedName}
         subtitle={category}
         icon={Icon ? <Icon className="h-6 w-6 opacity-80" /> : undefined}
       />
 
-      <section className="rounded-lg border p-4 space-y-4">
+      <div className="flex flex-col gap-6 rounded-xl bg-neutral-50 p-4 dark:bg-black/30">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-lg font-medium">凭证配置</h2>
@@ -253,46 +264,48 @@ export default function ClientProviderDetail({
             </ul>
           </div>
         )}
-      </section>
 
-      <section className="rounded-lg border p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-medium">模型列表</h2>
-            <p className="text-xs text-neutral-500">
-              验证成功后将自动同步可用模型，可在聊天页选择。
-            </p>
+        <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-4" />
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium">模型列表</h2>
+              <p className="text-xs text-neutral-500">
+                验证成功后将自动同步可用模型，可在聊天页选择。
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => fetchModels(meta.id, true)}
+              intent="default"
+              size="md"
+            >
+              重新加载
+            </Button>
           </div>
-          <Button
-            type="button"
-            onClick={() => fetchModels(meta.id, true)}
-            intent="default"
-            size="md"
-          >
-            重新加载
-          </Button>
+          {modelsStatus === "loading" && (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              加载中...
+            </p>
+          )}
+          {modelsStatus === "error" && (
+            <p className="text-sm text-rose-500">加载失败，可重试。</p>
+          )}
+          {modelsStatus === "success" && models.length === 0 && (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              暂无数据。
+            </p>
+          )}
+          {modelsStatus === "success" && models.length > 0 && (
+            <ul className="text-sm list-disc pl-5 space-y-1">
+              {models.map((m) => (
+                <li key={m.id}>{m.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
-        {modelsStatus === "loading" && (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            加载中...
-          </p>
-        )}
-        {modelsStatus === "error" && (
-          <p className="text-sm text-rose-500">加载失败，可重试。</p>
-        )}
-        {modelsStatus === "success" && models.length === 0 && (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            暂无数据。
-          </p>
-        )}
-        {modelsStatus === "success" && models.length > 0 && (
-          <ul className="text-sm list-disc pl-5 space-y-1">
-            {models.map((m) => (
-              <li key={m.id}>{m.name}</li>
-            ))}
-          </ul>
-        )}
-      </section>
+      </div>
     </div>
   );
 }

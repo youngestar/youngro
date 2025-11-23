@@ -65,18 +65,18 @@ export const IconStatusItem = React.forwardRef<
     ) : null;
 
     return (
-      <div
+      <a
+        ref={ref}
         className={clsx(
           "ui-icon-status-item group flex flex-col rounded-xl border-2 bg-neutral-50 dark:bg-neutral-800 border-neutral-100 dark:border-neutral-800/25 hover:border-primary-500/30 dark:hover:border-primary-400/30 drop-shadow-none hover:shadow-sm active:shadow-none dark:hover:shadow-none transition-all duration-400",
           className
         )}
+        {...rest}
       >
-        <a
-          ref={ref}
+        <div
           className={clsx(
             "ui-icon-status-item-link relative flex w-full h-full items-center overflow-hidden rounded-lg p-5 text-left bg-white dark:bg-neutral-900 transition-all duration-400 text-neutral-200/80 dark:text-neutral-700/40 group-hover:text-primary-300/50 dark:group-hover:text-primary-200/20"
           )}
-          {...rest}
         >
           <div className="z-10 flex-1">
             <div className="ui-icon-status-item-title text-neutral-800 text-lg font-normal transition-all duration-400">
@@ -87,7 +87,7 @@ export const IconStatusItem = React.forwardRef<
             </div>
           </div>
           {iconNode}
-        </a>
+        </div>
         <div className="p-2">
           {legacyBadge ? (
             configured ? (
@@ -109,7 +109,7 @@ export const IconStatusItem = React.forwardRef<
             />
           )}
         </div>
-      </div>
+      </a>
     );
   }
 );

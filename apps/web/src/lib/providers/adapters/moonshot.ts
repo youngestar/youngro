@@ -7,10 +7,10 @@ import type {
 } from "../adapter";
 import { api } from "../../api";
 
-// Static DeepSeek model list (can be refined via remote fetch later)
-const DEEPSEEK_MODELS: ProviderModelInfo[] = [
-  { id: "deepseek-chat", name: "deepseek-chat" },
-  { id: "deepseek-reasoner", name: "deepseek-reasoner" },
+const MOONSHOT_MODELS: ProviderModelInfo[] = [
+  { id: "moonshot-v1-8k", name: "moonshot-v1-8k (8k context)" },
+  { id: "moonshot-v1-32k", name: "moonshot-v1-32k (32k context)" },
+  { id: "moonshot-v1-128k", name: "moonshot-v1-128k (128k context)" },
 ];
 
 function readEnv(key: string): string | undefined {
@@ -29,20 +29,19 @@ function normalizeBaseUrl(raw?: string): string | undefined {
   return raw.replace(/\/$/, "");
 }
 
-export const deepseekAdapter: ChatProviderAdapter = {
-  id: "deepseek",
+export const moonshotAdapter: ChatProviderAdapter = {
+  id: "moonshot",
   async validateConfig(
     config: ProviderAdapterConfig
   ): Promise<ProviderValidationResult> {
-    const apiKey = config.apiKey || readEnv("DEEPSEEK_API_KEY");
+    const apiKey = config.apiKey || readEnv("MOONSHOT_API_KEY");
     const rawBaseUrl =
       config.baseUrl ||
-      readEnv("DEEPSEEK_BASE_URL") ||
-      "https://api.deepseek.com";
+      readEnv("MOONSHOT_BASE_URL") ||
+      "https://api.moonshot.cn/v1";
 
     const errors: string[] = [];
     if (!apiKey) errors.push("缺少 API Key");
-    if (!rawBaseUrl) errors.push("缺少 Base URL");
 
     const baseUrls = rawBaseUrl
       ? rawBaseUrl.split(",").map((u) => u.trim())
@@ -57,27 +56,28 @@ export const deepseekAdapter: ChatProviderAdapter = {
 
     return { valid: errors.length === 0, errors };
   },
+
   async listModels(
     _config: ProviderAdapterConfig
   ): Promise<ProviderModelInfo[]> {
-    void _config; // reserved for future dynamic fetch
-    // Future: call remote listing; now static
-    return DEEPSEEK_MODELS;
+    void _config;
+    return MOONSHOT_MODELS;
   },
+
   async *chatStream(
     messages: Array<{ role: string; content: unknown }>,
     config: ProviderAdapterConfig & { model?: string },
     options?: { signal?: AbortSignal }
   ): AsyncIterable<ChatStreamChunk> {
-    const apiKey = config.apiKey || readEnv("DEEPSEEK_API_KEY");
+    const apiKey = config.apiKey || readEnv("MOONSHOT_API_KEY");
     const rawBaseUrl =
       config.baseUrl ||
-      readEnv("DEEPSEEK_BASE_URL") ||
-      "https://api.deepseek.com";
-    const model = config.model || "deepseek-chat";
+      readEnv("MOONSHOT_BASE_URL") ||
+      "https://api.moonshot.cn/v1";
+    const model = config.model || "moonshot-v1-8k";
 
-    if (!apiKey || !rawBaseUrl) {
-      yield { type: "error", error: "配置不完整 (API Key/Base URL)" };
+    if (!apiKey) {
+      yield { type: "error", error: "配置不完整 (API Key)" };
       return;
     }
 
@@ -87,7 +87,7 @@ export const deepseekAdapter: ChatProviderAdapter = {
       .filter((u): u is string => !!u);
 
     // 自动追加官方节点作为兜底 (如果尚未包含)
-    const officialUrl = "https://api.deepseek.com";
+    const officialUrl = "https://api.moonshot.cn/v1";
     if (!baseUrls.includes(officialUrl)) {
       baseUrls.push(officialUrl);
     }
@@ -100,7 +100,7 @@ export const deepseekAdapter: ChatProviderAdapter = {
     for (const baseUrl of baseUrls) {
       const url = `${baseUrl}/chat/completions`;
       try {
-        console.debug(`[DeepSeek] Trying endpoint: ${url}`);
+        console.debug(`[Moonshot] Trying endpoint: ${url}`);
 
         response = await api.post(
           url,
@@ -115,11 +115,11 @@ export const deepseekAdapter: ChatProviderAdapter = {
             signal: options?.signal,
           }
         );
-        console.debug(`[DeepSeek] Connected to ${url}`);
+        console.debug(`[Moonshot] Connected to ${url}`);
         break; // 连接成功，跳出循环
       } catch (e) {
         console.warn(
-          `[DeepSeek] Connection failed to ${url}:`,
+          `[Moonshot] Connection failed to ${url}:`,
           (e as Error).message
         );
         lastError = e;
@@ -128,7 +128,7 @@ export const deepseekAdapter: ChatProviderAdapter = {
         if (baseUrl === officialUrl) {
           try {
             console.debug(
-              `[DeepSeek] Retrying official endpoint without proxy...`
+              `[Moonshot] Retrying official endpoint without proxy...`
             );
             response = await api.post(
               url,
@@ -144,11 +144,11 @@ export const deepseekAdapter: ChatProviderAdapter = {
                 proxy: false, // 强制禁用代理
               }
             );
-            console.debug(`[DeepSeek] Connected to ${url} (Direct)`);
+            console.debug(`[Moonshot] Connected to ${url} (Direct)`);
             break;
           } catch (e2) {
             console.warn(
-              `[DeepSeek] Direct connection failed too:`,
+              `[Moonshot] Direct connection failed too:`,
               (e2 as Error).message
             );
             lastError = e2;

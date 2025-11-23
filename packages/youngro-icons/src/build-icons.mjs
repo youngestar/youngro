@@ -59,17 +59,36 @@ async function build() {
     // Post-process the generated TSX to provide a named export + default export,
     // inject title/aria-friendly handling, and add displayName + explicit forwardRef generics.
     const innerName = `${compName}Inner`;
+
+    // Inject IconProps interface
+    tsxComponent = tsxComponent.replace(
+      'import { Ref, forwardRef } from "react";',
+      'import { Ref, forwardRef } from "react";\n\ninterface IconProps extends SVGProps<SVGSVGElement> {\n  title?: string;\n}\n'
+    );
+
     // rename the inner const e.g. `const Icon =` -> `const IconInner =`
-    tsxComponent = tsxComponent.replace(new RegExp(`const ${compName} =`), `const ${innerName} =`);
+    tsxComponent = tsxComponent.replace(
+      new RegExp(`const ${compName} =`),
+      `const ${innerName} =`
+    );
+
+    // Use IconProps instead of SVGProps<SVGSVGElement> for the inner component
+    tsxComponent = tsxComponent.replace(
+      `const ${innerName} = (props: SVGProps<SVGSVGElement>`,
+      `const ${innerName} = (props: IconProps`
+    );
 
     // inject title rendering right after opening <svg ...>
-    tsxComponent = tsxComponent.replace(/<svg([^>]*?)>/, `<svg$1>{props.title ? <title>{props.title}</title> : null}`);
+    tsxComponent = tsxComponent.replace(
+      /<svg([^>]*?)>/,
+      `<svg$1>{props.title ? <title>{props.title}</title> : null}`
+    );
 
     // replace ForwardRef default export with named forwardRef export + default
-    // use explicit generic for forwardRef: forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(Inner)
+    // use explicit generic for forwardRef: forwardRef<SVGSVGElement, IconProps>(Inner)
     tsxComponent = tsxComponent.replace(
       /const ForwardRef = forwardRef\([^\)]+\);\s*export default ForwardRef;?/,
-      `export const ${compName} = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
+      `export const ${compName} = forwardRef<SVGSVGElement, IconProps>(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
     );
 
     const genPath = new URL("./" + compName + ".tsx", generatedDir);

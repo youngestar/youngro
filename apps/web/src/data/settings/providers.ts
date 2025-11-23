@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
-import { DeepseekIcon } from "@youngro/icons";
+import { DeepseekIcon, MoonshotIcon } from "@youngro/icons";
 
 import {
   MessageSquare,
@@ -38,6 +38,15 @@ export const chatProviders: ProviderMeta[] = [
     localizedDescription: "高性价比推理与通用对话模型",
     icon: DeepseekIcon,
     iconColorClassName: "text-indigo-500 dark:text-indigo-400",
+    configured: false,
+  },
+  {
+    id: "moonshot",
+    category: "chat",
+    localizedName: "Moonshot AI",
+    localizedDescription: "Kimi 智能助手 (长上下文支持)",
+    icon: MoonshotIcon,
+    iconColorClassName: "text-blue-500 dark:text-blue-400",
     configured: false,
   },
   {

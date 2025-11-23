@@ -14,9 +14,9 @@ module.exports = {
   // Use POSIX-style globs to avoid backslash patterns on Windows which can accidentally match node_modules
   content: [
     // Scan only source folders to avoid node_modules
-    "../../apps/**/app/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
-    "../../apps/**/src/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
-    "../../packages/**/src/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
+    "../../apps/*/app/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
+    "../../apps/*/src/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
+    "../../packages/*/src/**/*.{js,ts,jsx,tsx,vue,html,mdx}",
   ],
   darkMode: "class",
   theme: {

@@ -1,0 +1,13 @@
+.page {
+  /* Padding is now handled by the settings layout container to match AIRI. */
+  padding: 0;
+}
+
+.main {
+  width: 100%;
+  /* Width is now controlled by the parent settings layout (2xl:max-w-screen-2xl). */
+}
+
+.logo {
+  display: block;
+}

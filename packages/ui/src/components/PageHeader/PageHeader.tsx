@@ -36,7 +36,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       }}
       className={clsx(
         "sticky inset-x-0 top-0 z-1 w-full bg-background/80 backdrop-blur pb-6 pt-10",
-        className,
+        className
       )}
     >
       <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             onClick={onBack}
             className={clsx(
               "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors",
-              { "pointer-events-none opacity-0": !showBackButton },
+              { "pointer-events-none opacity-0": !showBackButton }
             )}
             aria-label="Back"
           >

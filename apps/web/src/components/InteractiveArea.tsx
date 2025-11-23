@@ -14,7 +14,7 @@ import React, {
 } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
+import { Textarea, Button, ScrollArea, Icon, Select } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send } from "lucide-react";
 import {
@@ -31,7 +31,27 @@ export const InteractiveArea: React.FC = () => {
   useProvidersHydrate();
   const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const fetchModels = useProvidersStore((s) => s.fetchModels);
+
+  // Filter only configured providers
+  const configuredProviders = useMemo(() => {
+    return providers.filter((p) => p.configured);
+  }, [providers]);
+
   const [selectedProvider, setSelectedProvider] = useState<string>("deepseek");
+
+  // Auto-select first configured provider if current is not configured
+  useEffect(() => {
+    if (configuredProviders.length > 0) {
+      const currentIsConfigured = configuredProviders.some(
+        (p) => p.meta.id === selectedProvider
+      );
+      if (!currentIsConfigured) {
+        const first = configuredProviders[0];
+        if (first) setSelectedProvider(first.meta.id);
+      }
+    }
+  }, [configuredProviders, selectedProvider]);
+
   const providerState = useProvidersStore((s) =>
     s.getProvider(selectedProvider)
   );
@@ -91,7 +111,7 @@ export const InteractiveArea: React.FC = () => {
   return (
     <div className="flex flex-col items-center pt-4 w-full h-full">
       <div className="w-full h-[85dvh] py-4">
-        <div className="h-full mx-auto min-w-[30%] max-w-[600px] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
+        <div className="h-full mx-auto w-[600px] max-w-[95%] min-w-[30%] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
           <div className="flex flex-col h-full w-full">
             <ScrollArea
               variant="textarea"
@@ -124,7 +144,19 @@ export const InteractiveArea: React.FC = () => {
                   />
 
                   <div className="flex items-center justify-end px-2 py-2">
-                    <div className="flex gap-1">
+                    <div className="flex gap-2 items-center">
+                      <Select
+                        tone="tinted"
+                        vsize="sm"
+                        className="w-32"
+                        value={selectedProvider}
+                        onChange={(e) => setSelectedProvider(e.target.value)}
+                        options={configuredProviders.map((p) => ({
+                          value: p.meta.id,
+                          label: p.meta.localizedName,
+                        }))}
+                        title="选择模型提供商"
+                      />
                       <Button
                         intent="primary"
                         iconOnly

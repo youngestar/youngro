@@ -2,14 +2,16 @@
 import CloseIcon from './CloseIcon';
 import DeepseekIcon from './DeepseekIcon';
 import MenuIcon from './MenuIcon';
+import MoonshotIcon from './MoonshotIcon';
 import SearchIcon from './SearchIcon';
 
-export { CloseIcon, DeepseekIcon, MenuIcon, SearchIcon };
+export { CloseIcon, DeepseekIcon, MenuIcon, MoonshotIcon, SearchIcon };
 
 const icons = {
   CloseIcon,
   DeepseekIcon,
   MenuIcon,
+  MoonshotIcon,
   SearchIcon,
 } as const;
 
