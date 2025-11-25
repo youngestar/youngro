@@ -93,12 +93,25 @@ function getField(config: ProviderConfig, key: string): unknown {
   }
 }
 
-function computeConfigured(
+function hasRequiredFields(
   meta: ProviderMeta,
   config: ProviderConfig
 ): boolean {
   const req = requiredFields[meta.category];
   return req.every((f) => !!getField(config, f));
+}
+
+function shallowEqualConfig(a: ProviderConfig, b: ProviderConfig): boolean {
+  const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+  for (const key of keys) {
+    if (
+      (a as Record<string, unknown>)[key] !==
+      (b as Record<string, unknown>)[key]
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
@@ -148,7 +161,7 @@ function createInitialState(): Record<string, ProviderState> {
 
 // ---- Persistence key ----
 const STORAGE_KEY = "youngro.providers.v1";
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 interface PersistShape {
   version: number;
@@ -211,16 +224,24 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
   hydrate: () => {
     const persisted = loadPersisted();
     if (!persisted) return;
+    const persistedVersion = persisted.version ?? 1;
     set((state) => {
       const next = { ...state.registry };
       for (const [id, p] of Object.entries(persisted.registry)) {
         if (next[id]) {
+          const persistedConfig = p.config || {};
+          const validateErrors = validateConfig(next[id].meta, persistedConfig);
+          const meetsRequired = hasRequiredFields(
+            next[id].meta,
+            persistedConfig
+          );
+          const wasValidated =
+            persistedVersion >= 2 ? Boolean(p.configured) : false;
           const configured =
-            computeConfigured(next[id].meta, p.config) || p.configured;
-          const validateErrors = validateConfig(next[id].meta, p.config);
+            wasValidated && meetsRequired && validateErrors.length === 0;
           next[id] = {
             ...next[id],
-            config: p.config,
+            config: persistedConfig,
             configured,
             validateErrors,
           };
@@ -234,8 +255,11 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
       const cur = state.registry[id];
       if (!cur) return {};
       const config = { ...cur.config, ...patch };
-      const configured = computeConfigured(cur.meta, config);
+      const configChanged = !shallowEqualConfig(cur.config, config);
       const validateErrors = validateConfig(cur.meta, config);
+      const configured = configChanged
+        ? false
+        : cur.configured && validateErrors.length === 0;
       const next = {
         ...state.registry,
         [id]: { ...cur, config, configured, validateErrors },
@@ -245,19 +269,46 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
     });
   },
   validate: async (id) => {
-    // Mark validating, run checks, simulate async (future remote calls)
     const state = get().registry[id];
     if (!state) return false;
+
     set((s) => ({
       registry: {
         ...s.registry,
         [id]: { ...state, validating: true },
       },
     }));
-    // Async placeholder
-    await new Promise((r) => setTimeout(r, 150));
-    const validateErrors = validateConfig(state.meta, state.config);
+
+    let validateErrors: string[] = [];
+
+    // 1. Local structural validation
+    const localErrors = validateConfig(state.meta, state.config);
+    if (localErrors.length > 0) {
+      validateErrors = localErrors;
+    } else {
+      // 2. Remote validation via adapter (if chat provider)
+      if (state.meta.category === "chat") {
+        try {
+          const adapter = getChatAdapter(id);
+          if (adapter && adapter.validateConfig) {
+            const cfg: ProviderAdapterConfig = {
+              apiKey: (state.config as ChatProviderConfig).apiKey,
+              baseUrl: (state.config as ChatProviderConfig).baseUrl,
+              model: (state.config as ChatProviderConfig).defaultModel,
+            };
+            const result = await adapter.validateConfig(cfg);
+            if (!result.valid) {
+              validateErrors = result.errors || ["Remote validation failed"];
+            }
+          }
+        } catch (err) {
+          validateErrors = [(err as Error).message || "Validation error"];
+        }
+      }
+    }
+
     const configured = validateErrors.length === 0;
+
     set((s) => {
       const current = s.registry[id]!;
       return {
@@ -272,6 +323,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
         },
       };
     });
+
     // persist
     savePersisted(get().registry);
     return configured;

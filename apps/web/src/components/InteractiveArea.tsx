@@ -14,13 +14,14 @@ import React, {
 } from "react";
 import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button, ScrollArea, Icon, Select } from "@repo/ui";
+import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send } from "lucide-react";
 import {
   useProvidersStore,
   useProvidersHydrate,
 } from "../store/providersStore";
+import { useConsciousnessStore } from "../store/consciousnessStore";
 
 export const InteractiveArea: React.FC = () => {
   const { send, sending, registerOnStreamEnd } = useChatStore();
@@ -31,29 +32,17 @@ export const InteractiveArea: React.FC = () => {
   useProvidersHydrate();
   const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const fetchModels = useProvidersStore((s) => s.fetchModels);
+  const { activeProviderId, activeModelId, customModelName } =
+    useConsciousnessStore();
 
-  // Filter only configured providers
-  const configuredProviders = useMemo(() => {
-    return providers.filter((p) => p.configured);
-  }, [providers]);
-
-  const [selectedProvider, setSelectedProvider] = useState<string>("deepseek");
-
-  // Auto-select first configured provider if current is not configured
-  useEffect(() => {
-    if (configuredProviders.length > 0) {
-      const currentIsConfigured = configuredProviders.some(
-        (p) => p.meta.id === selectedProvider
-      );
-      if (!currentIsConfigured) {
-        const first = configuredProviders[0];
-        if (first) setSelectedProvider(first.meta.id);
-      }
-    }
-  }, [configuredProviders, selectedProvider]);
+  const fallbackProviderId = useMemo(() => {
+    if (activeProviderId) return activeProviderId;
+    const configured = providers.find((p) => p.configured);
+    return configured?.meta.id || "deepseek";
+  }, [activeProviderId, providers]);
 
   const providerState = useProvidersStore((s) =>
-    s.getProvider(selectedProvider)
+    s.getProvider(fallbackProviderId)
   );
   const models = useMemo(
     () => providerState?.resources.items ?? [],
@@ -63,7 +52,13 @@ export const InteractiveArea: React.FC = () => {
     const cfg = providerState?.config;
     return cfg ? { ...cfg } : undefined;
   }, [providerState?.config]);
-  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [fallbackModelId, setFallbackModelId] = useState<string>("");
+
+  const selectedModel = useMemo(() => {
+    if (customModelName?.trim()) return customModelName.trim();
+    if (activeModelId) return activeModelId;
+    return fallbackModelId || models[0]?.id || "";
+  }, [activeModelId, customModelName, fallbackModelId, models]);
 
   const handleSend = useCallback(() => {
     if (isComposing || sending) return;
@@ -73,7 +68,7 @@ export const InteractiveArea: React.FC = () => {
     setMessageInput("");
     void send(text, {
       model: modelToUse,
-      providerId: selectedProvider,
+      providerId: fallbackProviderId,
       providerConfig,
     });
     textareaRef.current?.focus();
@@ -83,7 +78,7 @@ export const InteractiveArea: React.FC = () => {
     messageInput,
     send,
     selectedModel,
-    selectedProvider,
+    fallbackProviderId,
     models,
     providerConfig,
   ]);
@@ -98,15 +93,15 @@ export const InteractiveArea: React.FC = () => {
   }, [registerOnStreamEnd]);
 
   useEffect(() => {
-    if (selectedProvider) void fetchModels(selectedProvider);
-  }, [selectedProvider, fetchModels]);
+    if (fallbackProviderId) void fetchModels(fallbackProviderId);
+  }, [fallbackProviderId, fetchModels]);
 
   useEffect(() => {
-    if (models.length && !selectedModel) {
-      const first = models[0];
-      if (first) setSelectedModel(first.id);
+    if (!activeModelId && !customModelName && models.length) {
+      const firstModel = models[0];
+      if (firstModel) setFallbackModelId(firstModel.id);
     }
-  }, [models, selectedModel]);
+  }, [models, activeModelId, customModelName]);
 
   return (
     <div className="flex flex-col items-center pt-4 w-full h-full">
@@ -144,19 +139,7 @@ export const InteractiveArea: React.FC = () => {
                   />
 
                   <div className="flex items-center justify-end px-2 py-2">
-                    <div className="flex gap-2 items-center">
-                      <Select
-                        tone="tinted"
-                        vsize="sm"
-                        className="w-32"
-                        value={selectedProvider}
-                        onChange={(e) => setSelectedProvider(e.target.value)}
-                        options={configuredProviders.map((p) => ({
-                          value: p.meta.id,
-                          label: p.meta.localizedName,
-                        }))}
-                        title="选择模型提供商"
-                      />
+                    <div className="flex gap-1">
                       <Button
                         intent="primary"
                         iconOnly

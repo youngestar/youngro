@@ -2,6 +2,7 @@
 
 import { PageHeader } from "@repo/ui";
 import { useRouter } from "next/navigation";
+import { ClientSpeechPage } from "./ClientSpeechPage";
 
 export default function ConsciousnessPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function ConsciousnessPage() {
         showBackButton
         onBack={() => router.back()}
       />
-      TODO
+      <ClientSpeechPage />
     </div>
   );
 }
