@@ -4,8 +4,9 @@ import DeepseekIcon from './DeepseekIcon';
 import MenuIcon from './MenuIcon';
 import MoonshotIcon from './MoonshotIcon';
 import SearchIcon from './SearchIcon';
+import TencentcloudIcon from './TencentcloudIcon';
 
-export { CloseIcon, DeepseekIcon, MenuIcon, MoonshotIcon, SearchIcon };
+export { CloseIcon, DeepseekIcon, MenuIcon, MoonshotIcon, SearchIcon, TencentcloudIcon };
 
 const icons = {
   CloseIcon,
@@ -13,6 +14,7 @@ const icons = {
   MenuIcon,
   MoonshotIcon,
   SearchIcon,
+  TencentcloudIcon,
 } as const;
 
 export default icons;

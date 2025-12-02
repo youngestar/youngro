@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import useChatStore from "../stores/useChatStore";
 
-export function ChatDemo(): JSX.Element {
+export function ChatDemo() {
   const messages = useChatStore((s) => s.messages);
   const streamingMessage = useChatStore((s) => s.streamingMessage);
   const sending = useChatStore((s) => s.sending);

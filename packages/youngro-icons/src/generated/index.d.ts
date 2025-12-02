@@ -5,6 +5,7 @@ export declare const DeepseekIcon: React.ForwardRefExoticComponent<React.SVGProp
 export declare const MenuIcon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement> & React.RefAttributes<SVGSVGElement>>;
 export declare const MoonshotIcon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement> & React.RefAttributes<SVGSVGElement>>;
 export declare const SearchIcon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement> & React.RefAttributes<SVGSVGElement>>;
+export declare const TencentcloudIcon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement> & React.RefAttributes<SVGSVGElement>>;
 
 declare const _default: {
   CloseIcon: typeof CloseIcon;
@@ -12,5 +13,6 @@ declare const _default: {
   MenuIcon: typeof MenuIcon;
   MoonshotIcon: typeof MoonshotIcon;
   SearchIcon: typeof SearchIcon;
+  TencentcloudIcon: typeof TencentcloudIcon;
 };
 export default _default;

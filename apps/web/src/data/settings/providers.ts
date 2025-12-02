@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 import type { LucideIcon } from "lucide-react";
-import { DeepseekIcon, MoonshotIcon } from "@youngro/icons";
+import { DeepseekIcon, MoonshotIcon, TencentcloudIcon } from "@youngro/icons";
 
 import {
   MessageSquare,
@@ -95,6 +95,15 @@ export const audioSpeechProviders: ProviderMeta[] = [
     localizedDescription: "微软语音服务 TTS",
     icon: Waves,
     iconColorClassName: "text-blue-500 dark:text-blue-400",
+    configured: false,
+  },
+  {
+    id: "tencent-cloud-speech",
+    category: "speech",
+    localizedName: "腾讯云语音",
+    localizedDescription: "腾讯云 TTS 语音合成",
+    icon: TencentcloudIcon,
+    iconColorClassName: "text-cyan-500 dark:text-cyan-400",
     configured: false,
   },
   {

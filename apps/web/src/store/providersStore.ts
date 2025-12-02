@@ -21,9 +21,17 @@ export interface ChatProviderConfig {
 }
 
 export interface SpeechProviderConfig {
+  // Generic fields (some providers use apiKey, some use secretId/secretKey)
   apiKey?: string;
   baseUrl?: string;
   voiceId?: string;
+  // Tencent Cloud specific
+  secretId?: string;
+  secretKey?: string;
+  region?: string;
+  appId?: string | number;
+  voiceType?: number | string;
+  websiteType?: string | number;
 }
 
 export interface TranscriptionProviderConfig {
@@ -62,11 +70,22 @@ export interface ProviderState {
 }
 
 // ---- Helper: compute configured ----
-const requiredFields: Record<ProviderCategory, string[]> = {
-  chat: ["apiKey", "baseUrl"],
-  speech: ["apiKey", "voiceId"],
-  transcription: ["apiKey", "modelId"],
-};
+function requiredFieldsFor(meta: { id: string; category: ProviderCategory }) {
+  // Default per-category requirements
+  const defaults: Record<ProviderCategory, string[]> = {
+    chat: ["apiKey", "baseUrl"],
+    speech: ["apiKey"],
+    transcription: ["apiKey", "modelId"],
+  };
+
+  // Provider-specific overrides
+  if (meta.id === "tencent-cloud-speech") {
+    // Tencent 只需要密钥即可完成最小校验；Region/WebsiteType 有默认值
+    return ["secretId", "secretKey"];
+  }
+
+  return defaults[meta.category];
+}
 
 function getField(config: ProviderConfig, key: string): unknown {
   switch (key) {
@@ -88,6 +107,22 @@ function getField(config: ProviderConfig, key: string): unknown {
       return "defaultModel" in config
         ? (config as ChatProviderConfig).defaultModel
         : undefined;
+    case "secretId":
+      return "secretId" in config
+        ? (config as SpeechProviderConfig).secretId
+        : undefined;
+    case "secretKey":
+      return "secretKey" in config
+        ? (config as SpeechProviderConfig).secretKey
+        : undefined;
+    case "region":
+      return "region" in config
+        ? (config as SpeechProviderConfig).region
+        : undefined;
+    case "websiteType":
+      return "websiteType" in config
+        ? (config as SpeechProviderConfig).websiteType
+        : undefined;
     default:
       return undefined;
   }
@@ -97,7 +132,7 @@ function hasRequiredFields(
   meta: ProviderMeta,
   config: ProviderConfig
 ): boolean {
-  const req = requiredFields[meta.category];
+  const req = requiredFieldsFor(meta as any);
   return req.every((f) => !!getField(config, f));
 }
 
@@ -116,7 +151,8 @@ function shallowEqualConfig(a: ProviderConfig, b: ProviderConfig): boolean {
 
 function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
   const errs: string[] = [];
-  for (const f of requiredFields[meta.category]) {
+  const req = requiredFieldsFor(meta as any);
+  for (const f of req) {
     if (!getField(config, f)) errs.push(`缺少必填字段: ${f}`);
   }
   const baseUrl = getField(config, "baseUrl") as string | undefined;
@@ -129,7 +165,7 @@ function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
     } catch {
       errs.push("Base URL 非法或不是绝对 URL");
     }
-  } else if (requiredFields[meta.category].includes("baseUrl")) {
+  } else if (requiredFieldsFor(meta as any).includes("baseUrl")) {
     errs.push("缺少必填字段: baseUrl");
   }
   return errs;
@@ -286,7 +322,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
     if (localErrors.length > 0) {
       validateErrors = localErrors;
     } else {
-      // 2. Remote validation via adapter (if chat provider)
+      // 2. Remote validation via adapter or provider-specific endpoint
       if (state.meta.category === "chat") {
         try {
           const adapter = getChatAdapter(id);
@@ -303,6 +339,27 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
           }
         } catch (err) {
           validateErrors = [(err as Error).message || "Validation error"];
+        }
+      } else if (state.meta.category === "speech") {
+        try {
+          const response = await fetch(`/api/speech/providers/${id}/validate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(state.config),
+          });
+          if (!response.ok) {
+            const errorPayload = (await response.json().catch(() => ({}))) as {
+              error?: string;
+              detail?: string;
+            };
+            const remoteMessage =
+              errorPayload.error || `远程验证失败 (HTTP ${response.status})`;
+            validateErrors = errorPayload.detail
+              ? [remoteMessage, errorPayload.detail]
+              : [remoteMessage];
+          }
+        } catch (err) {
+          validateErrors = [(err as Error).message || "远程验证出现异常"];
         }
       }
     }
