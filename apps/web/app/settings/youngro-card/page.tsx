@@ -14,6 +14,7 @@ import {
   composePostHistoryInstructions,
   DEFAULT_POST_HISTORY_INSTRUCTIONS,
   parseImportedCard,
+  newYoungroCard,
 } from "@youngro/store-card";
 import { CreateCardTile } from "./components/CreateCardTile";
 import { FileInput } from "./components/FileInput";
@@ -22,16 +23,52 @@ import { CardCreationDialog } from "./components/CardCreationDialog";
 import { CardDetailDialog } from "./components/CardDetailDialog";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 import { Toolbar } from "./components/Toolbar";
+import { useConsciousnessStore } from "../../../src/store/consciousnessStore";
+import { useSpeechStore } from "../../../src/store/speechStore";
 // YoungroExtension type is now provided by the store package
 
 function Content() {
   const router = useRouter();
   const { cards, activeCardId, addCard, removeCard, setActiveCard } =
     useYoungroCards();
+  const { activeModelId: consciousnessModelId, customModelName } =
+    useConsciousnessStore((state) => ({
+      activeModelId: state.activeModelId,
+      customModelName: state.customModelName,
+    }));
+  const {
+    activeModelId: speechModelId,
+    activeVoiceId,
+    activeProviderId: speechProviderId,
+    voiceSelections,
+  } = useSpeechStore((state) => ({
+    activeModelId: state.activeModelId,
+    activeVoiceId: state.activeVoiceId,
+    activeProviderId: state.activeProviderId,
+    voiceSelections: state.voiceSelections,
+  }));
+
+  const currentConsciousnessModel =
+    (customModelName?.trim() || consciousnessModelId || "").trim() || "未指定";
+  const currentSpeechModel = (speechModelId || "").trim() || "未指定";
+  const preferredVoiceId = speechProviderId
+    ? voiceSelections[speechProviderId] || ""
+    : "";
+  const currentSpeechVoice =
+    (activeVoiceId || preferredVoiceId || "").trim() || "未指定";
+
+  const currentModuleDefaults = React.useMemo(
+    () => ({
+      consciousnessModel: currentConsciousnessModel,
+      speechModel: currentSpeechModel,
+      speechVoiceId: currentSpeechVoice,
+    }),
+    [currentConsciousnessModel, currentSpeechModel, currentSpeechVoice]
+  );
 
   const [search, setSearch] = React.useState("");
   const [sort, setSort] = React.useState<"nameAsc" | "nameDesc" | "recent">(
-    "recent",
+    "recent"
   );
   const entries = Object.entries(cards).filter(([, card]) => {
     const q = search.trim().toLowerCase();
@@ -65,7 +102,8 @@ function Content() {
       const text = await file.text();
       const json = JSON.parse(text);
       const parsed = parseImportedCard(json);
-      addCard(parsed);
+      const enriched = newYoungroCard(parsed, currentModuleDefaults);
+      addCard(enriched);
     } catch (e) {
       console.error("Import card error", e);
       const msg = e instanceof Error ? e.message : "无效的 JSON 文件";
@@ -214,10 +252,9 @@ function Content() {
             });
             const postHistoryInstructions = composePostHistoryInstructions(
               DEFAULT_POST_HISTORY_INSTRUCTIONS,
-              v.postHistoryInstructions,
+              v.postHistoryInstructions
             );
-
-            addCard({
+            const baseCard = {
               name: v.name,
               nickname: v.nickname,
               version: v.version || "1.0.0",
@@ -228,7 +265,9 @@ function Content() {
               greetings: v.greetings,
               systemPrompt,
               postHistoryInstructions,
-            });
+            };
+            const enriched = newYoungroCard(baseCard, currentModuleDefaults);
+            addCard(enriched);
           }}
         />
 

@@ -26,6 +26,8 @@ export default function ProvidersPage() {
     behavior: "smooth",
     maxRetries: 15,
     retryDelay: 150,
+    queryParam: "section",
+    clearQueryParam: true,
   });
 
   return (

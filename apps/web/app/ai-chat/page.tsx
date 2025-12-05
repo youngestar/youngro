@@ -18,7 +18,7 @@ export default function Home() {
     return () =>
       window.removeEventListener(
         "youngro-card-activated",
-        handler as EventListener,
+        handler as EventListener
       );
   }, [applyActiveCardSystemPrompt]);
 
@@ -30,7 +30,7 @@ export default function Home() {
           <div className="flex-1 hidden md:block" />
           <div className="shrink-0 w-full md:w-auto">
             <InteractiveArea />
-            <div className="mx-auto min-w-[30%] max-w-[500px] flex justify-end mt-0.5 pr-1">
+            <div className="mx-auto min-w-[30%] max-w-[500px] flex justify-end pr-1">
               <Button
                 intent="default"
                 iconOnly

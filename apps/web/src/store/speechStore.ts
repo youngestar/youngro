@@ -36,6 +36,7 @@ interface SpeechStoreState {
   pitch: number;
   rate: number;
   useSSML: boolean;
+  autoplayReplies: boolean;
   availableVoices: Record<string, VoiceInfo[]>;
   voiceStatus: Record<string, VoiceLoadBucket>;
   setActiveProvider: (providerId: string | null) => void;
@@ -45,6 +46,7 @@ interface SpeechStoreState {
   setPitch: (pitch: number) => void;
   setRate: (rate: number) => void;
   setUseSSML: (enabled: boolean) => void;
+  setAutoplayReplies: (enabled: boolean) => void;
   fetchVoices: (
     providerId: string,
     config: SpeechProviderConfig,
@@ -64,6 +66,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
       pitch: 0,
       rate: 1,
       useSSML: false,
+      autoplayReplies: false,
       availableVoices: {},
       voiceStatus: {},
       setActiveProvider: (providerId) => {
@@ -113,6 +116,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
       setPitch: (pitch) => set({ pitch }),
       setRate: (rate) => set({ rate }),
       setUseSSML: (enabled) => set({ useSSML: enabled }),
+      setAutoplayReplies: (enabled) => set({ autoplayReplies: enabled }),
       fetchVoices: async (providerId, config, options) => {
         if (!providerId) return [];
         const state = get();
@@ -190,6 +194,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
         pitch: state.pitch,
         rate: state.rate,
         useSSML: state.useSSML,
+        autoplayReplies: state.autoplayReplies,
         availableVoices: state.availableVoices,
         voiceStatus: state.voiceStatus,
       }),

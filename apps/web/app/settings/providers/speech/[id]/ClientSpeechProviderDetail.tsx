@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Button,
   Checkbox,
@@ -18,6 +19,7 @@ import {
   type ModelInfo,
 } from "../../../../../src/store/providersStore";
 import { useSpeechStore } from "../../../../../src/store/speechStore";
+import { useSpeechResources } from "../../../../../src/hooks/useSpeechResources";
 
 const VOICE_PRESETS: Record<
   string,
@@ -62,7 +64,6 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const providerState = useProvidersStore((s) => s.getProvider(id));
   const setConfig = useProvidersStore((s) => s.setConfig);
   const validate = useProvidersStore((s) => s.validate);
-  const fetchModels = useProvidersStore((s) => s.fetchModels);
 
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
@@ -97,17 +98,17 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const providerId = meta?.id;
 
   const setSpeechActiveProvider = useSpeechStore((s) => s.setActiveProvider);
-  const fetchSpeechVoices = useSpeechStore((s) => s.fetchVoices);
   const speechStoreActiveProviderId = useSpeechStore((s) => s.activeProviderId);
   const activeVoiceId = useSpeechStore((s) => s.activeVoiceId || "");
   const setActiveVoiceId = useSpeechStore((s) => s.setActiveVoice);
   const clearVoiceSelection = useSpeechStore((s) => s.clearVoiceSelection);
-  const providerVoices = useSpeechStore((s) =>
-    providerId ? s.availableVoices[providerId] : undefined
-  );
-  const providerVoiceStatus = useSpeechStore((s) =>
-    providerId ? s.voiceStatus[providerId] : undefined
-  );
+  const {
+    voices: providerVoices,
+    voicesError,
+    voiceStatus,
+    fetchVoices,
+    fetchModels: fetchSpeechModels,
+  } = useSpeechResources({ providerId });
   const isTencentProvider = providerId === "tencent-cloud-speech";
   const hasVoiceCredentials = isTencentProvider
     ? Boolean(secretId.trim() && secretKey.trim())
@@ -186,13 +187,15 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
 
   useEffect(() => {
     if (!providerId) return;
-    setSpeechActiveProvider(providerId);
-  }, [providerId, setSpeechActiveProvider]);
+    if (speechStoreActiveProviderId !== providerId) {
+      setSpeechActiveProvider(providerId);
+    }
+  }, [providerId, speechStoreActiveProviderId, setSpeechActiveProvider]);
 
   useEffect(() => {
     if (!providerId || !hasVoiceCredentials) return;
-    void fetchSpeechVoices(providerId, voiceRequestConfig);
-  }, [providerId, hasVoiceCredentials, voiceRequestConfig, fetchSpeechVoices]);
+    void fetchVoices(undefined, voiceRequestConfig);
+  }, [providerId, hasVoiceCredentials, voiceRequestConfig, fetchVoices]);
 
   useEffect(() => {
     if (!providerId || !providerState) return;
@@ -271,8 +274,8 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   }, [storeModels]);
 
   const formattedPitch = pitch > 0 ? `+${pitch}` : `${pitch}`;
-  const voiceLoadState = providerVoiceStatus?.status ?? "idle";
-  const voiceLoadError = providerVoiceStatus?.error ?? null;
+  const voiceLoadState = voiceStatus;
+  const voiceLoadError = voicesError ?? null;
   const canFetchVoices = Boolean(providerId && hasVoiceCredentials);
 
   const credentialStatus = providerState?.validating
@@ -301,13 +304,8 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
 
   useEffect(() => {
     if (!providerId) return;
-    void fetchModels(providerId);
-  }, [providerId, fetchModels]);
-
-  useEffect(() => {
-    if (!meta) return;
-    void fetchModels(meta.id);
-  }, [meta, fetchModels]);
+    void fetchSpeechModels();
+  }, [providerId, fetchSpeechModels]);
 
   if (!providerState || !meta || meta.category !== "speech") {
     return null;
@@ -345,7 +343,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     if (ok) {
       setTestStatus("success");
       setLastValidatedAt(Date.now());
-      await fetchModels(meta!.id, true);
+      await fetchSpeechModels(true);
     } else {
       setTestStatus("error");
     }
@@ -389,7 +387,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
       return;
     }
     setErrorMessage(null);
-    await fetchSpeechVoices(providerId, voiceRequestConfig, { force });
+    await fetchVoices(force, voiceRequestConfig);
   }
 
   async function handleGeneratePreview() {

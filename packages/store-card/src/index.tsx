@@ -71,41 +71,32 @@ function parseMesExample(mes?: string): string[][] | undefined {
   return parts.length ? parts : undefined;
 }
 
+const UNASSIGNED_MODULE_VALUE = "未指定";
+
 export function resolveYoungroExtension(
   card: BaseCard | CCV3CharacterCardV3,
   defaults: {
     consciousnessModel: string;
     speechModel: string;
     speechVoiceId: string;
-  },
+  }
 ): YoungroExtension {
-  const existing =
-    "data" in card
-      ? ((card.data.extensions?.["youngro"] as YoungroExtension | undefined) ??
-        undefined)
-      : ((card.extensions as Record<string, unknown> | undefined)?.[
-          "youngro"
-        ] as YoungroExtension | undefined);
+  const resolvedConsciousnessModel =
+    defaults.consciousnessModel || UNASSIGNED_MODULE_VALUE;
+  const resolvedSpeechModel = defaults.speechModel || UNASSIGNED_MODULE_VALUE;
+  const resolvedVoiceId = defaults.speechVoiceId || UNASSIGNED_MODULE_VALUE;
 
   return {
     modules: {
       consciousness: {
-        model:
-          existing?.modules?.consciousness?.model ??
-          defaults.consciousnessModel,
+        model: resolvedConsciousnessModel,
       },
       speech: {
-        model: existing?.modules?.speech?.model ?? defaults.speechModel,
-        voice_id: existing?.modules?.speech?.voice_id ?? defaults.speechVoiceId,
-        pitch: existing?.modules?.speech?.pitch,
-        rate: existing?.modules?.speech?.rate,
-        ssml: existing?.modules?.speech?.ssml,
-        language: existing?.modules?.speech?.language,
+        model: resolvedSpeechModel,
+        voice_id: resolvedVoiceId,
       },
-      vrm: existing?.modules?.vrm,
-      live2d: existing?.modules?.live2d,
     },
-    agents: existing?.agents ?? {},
+    agents: {},
   };
 }
 
@@ -115,7 +106,7 @@ export function newYoungroCard(
     consciousnessModel: string;
     speechModel: string;
     speechVoiceId: string;
-  },
+  }
 ): YoungroCard {
   const ext = resolveYoungroExtension(card, defaults);
 
@@ -131,7 +122,7 @@ export function newYoungroCard(
       personality: data.personality ?? "",
       scenario: data.scenario ?? "",
       greetings: [data.first_mes, ...(data.alternate_greetings ?? [])].filter(
-        Boolean,
+        Boolean
       ) as string[],
       systemPrompt: data.system_prompt ?? "",
       postHistoryInstructions: data.post_history_instructions ?? "",
@@ -197,7 +188,7 @@ export interface YoungroCardActions {
 type YoungroCardContextType = [YoungroCardState, YoungroCardActions];
 
 const YoungroCardContext = React.createContext<YoungroCardContextType | null>(
-  null,
+  null
 );
 
 const STORAGE_KEY_CARDS = "youngro-cards";
@@ -219,7 +210,7 @@ export function YoungroCardProvider({
   children: React.ReactNode;
 }) {
   const [state, setState] = React.useState<YoungroCardState>(() =>
-    loadInitial(),
+    loadInitial()
   );
   const stateRef = React.useRef(state);
 
@@ -305,17 +296,17 @@ export function YoungroCardProvider({
           window.dispatchEvent(
             new CustomEvent("youngro-card-activated", {
               detail: { card: selected },
-            }),
+            })
           );
         }
       },
     }),
-    [],
+    []
   );
 
   const value = React.useMemo<YoungroCardContextType>(
     () => [state, actions],
-    [state, actions],
+    [state, actions]
   );
 
   return (
@@ -383,7 +374,7 @@ export function composeDescription(input: {
       : "";
   const scene = input.scenario ? `，场景：${trimTo(input.scenario, 60)}` : "";
   return cleanText(
-    `${input.name} 是一位${traitText}的 AI 助手${tagText}${scene}。`,
+    `${input.name} 是一位${traitText}的 AI 助手${tagText}${scene}。`
   );
 }
 
@@ -413,7 +404,7 @@ export function composeSystemPrompt(input: {
 
 export function composePostHistoryInstructions(
   defaults: string | undefined,
-  user: string | undefined,
+  user: string | undefined
 ) {
   const parts = [defaults || DEFAULT_POST_HISTORY_INSTRUCTIONS, user || ""]
     .map((x) => x.trim())
@@ -478,7 +469,7 @@ const CCV3DataSchema = z.object({
 const CCV3Schema = z.object({ data: CCV3DataSchema });
 
 export function parseImportedCard(
-  json: unknown,
+  json: unknown
 ): BaseCard | CCV3CharacterCardV3 {
   // Try CCV3 first
   const cc = CCV3Schema.safeParse(json);
@@ -491,7 +482,7 @@ export function parseImportedCard(
   const issues =
     err?.issues?.map(
       (i: { path: (string | number)[]; message: string }) =>
-        `${i.path.join(".")}: ${i.message}`,
+        `${i.path.join(".")}: ${i.message}`
     ) ?? [];
   throw new Error(`无效的卡片 JSON：\n${issues.join("\n")}`);
 }

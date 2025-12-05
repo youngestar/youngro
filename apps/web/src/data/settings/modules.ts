@@ -42,7 +42,6 @@ export const modulesList: SettingsModuleEntry[] = [
     icon: Mic,
     iconColorClassName: "text-neutral-500",
     href: "/settings/modules/speech",
-    configured: true,
   },
   {
     id: "hearing",
@@ -59,7 +58,6 @@ export const modulesList: SettingsModuleEntry[] = [
     icon: Brain,
     iconColorClassName: "text-neutral-500",
     href: "/settings/modules/memory-short-term",
-    configured: true,
   },
   {
     id: "memory-long-term",

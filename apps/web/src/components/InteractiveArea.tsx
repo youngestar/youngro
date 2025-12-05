@@ -16,12 +16,13 @@ import { useChatStore } from "@youngro/chat-zustand";
 import { ChatHistory } from "./ChatHistory";
 import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
 import styles from "./InteractiveArea.module.css";
-import { Send } from "lucide-react";
+import { Send, Volume2, VolumeX } from "lucide-react";
 import {
   useProvidersStore,
   useProvidersHydrate,
 } from "../store/providersStore";
 import { useConsciousnessStore } from "../store/consciousnessStore";
+import useStreamingSpeechPlayback from "../hooks/useStreamingSpeechPlayback";
 
 export const InteractiveArea: React.FC = () => {
   const { send, sending, registerOnStreamEnd } = useChatStore();
@@ -53,6 +54,31 @@ export const InteractiveArea: React.FC = () => {
     return cfg ? { ...cfg } : undefined;
   }, [providerState?.config]);
   const [fallbackModelId, setFallbackModelId] = useState<string>("");
+  const {
+    enabled: speechAutoplayEnabled,
+    setEnabled: setSpeechAutoplayEnabled,
+    status: speechPlaybackStatus,
+    error: speechPlaybackError,
+    ready: speechPlaybackReady,
+    queueSize: speechQueueSize,
+    lastEmotion: speechLastEmotion,
+    stop: stopSpeechPlayback,
+  } = useStreamingSpeechPlayback();
+
+  const speechStatusText = useMemo(() => {
+    switch (speechPlaybackStatus) {
+      case "chunking":
+        return "语音分段中…";
+      case "buffering":
+        return "语音合成中…";
+      case "playing":
+        return "播报中…";
+      case "error":
+        return "语音播放异常";
+      default:
+        return null;
+    }
+  }, [speechPlaybackStatus]);
 
   const selectedModel = useMemo(() => {
     if (customModelName?.trim()) return customModelName.trim();
@@ -141,6 +167,29 @@ export const InteractiveArea: React.FC = () => {
                   <div className="flex items-center justify-end px-2 py-2">
                     <div className="flex gap-1">
                       <Button
+                        type="button"
+                        intent={speechAutoplayEnabled ? "primary" : "subtle"}
+                        iconOnly
+                        aria-pressed={speechAutoplayEnabled}
+                        aria-label="自动播报回复"
+                        title={
+                          speechPlaybackReady
+                            ? speechAutoplayEnabled
+                              ? "自动播报已开启"
+                              : "点击开启自动播报"
+                            : "需先配置语音 Provider"
+                        }
+                        disabled={!speechPlaybackReady}
+                        onClick={() =>
+                          setSpeechAutoplayEnabled(!speechAutoplayEnabled)
+                        }
+                      >
+                        <Icon
+                          icon={speechAutoplayEnabled ? Volume2 : VolumeX}
+                          size="sm"
+                        />
+                      </Button>
+                      <Button
                         intent="primary"
                         iconOnly
                         aria-label="发送"
@@ -157,6 +206,48 @@ export const InteractiveArea: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                {/* <div className="flex flex-col gap-1 px-2 pb-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-600 dark:text-neutral-300">
+                    <div className="flex items-center gap-1">
+                      <span>
+                        自动播报：
+                        {speechAutoplayEnabled ? "已开启" : "未开启"}
+                        {!speechPlaybackReady ? "（需配置语音 Provider）" : ""}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      intent="subtle"
+                      disabled={speechPlaybackStatus === "idle"}
+                      onClick={() => stopSpeechPlayback()}
+                    >
+                      停止播报
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-[11px]">
+                    {speechStatusText && (
+                      <span className="text-neutral-500">
+                        {speechStatusText}
+                      </span>
+                    )}
+                    {speechQueueSize > 0 && (
+                      <span className="text-neutral-500">
+                        队列剩余 {speechQueueSize} 段
+                      </span>
+                    )}
+                    {speechLastEmotion && (
+                      <span className="text-neutral-500">
+                        当前情绪：{speechLastEmotion}
+                      </span>
+                    )}
+                    {speechPlaybackError && (
+                      <span className="text-red-500">
+                        语音播放失败：{speechPlaybackError}
+                      </span>
+                    )}
+                  </div>
+                </div> */}
               </div>
             </div>
           </div>

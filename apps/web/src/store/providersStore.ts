@@ -50,6 +50,11 @@ export interface ModelInfo {
   name: string;
   provider: string;
   description?: string;
+  contextLength?: number;
+  deprecated?: boolean;
+  metadata?: Record<string, unknown>;
+  tags?: string[];
+  languages?: string[];
 }
 
 interface ResourceBucket {
@@ -419,10 +424,50 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
             description: m.description,
           }));
         }
+      } else if (st.meta.category === "speech") {
+        const response = await fetch(`/api/speech/providers/${id}/models`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(st.config ?? {}),
+          cache: "no-store",
+        });
+        const raw = (await response.json().catch(() => null)) as {
+          models?: Array<Partial<ModelInfo>>;
+          error?: string;
+          detail?: string;
+        } | null;
+        if (!response.ok) {
+          const message = raw?.error || raw?.detail || response.statusText;
+          throw new Error(message || "无法获取语音模型列表");
+        }
+        const payload = raw?.models ?? [];
+        items = payload
+          .map((model) => {
+            if (!model?.id) return null;
+            return {
+              id: model.id,
+              name: model.name || model.id,
+              provider: id,
+              description: model.description,
+              contextLength: model.contextLength,
+              deprecated: model.deprecated,
+              metadata: model.metadata,
+              tags: model.tags,
+              languages: model.languages,
+            } satisfies ModelInfo;
+          })
+          .filter(Boolean) as ModelInfo[];
       }
-      // Fallback if adapter unavailable or not chat category
+      // Fallback if adapter unavailable or provider未返回
       if (items.length === 0) {
-        items = [{ id: "default", name: "默认模型", provider: id }];
+        items = [
+          {
+            id: `${id}-default`,
+            name: "默认模型",
+            provider: id,
+            description: "当前 Provider 未返回模型列表",
+          },
+        ];
       }
       set((s) => {
         const cur = s.registry[id]!;

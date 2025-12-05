@@ -18,6 +18,11 @@ import {
 const ENABLE_TOKEN_PARSE = true; // future: externalize via settings/feature flag
 const streamTokenizer = createStreamTokenizer();
 
+export interface StreamingChunkPayload {
+  text: string;
+  tokens: EmotionToken[];
+}
+
 export interface ChatState {
   messages: BaseMessage[];
   streamingMessage: AssistantMessage | null;
@@ -26,6 +31,8 @@ export interface ChatState {
   // hooks
   onTokenLiteral: Array<(literal: string) => void>;
   onStreamEnd: Array<() => void>;
+  onStreamingTokens: Array<(payload: StreamingChunkPayload) => void>;
+  onStreamFlush: Array<() => void>;
 
   // actions
   send: (
@@ -40,6 +47,10 @@ export interface ChatState {
   cleanup: () => void;
   registerOnTokenLiteral: (cb: (s: string) => void) => () => void;
   registerOnStreamEnd: (cb: () => void) => () => void;
+  registerOnStreamingTokens: (
+    cb: (payload: StreamingChunkPayload) => void
+  ) => () => void;
+  registerOnStreamFlush: (cb: () => void) => () => void;
   // sync system prompt from active Youngro card
   applyActiveCardSystemPrompt: () => void;
 }
@@ -55,6 +66,8 @@ export const useChatStore = create<ChatState>()(
 
       onTokenLiteral: [],
       onStreamEnd: [],
+      onStreamingTokens: [],
+      onStreamFlush: [],
 
       send: async (
         text: string,
@@ -115,6 +128,15 @@ export const useChatStore = create<ChatState>()(
         let attempt = 0;
         let receivedAnyDelta = false;
 
+        const emitStreamingPayload = (payload: StreamingChunkPayload) => {
+          if (!payload.text && payload.tokens.length === 0) return;
+          get().onStreamingTokens.forEach((cb) => cb(payload));
+        };
+
+        const emitStreamFlush = () => {
+          get().onStreamFlush.forEach((cb) => cb());
+        };
+
         const runStream = async (): Promise<void> => {
           const res = await fetch("/api/chat", {
             method: "POST",
@@ -142,12 +164,15 @@ export const useChatStore = create<ChatState>()(
                 const rawChunk = typeof obj.text === "string" ? obj.text : "";
                 if (!rawChunk) return;
                 receivedAnyDelta = true;
-                let visible = rawChunk;
+                let textDelta = rawChunk;
+                let tokenPayload: EmotionToken[] = [];
                 if (ENABLE_TOKEN_PARSE) {
-                  const { textDelta } = streamTokenizer.ingest(rawChunk);
-                  visible = textDelta;
+                  const { textDelta: parsed, tokens } =
+                    streamTokenizer.ingest(rawChunk);
+                  textDelta = parsed;
+                  tokenPayload = tokens;
                 }
-                if (visible) visible = stripTokens(visible);
+                const visible = textDelta ? stripTokens(textDelta) : "";
                 if (visible) {
                   set((st) => {
                     if (!st.streamingMessage) return;
@@ -161,7 +186,35 @@ export const useChatStore = create<ChatState>()(
                   });
                   get().onTokenLiteral.forEach((cb) => cb(visible));
                 }
+                if (visible || tokenPayload.length) {
+                  emitStreamingPayload({ text: visible, tokens: tokenPayload });
+                }
               } else if (t === "finish") {
+                if (ENABLE_TOKEN_PARSE) {
+                  const flushResult = streamTokenizer.flush();
+                  const flushText = flushResult.textDelta
+                    ? stripTokens(flushResult.textDelta)
+                    : "";
+                  if (flushText) {
+                    set((st) => {
+                      if (!st.streamingMessage) return;
+                      st.streamingMessage.content += flushText;
+                      st.streamingMessage.slices =
+                        st.streamingMessage.slices || [];
+                      st.streamingMessage.slices.push({
+                        type: "text",
+                        text: flushText,
+                      });
+                    });
+                    get().onTokenLiteral.forEach((cb) => cb(flushText));
+                  }
+                  if (flushText || flushResult.tokens.length) {
+                    emitStreamingPayload({
+                      text: flushText,
+                      tokens: flushResult.tokens,
+                    });
+                  }
+                }
                 set((st) => {
                   if (
                     st.streamingMessage &&
@@ -183,6 +236,7 @@ export const useChatStore = create<ChatState>()(
                   st.abortController = null;
                 });
                 get().onStreamEnd.forEach((cb) => cb());
+                emitStreamFlush();
               } else if (t === "error") {
                 const msg =
                   typeof obj.error === "string"
@@ -240,12 +294,20 @@ export const useChatStore = create<ChatState>()(
           s.abortController = null;
           // ensure flush remaining buffered plain text (if any)
           if (ENABLE_TOKEN_PARSE && s.streamingMessage) {
-            const { textDelta } = streamTokenizer.flush();
+            const { textDelta, tokens } = streamTokenizer.flush();
             if (textDelta) {
               const cleaned = stripTokens(textDelta);
-              s.streamingMessage.content += cleaned;
-              s.streamingMessage.slices = s.streamingMessage.slices || [];
-              s.streamingMessage.slices.push({ type: "text", text: cleaned });
+              if (cleaned) {
+                s.streamingMessage.content += cleaned;
+                s.streamingMessage.slices = s.streamingMessage.slices || [];
+                s.streamingMessage.slices.push({ type: "text", text: cleaned });
+                get().onTokenLiteral.forEach((cb) => cb(cleaned));
+              }
+            }
+            if (textDelta || tokens.length) {
+              get().onStreamingTokens.forEach((cb) =>
+                cb({ text: textDelta ? stripTokens(textDelta) : "", tokens })
+              );
             }
             if (typeof s.streamingMessage.content === "string") {
               s.streamingMessage.content = stripTokens(
@@ -255,6 +317,7 @@ export const useChatStore = create<ChatState>()(
           }
           s.streamingMessage = null;
         });
+        get().onStreamFlush.forEach((cb) => cb());
       },
 
       // 清空 = 重置为仅系统提示
@@ -283,6 +346,26 @@ export const useChatStore = create<ChatState>()(
         return () =>
           set((s) => {
             s.onStreamEnd = s.onStreamEnd.filter((fn) => fn !== cb);
+          });
+      },
+
+      registerOnStreamingTokens: (cb) => {
+        set((s) => {
+          s.onStreamingTokens.push(cb);
+        });
+        return () =>
+          set((s) => {
+            s.onStreamingTokens = s.onStreamingTokens.filter((fn) => fn !== cb);
+          });
+      },
+
+      registerOnStreamFlush: (cb) => {
+        set((s) => {
+          s.onStreamFlush.push(cb);
+        });
+        return () =>
+          set((s) => {
+            s.onStreamFlush = s.onStreamFlush.filter((fn) => fn !== cb);
           });
       },
 

@@ -15,10 +15,20 @@ import {
 import {
   useProvidersHydrate,
   useProvidersStore,
-  type ProviderState,
   type SpeechProviderConfig,
 } from "../../../../src/store/providersStore";
 import { useSpeechStore } from "../../../../src/store/speechStore";
+import { useSpeechResources } from "../../../../src/hooks/useSpeechResources";
+
+function base64ToBlob(base64: string, mimeType: string) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i += 1) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimeType });
+}
 
 interface DemoVoice {
   id: string;
@@ -119,7 +129,11 @@ export function ClientSpeechPage() {
   const speechProviders = useProvidersStore((s) =>
     s.getProvidersByCategory("speech")
   );
-  const fetchModels = useProvidersStore((s) => s.fetchModels);
+  const configuredSpeechProviders = useMemo(
+    () => speechProviders.filter((provider) => provider.configured),
+    [speechProviders]
+  );
+  const fetchProviderModels = useProvidersStore((s) => s.fetchModels);
 
   const [activeProviderId, setActiveProviderId] = useState<string>("");
   const [activeModelId, setActiveModelId] = useState<string>("");
@@ -134,56 +148,75 @@ export function ClientSpeechPage() {
   const [isRefreshingModels, setIsRefreshingModels] = useState(false);
   const activeVoiceId = useSpeechStore((s) => s.activeVoiceId || "");
   const setActiveVoice = useSpeechStore((s) => s.setActiveVoice);
+  const speechActiveProviderId = useSpeechStore((s) => s.activeProviderId);
+  const speechActiveModelId = useSpeechStore((s) => s.activeModelId);
   const pitch = useSpeechStore((s) => s.pitch);
   const setPitch = useSpeechStore((s) => s.setPitch);
   const rate = useSpeechStore((s) => s.rate);
   const setRate = useSpeechStore((s) => s.setRate);
   const useSSML = useSpeechStore((s) => s.useSSML);
   const setUseSSML = useSpeechStore((s) => s.setUseSSML);
-  const fetchSpeechVoices = useSpeechStore((s) => s.fetchVoices);
-  const speechVoices = useSpeechStore((s) => s.availableVoices);
-  const speechVoiceStatus = useSpeechStore((s) => s.voiceStatus);
   const setSpeechActiveProvider = useSpeechStore((s) => s.setActiveProvider);
   const setSpeechActiveModel = useSpeechStore((s) => s.setActiveModel);
 
-  const activeProvider = useMemo<ProviderState | undefined>(
-    () => speechProviders.find((p) => p.meta.id === activeProviderId),
-    [speechProviders, activeProviderId]
-  );
+  const {
+    provider: activeProvider,
+    voices: providerVoices,
+    voicesError,
+    voiceStatus,
+    fetchVoices: fetchSpeechVoices,
+    fetchModels: fetchSpeechModels,
+    modelsError,
+    modelsStatus,
+  } = useSpeechResources({ providerId: activeProviderId });
 
-  const modelsStatus = activeProvider?.resources.status ?? "idle";
-  const modelsError = activeProvider?.resources.error ?? null;
+  const providerConfig = activeProvider?.config as
+    | SpeechProviderConfig
+    | undefined;
+
+  const effectiveModelsStatus = modelsStatus;
 
   useEffect(() => {
-    setSpeechActiveProvider(activeProviderId || null);
-  }, [activeProviderId, setSpeechActiveProvider]);
+    if (!activeProviderId && speechActiveProviderId) {
+      setActiveProviderId(speechActiveProviderId);
+    }
+    const next = activeProviderId || null;
+    if (speechActiveProviderId !== next) {
+      setSpeechActiveProvider(next);
+    }
+  }, [activeProviderId, speechActiveProviderId, setSpeechActiveProvider]);
 
   useEffect(() => {
-    setSpeechActiveModel(activeModelId || null);
-  }, [activeModelId, setSpeechActiveModel]);
+    if (!activeModelId && speechActiveModelId) {
+      setActiveModelId(speechActiveModelId);
+    }
+    const next = activeModelId || null;
+    if (speechActiveModelId !== next) {
+      setSpeechActiveModel(next);
+    }
+  }, [activeModelId, speechActiveModelId, setSpeechActiveModel]);
 
   useEffect(() => {
     if (!activeProviderId) return;
-    const config = activeProvider?.config as SpeechProviderConfig;
-    if (!config?.apiKey) return;
-    void fetchSpeechVoices(activeProviderId, config);
-  }, [activeProviderId, activeProvider, fetchSpeechVoices]);
+    if (!providerConfig?.apiKey) return;
+    void fetchSpeechVoices(undefined, providerConfig);
+  }, [activeProviderId, providerConfig, fetchSpeechVoices]);
 
   useEffect(() => {
-    if (!activeProviderId && speechProviders.length > 0) {
-      const first = speechProviders[0];
-      if (!first) return;
-      setActiveProviderId(first.meta.id);
-      setActiveModelId("");
-      setSpeechActiveProvider(first.meta.id);
-      setSpeechActiveModel(null);
-      fetchModels(first.meta.id).catch(() => undefined);
-    }
+    if (activeProviderId || speechActiveProviderId) return;
+    if (configuredSpeechProviders.length === 0) return;
+    const first = configuredSpeechProviders[0];
+    if (!first) return;
+    setActiveProviderId(first.meta.id);
+    setActiveModelId("");
+    setSpeechActiveProvider(first.meta.id);
+    setSpeechActiveModel(null);
+    fetchSpeechModels(true).catch(() => undefined);
   }, [
     activeProviderId,
-    speechProviders,
-    fetchModels,
-    setActiveVoice,
+    speechActiveProviderId,
+    configuredSpeechProviders,
+    fetchSpeechModels,
     setSpeechActiveProvider,
     setSpeechActiveModel,
   ]);
@@ -201,13 +234,6 @@ export function ClientSpeechPage() {
     if (items.length > 0) return items;
     return MODEL_FALLBACK;
   }, [activeProvider]);
-
-  const providerVoices = activeProviderId
-    ? speechVoices[activeProviderId]
-    : undefined;
-  const providerVoiceStatus = activeProviderId
-    ? speechVoiceStatus[activeProviderId]
-    : undefined;
 
   useEffect(() => {
     if (!providerVoices) return;
@@ -252,8 +278,8 @@ export function ClientSpeechPage() {
     return fallback ?? [];
   }, [providerVoices, activeProviderId]);
 
-  const voiceLoadState = providerVoiceStatus?.status ?? "idle";
-  const voiceLoadError = providerVoiceStatus?.error ?? null;
+  const voiceLoadState = voiceStatus;
+  const voiceLoadError = voicesError ?? null;
   const canFetchVoices = Boolean(
     activeProviderId &&
       (activeProvider?.config as SpeechProviderConfig | undefined)?.apiKey
@@ -270,14 +296,14 @@ export function ClientSpeechPage() {
     );
   }, [availableVoices, voiceSearch]);
 
-  const hasSpeechProviders = speechProviders.length > 0;
+  const hasSpeechProviders = configuredSpeechProviders.length > 0;
   const canOperateModels = Boolean(activeProvider);
 
   const handleRefreshModels = async () => {
     if (!activeProvider) return;
     setIsRefreshingModels(true);
     try {
-      await fetchModels(activeProvider.meta.id, true);
+      await fetchSpeechModels(true);
     } finally {
       setIsRefreshingModels(false);
     }
@@ -285,12 +311,11 @@ export function ClientSpeechPage() {
 
   const handleRefreshVoices = async () => {
     if (!activeProviderId) return;
-    const config = activeProvider?.config as SpeechProviderConfig;
-    if (!config?.apiKey) {
+    if (!providerConfig?.apiKey) {
       setErrorMessage("当前 Provider 未配置 API Key，暂无法拉取声线");
       return;
     }
-    await fetchSpeechVoices(activeProviderId, config, { force: true });
+    await fetchSpeechVoices(true, providerConfig);
   };
 
   const handlePlaygroundSubmit = async () => {
@@ -299,26 +324,90 @@ export function ClientSpeechPage() {
       return;
     }
 
-    if (!useSSML && !textInput.trim()) {
-      setErrorMessage("请输入要合成的文本");
+    if (!activeProvider) {
+      setErrorMessage("当前 Provider 不可用，请重新选择");
       return;
     }
 
-    if (useSSML && !ssmlInput.trim()) {
-      setErrorMessage("请输入 SSML 内容");
+    if (!providerConfig || Object.keys(providerConfig).length === 0) {
+      setErrorMessage("请先在 Provider 页面完成凭证配置");
+      return;
+    }
+
+    const trimmedText = useSSML ? ssmlInput.trim() : textInput.trim();
+    if (!trimmedText) {
+      setErrorMessage(useSSML ? "请输入 SSML 内容" : "请输入要合成的文本");
+      return;
+    }
+
+    const rawVoice = providerVoices?.find(
+      (voice) => voice.id === activeVoiceId
+    );
+    if (!rawVoice) {
+      setErrorMessage("尚未从 Provider 拉取真实声线，无法生成试听");
       return;
     }
 
     setErrorMessage(null);
     setIsGenerating(true);
+    try {
+      const response = await fetch(
+        `/api/speech/providers/${activeProviderId}/synthesize`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...providerConfig,
+            text: trimmedText,
+            ssmlEnabled: useSSML,
+            voiceId: activeVoiceId,
+            voiceMetadata: rawVoice.metadata,
+            pitch,
+            rate,
+            modelId: activeModelId,
+          }),
+        }
+      );
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsGenerating(false);
-    setAudioUrl(null);
-    setErrorMessage("语音服务接入开发中，当前为 UI 骨架预览");
+      const payload = (await response.json().catch(() => null)) as {
+        audio?: string;
+        mimeType?: string;
+        error?: string;
+        detail?: string;
+      } | null;
+
+      if (!response.ok) {
+        const remoteError =
+          payload?.error || payload?.detail || response.statusText;
+        throw new Error(remoteError || "生成试听失败");
+      }
+
+      if (!payload?.audio) {
+        throw new Error("接口未返回音频数据");
+      }
+
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+
+      const blob = base64ToBlob(
+        payload.audio,
+        payload.mimeType || "audio/mpeg"
+      );
+      const objectUrl = URL.createObjectURL(blob);
+      setAudioUrl(objectUrl);
+    } catch (error) {
+      setAudioUrl(null);
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleStopPreview = () => {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
     setAudioUrl(null);
   };
 
@@ -333,36 +422,43 @@ export function ClientSpeechPage() {
                   Provider 选择
                 </h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  选择已配置的语音服务来源，后续配置将基于该 Provider。
+                  选择已配置的语音服务来源，后续配置将基于该 Provider
                 </p>
               </div>
 
               {hasSpeechProviders ? (
                 <ScrollArea className="max-w-full">
                   <div className="flex gap-4 p-1">
-                    {speechProviders.map((provider) => {
+                    {configuredSpeechProviders.map((provider) => {
                       const isActive = provider.meta.id === activeProviderId;
                       return (
-                        <RadioCard
+                        <div
                           key={provider.meta.id}
-                          label={
-                            provider.meta.localizedName ?? provider.meta.id
-                          }
-                          description={provider.meta.localizedDescription}
-                          checked={isActive}
-                          onChange={() => {
-                            setActiveProviderId(provider.meta.id);
-                            setActiveModelId("");
-                            fetchModels(provider.meta.id, true);
-                          }}
-                          className="min-w-[15rem]"
-                        />
+                          className="flex min-w-[16rem] flex-col gap-2"
+                        >
+                          <RadioCard
+                            label={
+                              provider.meta.localizedName ?? provider.meta.id
+                            }
+                            description={provider.meta.localizedDescription}
+                            icon={provider.meta.icon}
+                            checked={isActive}
+                            onChange={() => {
+                              setActiveProviderId(provider.meta.id);
+                              setActiveModelId("");
+                              fetchProviderModels(provider.meta.id, true);
+                            }}
+                          />
+                        </div>
                       );
                     })}
 
                     <Link
-                      href="/settings/providers#speech"
-                      className="relative flex min-w-[12rem] flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50/80 p-4 text-sm text-neutral-500 transition-all hover:border-primary-500/40 dark:border-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-400"
+                      href={{
+                        pathname: "/settings/providers",
+                        query: { section: "speech" },
+                      }}
+                      className="relative flex min-w-[12rem] flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-100 bg-white p-4 text-sm text-neutral-500 transition-all hover:border-primary-500/40 dark:border-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-400"
                     >
                       <span className="text-base font-medium">
                         管理 / 新增 Provider
@@ -375,7 +471,10 @@ export function ClientSpeechPage() {
                 </ScrollArea>
               ) : (
                 <Link
-                  href="/settings/providers"
+                  href={{
+                    pathname: "/settings/providers",
+                    query: { section: "speech" },
+                  }}
                   className="flex items-center gap-3 rounded-lg border-2 border-dashed border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-300"
                 >
                   <div className="text-2xl">⚠️</div>
@@ -395,7 +494,7 @@ export function ClientSpeechPage() {
                   模型选择
                 </h3>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  大多数 Provider 会返回可用的 TTS 模型列表，也可以手动指定。
+                  从 Provider 返回的可用的 TTS 模型列表里指定
                 </p>
               </div>
 
@@ -419,14 +518,14 @@ export function ClientSpeechPage() {
                 </Button>
               </div>
 
-              {modelsStatus === "loading" && (
+              {effectiveModelsStatus === "loading" && (
                 <div className="flex items-center gap-2 rounded-lg border border-dashed border-neutral-200 px-3 py-2 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
                   <span className="inline-flex h-3 w-3 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
                   正在同步模型列表…
                 </div>
               )}
 
-              {modelsStatus === "error" && modelsError && (
+              {effectiveModelsStatus === "error" && modelsError && (
                 <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-900/60 dark:bg-rose-900/20 dark:text-rose-200">
                   {modelsError}
                 </p>
@@ -596,25 +695,23 @@ export function ClientSpeechPage() {
                 参数调节
               </div>
               <Field label={`音高 (${pitch}%)`}>
-                <input
+                <Input
                   type="range"
                   min={-100}
                   max={100}
                   value={pitch}
                   onChange={(e) => setPitch(Number(e.target.value))}
-                  className="w-full accent-primary-500"
                 />
               </Field>
 
               <Field label={`语速 (${rate.toFixed(1)}x)`}>
-                <input
+                <Input
                   type="range"
                   min={0.5}
                   max={2}
                   step={0.1}
                   value={rate}
                   onChange={(e) => setRate(Number(e.target.value))}
-                  className="w-full accent-primary-500"
                 />
               </Field>
 

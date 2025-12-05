@@ -1,9 +1,13 @@
 import { useMemo } from "react";
 import { modulesList, SettingsModuleEntry } from "../data/settings/modules";
 import { useConsciousnessStore } from "../store/consciousnessStore";
-import { useProvidersStore } from "../store/providersStore";
+import {
+  useProvidersStore,
+  useProvidersHydrate,
+} from "../store/providersStore";
 
 export function useModulesList() {
+  useProvidersHydrate();
   const { activeProviderId, activeModelId, customModelName } =
     useConsciousnessStore();
   const providers = useProvidersStore((s) => s.registry);
@@ -16,18 +20,23 @@ export function useModulesList() {
     );
   }, [activeProviderId, activeModelId, customModelName, providers]);
 
+  const isSpeechConfigured = useMemo(() => {
+    return Object.values(providers).some(
+      (provider) => provider.meta.category === "speech" && provider.configured
+    );
+  }, [providers]);
+
   const list = useMemo<SettingsModuleEntry[]>(() => {
     return modulesList.map((module) => {
       if (module.id === "consciousness") {
-        return {
-          ...module,
-          configured: isConsciousnessConfigured,
-        };
+        return { ...module, configured: isConsciousnessConfigured };
       }
-      // Future: Add logic for other modules here (speech, hearing, etc.)
+      if (module.id === "speech") {
+        return { ...module, configured: isSpeechConfigured };
+      }
       return module;
     });
-  }, [isConsciousnessConfigured]);
+  }, [isConsciousnessConfigured, isSpeechConfigured]);
 
   return {
     modulesList: list,

@@ -8,12 +8,14 @@ export interface ProviderPageHeaderProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   icon?: React.ReactNode;
+  backHref?: string;
 }
 
 export default function ProviderPageHeader({
   title,
   subtitle,
   icon,
+  backHref,
 }: ProviderPageHeaderProps) {
   const router = useRouter();
 
@@ -24,12 +26,20 @@ export default function ProviderPageHeader({
     </div>
   );
 
+  const handleBack = () => {
+    if (backHref) {
+      router.push(backHref);
+      return;
+    }
+    router.back();
+  };
+
   return (
     <PageHeader
       title={titleNode}
       subtitle={subtitle}
       showBackButton
-      onBack={() => router.back()}
+      onBack={handleBack}
     />
   );
 }

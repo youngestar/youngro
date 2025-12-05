@@ -19,6 +19,34 @@ export type ProviderCategory = "chat" | "speech" | "transcription";
 
 type ProviderIcon = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
 
+export interface SpeechModelCapabilities {
+  /** Indicates whether the provider exposes a model catalog we can fetch. */
+  managed?: boolean;
+  /** Provider returns language metadata for each model. */
+  exposesLanguages?: boolean;
+  /** Provider returns tag/feature metadata for each model. */
+  exposesTags?: boolean;
+}
+
+export interface SpeechVoiceCapabilities {
+  /** Indicates whether the provider exposes a remote voice list. */
+  managed?: boolean;
+  /** Provider includes language metadata for each voice. */
+  exposesLanguages?: boolean;
+  /** Provider includes preview audio URLs for each voice. */
+  exposesPreview?: boolean;
+}
+
+export interface SpeechProviderCapabilities {
+  supportsSSML?: boolean;
+  models?: SpeechModelCapabilities;
+  voices?: SpeechVoiceCapabilities;
+}
+
+export interface ProviderCapabilities {
+  speech?: SpeechProviderCapabilities;
+}
+
 export interface ProviderMeta {
   id: string;
   category: ProviderCategory;
@@ -28,6 +56,7 @@ export interface ProviderMeta {
   iconColorClassName?: string;
   iconImageSrc?: string;
   configured?: boolean;
+  capabilities?: ProviderCapabilities;
 }
 
 export const chatProviders: ProviderMeta[] = [
@@ -80,6 +109,27 @@ export const chatProviders: ProviderMeta[] = [
 
 export const audioSpeechProviders: ProviderMeta[] = [
   {
+    id: "tencent-cloud-speech",
+    category: "speech",
+    localizedName: "腾讯云语音",
+    localizedDescription: "腾讯云 TTS 语音合成",
+    icon: TencentcloudIcon,
+    iconColorClassName: "text-cyan-500 dark:text-cyan-400",
+    configured: false,
+    capabilities: {
+      speech: {
+        supportsSSML: false,
+        models: {
+          managed: true,
+        },
+        voices: {
+          managed: true,
+          exposesLanguages: true,
+        },
+      },
+    },
+  },
+  {
     id: "elevenlabs",
     category: "speech",
     localizedName: "ElevenLabs",
@@ -87,6 +137,21 @@ export const audioSpeechProviders: ProviderMeta[] = [
     icon: Volume2,
     iconColorClassName: "text-purple-500 dark:text-purple-400",
     configured: false,
+    capabilities: {
+      speech: {
+        supportsSSML: true,
+        models: {
+          managed: true,
+          exposesLanguages: true,
+          exposesTags: true,
+        },
+        voices: {
+          managed: true,
+          exposesLanguages: true,
+          exposesPreview: true,
+        },
+      },
+    },
   },
   {
     id: "azure-speech",
@@ -96,15 +161,18 @@ export const audioSpeechProviders: ProviderMeta[] = [
     icon: Waves,
     iconColorClassName: "text-blue-500 dark:text-blue-400",
     configured: false,
-  },
-  {
-    id: "tencent-cloud-speech",
-    category: "speech",
-    localizedName: "腾讯云语音",
-    localizedDescription: "腾讯云 TTS 语音合成",
-    icon: TencentcloudIcon,
-    iconColorClassName: "text-cyan-500 dark:text-cyan-400",
-    configured: false,
+    capabilities: {
+      speech: {
+        supportsSSML: true,
+        models: {
+          managed: true,
+          exposesLanguages: true,
+        },
+        voices: {
+          managed: false,
+        },
+      },
+    },
   },
   {
     id: "local-tts",
@@ -114,6 +182,17 @@ export const audioSpeechProviders: ProviderMeta[] = [
     icon: Mic,
     iconColorClassName: "text-amber-500 dark:text-amber-400",
     configured: false,
+    capabilities: {
+      speech: {
+        supportsSSML: true,
+        models: {
+          managed: true,
+        },
+        voices: {
+          managed: false,
+        },
+      },
+    },
   },
 ];
 
@@ -143,3 +222,41 @@ export const allProviders: ProviderMeta[] = [
   ...audioSpeechProviders,
   ...audioTranscriptionProviders,
 ];
+
+export function getSpeechCapabilities(
+  meta?: ProviderMeta | null
+): SpeechProviderCapabilities {
+  return meta?.capabilities?.speech ?? {};
+}
+
+export function speechProviderSupportsSSML(
+  meta?: ProviderMeta | null
+): boolean {
+  return Boolean(meta?.capabilities?.speech?.supportsSSML);
+}
+
+export function speechProviderHasManagedModels(
+  meta?: ProviderMeta | null
+): boolean {
+  return Boolean(meta?.capabilities?.speech?.models?.managed);
+}
+
+export function speechProviderHasManagedVoices(
+  meta?: ProviderMeta | null
+): boolean {
+  return Boolean(meta?.capabilities?.speech?.voices?.managed);
+}
+
+export function speechProviderExposesModelMetadata(
+  meta: ProviderMeta | null | undefined,
+  key: "exposesLanguages" | "exposesTags"
+): boolean {
+  return Boolean(meta?.capabilities?.speech?.models?.[key]);
+}
+
+export function speechProviderExposesVoiceMetadata(
+  meta: ProviderMeta | null | undefined,
+  key: "exposesLanguages" | "exposesPreview"
+): boolean {
+  return Boolean(meta?.capabilities?.speech?.voices?.[key]);
+}
