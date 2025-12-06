@@ -72,7 +72,7 @@ export function useScrollToHash({
     };
     window.addEventListener("hashchange", onHashChange);
 
-    let popStateHandler: ((this: Window, ev: PopStateEvent) => any) | null =
+    let popStateHandler: ((this: Window, ev: PopStateEvent) => void) | null =
       null;
     if (queryParam) {
       popStateHandler = () => {

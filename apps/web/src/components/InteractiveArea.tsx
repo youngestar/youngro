@@ -57,28 +57,8 @@ export const InteractiveArea: React.FC = () => {
   const {
     enabled: speechAutoplayEnabled,
     setEnabled: setSpeechAutoplayEnabled,
-    status: speechPlaybackStatus,
-    error: speechPlaybackError,
     ready: speechPlaybackReady,
-    queueSize: speechQueueSize,
-    lastEmotion: speechLastEmotion,
-    stop: stopSpeechPlayback,
   } = useStreamingSpeechPlayback();
-
-  const speechStatusText = useMemo(() => {
-    switch (speechPlaybackStatus) {
-      case "chunking":
-        return "语音分段中…";
-      case "buffering":
-        return "语音合成中…";
-      case "playing":
-        return "播报中…";
-      case "error":
-        return "语音播放异常";
-      default:
-        return null;
-    }
-  }, [speechPlaybackStatus]);
 
   const selectedModel = useMemo(() => {
     if (customModelName?.trim()) return customModelName.trim();

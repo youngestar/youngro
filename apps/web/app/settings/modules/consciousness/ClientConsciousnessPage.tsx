@@ -41,7 +41,10 @@ export function ClientConsciousnessPage() {
 
   const supportsModelListing = !!activeProvider; // chat providers 视为支持 list models
 
-  const providerModels = activeProvider?.resources.items ?? [];
+  const providerModels = useMemo(
+    () => activeProvider?.resources.items ?? [],
+    [activeProvider?.resources.items]
+  );
   const modelsStatus = activeProvider?.resources.status ?? "idle";
   const modelsError = activeProvider?.resources.error ?? null;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTurnToPage } from "../src/hooks/useTurnToPage";
-import { Button, BrandLogo } from "@repo/ui";
+import { Button } from "@repo/ui";
 import styles from "./page.module.css";
 
 // useTurnToPage imported from src/hooks

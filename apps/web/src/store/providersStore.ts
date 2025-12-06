@@ -137,7 +137,7 @@ function hasRequiredFields(
   meta: ProviderMeta,
   config: ProviderConfig
 ): boolean {
-  const req = requiredFieldsFor(meta as any);
+  const req = requiredFieldsFor(meta);
   return req.every((f) => !!getField(config, f));
 }
 
@@ -156,7 +156,7 @@ function shallowEqualConfig(a: ProviderConfig, b: ProviderConfig): boolean {
 
 function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
   const errs: string[] = [];
-  const req = requiredFieldsFor(meta as any);
+  const req = requiredFieldsFor(meta);
   for (const f of req) {
     if (!getField(config, f)) errs.push(`缺少必填字段: ${f}`);
   }
@@ -170,7 +170,7 @@ function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
     } catch {
       errs.push("Base URL 非法或不是绝对 URL");
     }
-  } else if (requiredFieldsFor(meta as any).includes("baseUrl")) {
+  } else if (requiredFieldsFor(meta).includes("baseUrl")) {
     errs.push("缺少必填字段: baseUrl");
   }
   return errs;

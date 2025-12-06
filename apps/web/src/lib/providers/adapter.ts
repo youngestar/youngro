@@ -31,7 +31,7 @@ export interface ChatProviderAdapter {
   ): Promise<ProviderValidationResult>;
   listModels(config: ProviderAdapterConfig): Promise<ProviderModelInfo[]>; // may be static
   chatStream(
-    messages: Array<{ role: string; content: any }>,
+    messages: Array<{ role: string; content: unknown }>,
     config: ProviderAdapterConfig & { model?: string },
     options?: { signal?: AbortSignal }
   ): AsyncIterable<ChatStreamChunk>;
