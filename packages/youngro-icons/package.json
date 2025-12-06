@@ -24,17 +24,20 @@
   },
   "exports": {
     ".": {
+      "types": "./src/generated/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./react": {
+      "types": "./src/generated/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./dist": {
+      "types": "./src/generated/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
-  "types": "dist/index.d.ts"
+  "types": "src/generated/index.d.ts"
 }
