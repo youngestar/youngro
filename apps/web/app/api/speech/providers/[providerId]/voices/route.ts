@@ -175,7 +175,7 @@ async function fetchElevenLabsVoices(request: VoiceGatewayRequest) {
 
 export async function POST(
   request: Request,
-  context: { params: { providerId: string } | Promise<{ providerId: string }> }
+  context: { params: Promise<{ providerId: string }> }
 ) {
   const { providerId } = await context.params;
   if (!providerId) {

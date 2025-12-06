@@ -11,18 +11,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <BrandLogo
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-        />
-        <Button>Open alert</Button>
-        <Button onClick={() => turnToPage("/ai-chat")}>
-          TurnToPage button
-        </Button>
+        <Button onClick={() => turnToPage("/ai-chat")}>开始聊天!</Button>
       </main>
     </div>
   );
