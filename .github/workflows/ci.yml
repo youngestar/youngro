@@ -153,10 +153,10 @@ jobs:
       - name: Build UI package
         run: pnpm -w -F @repo/ui build:ui || echo 'UI package build optional'
 
-      - name: Build web app
+      - name: Build web app (with upstream packages)
         env:
           NODE_OPTIONS: --trace-uncaught --unhandled-rejections=strict
-        run: pnpm -w -F web build
+        run: pnpm turbo run build --filter=web...
 
       - name: Build web app (fallback without Shiki)
         if: failure()
@@ -165,10 +165,10 @@ jobs:
           NODE_OPTIONS: --trace-uncaught --unhandled-rejections=strict
         run: |
           echo "Primary web build failed; retrying with DISABLE_SHIKI=1 for diagnostics"
-          pnpm -w -F web build
+          pnpm turbo run build --filter=web...
 
-      - name: Build docs app
-        run: pnpm -w -F docs build
+      - name: Build docs app (with upstream packages)
+        run: pnpm turbo run build --filter=docs...
 
       - name: Verify web build output
         run: |
