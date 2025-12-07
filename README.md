@@ -1,178 +1,231 @@
-# youngro Monorepo
+<p align="right">
+  <a href="./README.md">English</a> |
+  <a href="./README.zh-CN.md">简体中文</a> |
+</p>
 
-本仓库基于 Turborepo 与 pnpm 搭建，当前已采用“单向依赖分层”并启用 ESLint 边界规则来约束包之间的引用。
+<p align="center">
+  <sub>Built with Turborepo + pnpm</sub>
+</p>
 
-## Using this example
+<h1 align="center">Project YOUNGRO</h1>
 
-Run the following command:
+<p align="center">A modern full-stack monorepo for multimodal AI companions, orchestrating consciousness, speech, memory and peripherals in a single codebase.</p>
 
-```sh
-npx create-turbo@latest
-```
+> [!NOTE]
+> Youngro is evolving rapidly. This doc describes the current capabilities; features not yet merged are marked WIP.
 
-## What's inside?
+## Why Youngro?
 
-当前包含以下应用与包：
+Inspired by AIRI’s workflow but re-imagined in TypeScript, Youngro runs its core experience on Next.js 15 + React 19. Strict dependency layers let Web, Desktop and Robot runtimes share the same infrastructure. You can prototype consciousness, speech and memory modules in the browser and instantly assemble your own digital character.
 
-### Apps and Packages
+## Key Highlights
 
-- `docs`: 基于 [Next.js](https://nextjs.org/) 的文档应用
-- `web`: 基于 [Next.js](https://nextjs.org/) 的 Web 应用
-- `@repo/ui`: 共享 UI 组件库（只从 `dist` 作为公共入口导出）
-- `@repo/eslint-config`: 共享 ESLint 配置（已包含依赖边界与 import 约束）
-- `@repo/typescript-config`: 共享 TypeScript 配置
-- `@youngro/store-card`: 领域 Store 与类型定义
-- `@youngro/feature-youngro-card`: 领域 Feature（UI 组合逻辑）
+- **Unified Module Dashboard**  
+  Consciousness, speech, hearing, memory, messaging and gaming modules are declared in `modulesList`; routes are auto-generated and can be toggled on/off at runtime.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- **Provider Hub + Validation**  
+  Chat / speech / transcription providers register metadata, persist config and perform remote validation through `providersStore`; model catalogs are fetched on demand.
 
-### Utilities
+- **Real-time Speech Pipeline**  
+  `useStreamingSpeechPlayback` splits model output into chunks, queues them via `/api/speech/providers/:id`, handles SSML, pitch/rate, latency and emotion tags.
 
-- [TypeScript](https://www.typescriptlang.org/): 静态类型检查
-- [ESLint](https://eslint.org/): 代码规范（含依赖边界）
-- [Prettier](https://prettier.io): 代码格式化
+- **Youngro Card Domain Model**  
+  `@youngro/store-card` standardizes character cards, auto-completes module configs, persists to localStorage and exposes reusable prompt snippets for Web, Bot and MCP plug-ins.
 
-## 架构与依赖边界
+- **Design System Out-of-the-box**  
+  `@repo/ui`, `@youngro/design-tokens`, `@youngro/emotion-tokens` and `@youngro/youngro-icons` give you Tailwind themes, fonts and an SVG→React icon pipeline.
 
-分层模型采用自上而下单向依赖：
+- **Type-safe Unidirectional Dependencies**  
+  ESLint `boundaries` enforce `lib → store → feature → ui → app`. Shared TS / ESLint configs keep the graph acyclic and tree-shakable.
+
+## Capability Roadmap
+
+- [x] **Consciousness / Chat**  
+       Multi-provider LLM, custom model priority, prompt templates, personality assembly via `YoungroCard`.
+
+- [x] **Speech Synthesis**  
+       Auto-read replies, pitch/rate control, SSML switching, emotion-tagged queue playback.
+
+- [x] **Provider Management**  
+       Persistent config, remote validation, dynamic model list, adapter registry (`apps/web/src/lib/providers`).
+
+- [ ] **Hearing Input**  
+       UI for mic/VAD/ASR ready; backend audio ingestion planned.
+
+- [ ] **Memory (short & long term)**  
+       UI for context window & vector DB in place; adapters WIP.
+
+- [ ] **Messaging Bridge**  
+       Discord connector UI stubbed; backend service pending.
+
+- [ ] **Gaming Agent**  
+       Minecraft module follows AIRI pattern; server-side controller TODO.
+
+## Architecture
 
 ```mermaid
 flowchart TD
-  lib[lib] --> store[store]
-  store --> feature[feature]
-  feature --> ui[ui]
-  ui --> app[app]
+  subgraph Apps
+    Web[apps/web (Next.js 15 + Turbopack)]
+    Docs[apps/docs (Next.js 15)]
+  end
 
-  app -.can.-> feature
-  app -.can.-> store
-  app -.can.-> lib
+  subgraph Features & Stores
+    ChatStore[@youngro/chat-zustand]
+    CardStore[@youngro/store-card]
+    FeatureCard[@youngro/feature-youngro-card]
+    ProvidersStore[providersStore.ts]
+  end
+
+  subgraph UI System
+    UI[@repo/ui]
+    Tokens[@youngro/design-tokens]
+    EmoTokens[@youngro/emotion-tokens]
+    Icons[@youngro/youngro-icons]
+  end
+
+  subgraph Tooling
+    ESLint[@repo/eslint-config]
+    TSConfig[@repo/typescript-config]
+    Utils[@youngro/lib-utils]
+  end
+
+  Web --> ChatStore
+  Web --> ProvidersStore
+  Web --> FeatureCard
+  FeatureCard --> CardStore
+  CardStore --> ChatStore
+  FeatureCard --> UI
+  UI --> Tokens
+  UI --> EmoTokens
+  UI --> Icons
+  Docs --> UI
+  Docs --> Tokens
+  Docs --> ESLint
+  Docs --> TSConfig
+  Web --> Utils
 ```
 
-约束原则：
+## Packages at a Glance
 
-- 依赖方向：`lib → store → feature → ui → app`（单向，不可反向依赖）
-- 只允许通过包“公共入口”导入，禁止跨包深层导入他包的 `src/` 或 `dist/`
-- `@repo/ui` 等包仅从 exports 显式暴露的入口导入
+| Scope                           | Description                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web`                      | Main experience. Next.js 15 app with multi-panel chat (`InteractiveArea`), module settings, provider & speech streaming. |
+| `apps/docs`                     | Doc / marketplace site, also Next.js, reuses UI kit for visual consistency.                                              |
+| `@repo/ui`                      | Headless + styled components (Button, Icon, ScrollArea, Textarea …). Tailwind + Radix, built with tsup to `dist/`.       |
+| `@youngro/design-tokens`        | Colors, typography, safelist and compiled CSS, shared by Web / Docs / UI.                                                |
+| `@youngro/emotion-tokens`       | Emotion presets mapping inference labels to UI state and speech hints.                                                   |
+| `@youngro/youngro-icons`        | SVGR pipeline SVG → React icons with types and multi-entry exports.                                                      |
+| `@youngro/store-card`           | Character-card domain model & `YoungroCardProvider`, parses CCv3 / custom schema.                                        |
+| `@youngro/feature-youngro-card` | Feature layer wiring UI components to card store for an editable persona panel.                                          |
+| `@youngro/chat-zustand`         | Chat store: send queue, streaming callbacks, provider hooks.                                                             |
+| `@youngro/lib-utils`            | Pure TypeScript helpers used across packages.                                                                            |
+| `@repo/eslint-config`           | Centralized ESLint preset with import hygiene & boundary rules.                                                          |
+| `@repo/typescript-config`       | Base / React / Package-level TSConfigs for all packages to `extends`.                                                    |
 
-对应规则（已在 `@repo/eslint-config` 启用）：
+## Supported Providers
 
-- `boundaries/element-types`：限制包层级依赖方向
-- `no-restricted-imports`：禁止导入 `@youngro/**/src/**` 与 `@youngro/**/dist/**`（`@repo/**` 同理）
-- `import/no-cycle`、`import/no-extraneous-dependencies`：导入卫生
+Definitions live in `apps/web/src/data/settings/providers.ts`. Defaults:
 
-## 运行与开发
+### Chat
 
-### Build
+- DeepSeek
+- Moonshot AI (Kimi)
 
-To build all apps and packages, run the following command:
+### Speech
 
-```
-cd my-turborepo
+- Tencent Cloud TTS
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+Each provider declares capabilities (models, languages, tags, voice preview). `providersStore` validates required fields, encrypts and stores config in `localStorage`, then calls `/api/.../validate` or adapter self-check before marking “configured”.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+## Module System
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+| Module        | Purpose                                        | Route                             |
+| ------------- | ---------------------------------------------- | --------------------------------- |
+| Consciousness | Tune persona, tone, core model.                | `/settings/modules/consciousness` |
+| Speech        | Pick provider, model, voice, SSML, pitch/rate. | `/settings/modules/speech`        |
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+<!-- | Hearing        | Mic source, ASR, VAD behavior.                        | `/settings/modules/hearing`           |
+| Short Memory   | Session context window, refresh policy.               | `/settings/modules/memory-short-term` |
+| Long Memory    | Vector / knowledge sync (DuckDB / pglite planned).    | `/settings/modules/memory-long-term`  |
+| Discord Bridge | OAuth, channel event sync.                            | `/settings/modules/messaging-discord` |
+| Minecraft      | In-game chat, commands, event callbacks.              | `/settings/modules/gaming-minecraft`  |
+| Beta Features  | Toggle experimental capabilities.                     | `/settings/modules/beta`              | -->
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## Development Guide
 
-### Develop
+### Requirements
 
-To develop all apps and packages, run the following command:
+- Node.js ≥ 18
+- pnpm 9 (locked in `packageManager`)
+- Turbo CLI (install globally to run bare `turbo` commands)
 
-```
-cd my-turborepo
+### Install & Bootstrap
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```sh
+pnpm install
 ```
 
-### Remote Caching
+Design tokens must be built before dev/build (automated via `predev`/`prebuild`, but you can run manually):
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
+```sh
+pnpm --filter @youngro/design-tokens build
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+### Run Apps
+
+```sh
+# web + docs concurrently, orchestrated by Turborepo
+pnpm dev
+
+# web only
+pnpm dev:web
+
+# filter examples
+pnpm --filter web dev
+pnpm --filter docs dev
+```
+
+### Build & Check
+
+```sh
+pnpm build        # turbo run build
+pnpm lint         # turbo run lint
+pnpm check-types  # turbo run check-types
+```
+
+### Environment Variables
+
+Passed via Turbo `globalEnv`, place in `.env.local` or shell:
+
+- `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`
+- `DISABLE_SHIKI`, `NEXT_DISABLE_SHIKI`, `MARKDOWN_NO_SHIKI`
+
+### Remote Caching (optional)
+
+Leverage Turborepo remote cache with a Vercel account:
+
+```sh
 turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
 turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
 ```
 
-## Useful Links
+## Directory Cheat-sheet
 
-Learn more about the power of Turborepo:
+- `apps/web/src/components` – Chat UI, toolbar, Markdown renderer, widgets.
+- `apps/web/src/store` – Zustand stores (Providers, Speech, Consciousness …).
+- `apps/web/src/lib/providers` – Chat / speech / transcription adapter registry & impl.
+- `packages/*` – Reusable packages with source + build outputs.
+- `docs/` – Standalone doc site content & scripts.
+- `scripts/` – Helper scripts (more CI/automation incoming).
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## Icon Guidelines
 
-## 图标规范与用法
-
-- 系统图标：统一使用 `@repo/ui` 的 `Icon` 搭配 `lucide-react`，通过 `text-*` 控制颜色、`size` 控制尺寸。
-- 品牌/Logo：使用 `@repo/ui` 的 `BrandLogo` 或原生 `<img>`；SVG 资源不使用 `next/image`。
-- Lint 约束：
-  - 禁止 `<Image src="*.svg"/>`（会触发 ESLint 报错）。
-  - `<img>`/`BrandLogo` 必须提供 `alt` 文本（无障碍要求）。
-
-示例：
+- System icons: use `@repo/ui` `Icon` + `lucide-react`, color via `text-*`, size via `size` prop.
+- Brand / logos: use `@repo/ui` `BrandLogo` or plain `<img>`; SVG assets skip `next/image`.
+- ESLint enforces:
+  - No `<Image src="*.svg" />`
+  - `<img>` / `BrandLogo` must have `alt` text
 
 ```tsx
 import { Icon, BrandLogo } from "@repo/ui";
