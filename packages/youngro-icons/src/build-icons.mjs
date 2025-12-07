@@ -6,7 +6,8 @@ import { transform } from "@svgr/core";
 const base = new URL("./", import.meta.url);
 const svgDir = new URL("./svg/", base); // packages/youngro-icons/src/svg/
 const generatedDir = new URL("./generated/", base); // packages/youngro-icons/src/generated/
-const distReactDir = new URL("../dist/react/", base); // packages/youngro-icons/dist/react/
+const distDir = new URL("../dist/", base);
+const distReactDir = new URL("./react/", distDir); // packages/youngro-icons/dist/react/
 
 function pascalCase(name) {
   return name
@@ -24,6 +25,7 @@ async function ensureDir(u) {
 
 async function build() {
   await ensureDir(generatedDir);
+  await ensureDir(distDir);
   await ensureDir(distReactDir);
 
   const files = await fs.readdir(svgDir);
@@ -188,6 +190,20 @@ async function build() {
     " }\nexport default icons\n";
   const distIndexPath = new URL("./index.js", distReactDir);
   await fs.writeFile(distIndexPath, distIdx, "utf8");
+
+  const distRootIndex = new URL("./index.js", distDir);
+  await fs.writeFile(
+    distRootIndex,
+    "import icons from './react/index.js';\nexport default icons;\nexport * from './react/index.js';\n",
+    "utf8"
+  );
+
+  const distRootDts = new URL("./index.d.ts", distDir);
+  await fs.writeFile(
+    distRootDts,
+    "export * from './react/index.d.ts';\nexport { default } from './react/index.d.ts';\n",
+    "utf8"
+  );
 
   console.log("built react icons to", distReactDir.pathname);
 }
