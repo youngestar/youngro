@@ -9,8 +9,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p .",
-    "dev": "vite",
-    "test": "vitest",
+    "dev:sandbox": "vite",
+    "test": "vitest run --passWithNoTests",
     "prepare": "pnpm run build"
   },
   "dependencies": {

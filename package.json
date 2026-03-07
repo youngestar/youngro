@@ -9,7 +9,11 @@
     "dev:web": "pnpm --filter web dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "validate": "pnpm run format && turbo run lint check-types test",
+    "clean": "rimraf --glob .turbo node_modules \"apps/**/.next\" \"apps/**/node_modules\" \"packages/**/dist\" \"packages/**/node_modules\""
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",

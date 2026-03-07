@@ -21,7 +21,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json -w",
-    "dev": "pnpm run build:watch",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "lint": "echo 'no lint for feature-youngro-card yet'"
   },
