@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { HeaderLink } from "@repo/ui";
+import { HeaderLink } from "@youngro/ui";
 import FloatingSettings from "./components/FloatingSettings";
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {

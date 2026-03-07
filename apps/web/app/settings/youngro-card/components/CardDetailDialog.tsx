@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SimpleModal } from "./SimpleModal";
-import type { YoungroCard, YoungroExtension } from "@youngro/store-card";
+import type { YoungroCard, YoungroExtension } from "@youngro/feature-card";
 import {
   FileText,
   StickyNote,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Field, Input, Textarea, Icon } from "@repo/ui";
+import { Button, Field, Input, Textarea, Icon } from "@youngro/ui";
 import { SimpleModal } from "./SimpleModal";
 import {
   User,

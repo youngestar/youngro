@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader, IconStatusItem } from "@repo/ui";
+import { PageHeader, IconStatusItem } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 // Metadata retained only if future localization merges are needed

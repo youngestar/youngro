@@ -1,5 +1,6 @@
+export * from './store/index';
 import * as React from "react";
-import { Field, Input, Textarea } from "@repo/ui";
+import { Field, Input, Textarea } from "@youngro/ui";
 import { Eye, SlidersHorizontal } from "lucide-react";
 
 export type CardDetailsTab = "details" | "modules";

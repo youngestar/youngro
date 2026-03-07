@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button } from "@repo/ui";
-import { useChatStore } from "@youngro/chat-zustand";
+import { Button } from "@youngro/ui";
+import { useChatStore } from "@youngro/feature-chat";
 
 export const ChatToolbar: React.FC = () => {
   const { cleanup, sending, messages } = useChatStore();

@@ -43,7 +43,7 @@ importers:
 
   apps/docs:
     dependencies:
-      '@repo/ui':
+      '@youngro/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       lucide-react:
@@ -59,12 +59,6 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
     devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
@@ -74,6 +68,12 @@ importers:
       '@types/react-dom':
         specifier: 19.1.1
         version: 19.1.1(@types/react@19.1.0)
+      '@youngro/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@youngro/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       eslint:
         specifier: ^9.34.0
         version: 9.34.0(jiti@1.21.7)
@@ -83,27 +83,24 @@ importers:
 
   apps/web:
     dependencies:
-      '@repo/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@shikijs/rehype':
         specifier: ^3.12.2
         version: 3.13.0
-      '@youngro/chat-zustand':
-        specifier: workspace:*
-        version: link:../../packages/chat-zustand
       '@youngro/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
-      '@youngro/feature-youngro-card':
+      '@youngro/feature-card':
         specifier: workspace:*
-        version: link:../../packages/feature-youngro-card
+        version: link:../../packages/feature-card
+      '@youngro/feature-chat':
+        specifier: workspace:*
+        version: link:../../packages/feature-chat
       '@youngro/icons':
         specifier: workspace:*
-        version: link:../../packages/youngro-icons
-      '@youngro/store-card':
+        version: link:../../packages/icons
+      '@youngro/ui':
         specifier: workspace:*
-        version: link:../../packages/store-card
+        version: link:../../packages/ui
       axios:
         specifier: ^1.7.9
         version: 1.12.2
@@ -162,12 +159,6 @@ importers:
         specifier: ^4.4.0
         version: 4.5.7(@types/react@19.1.0)(immer@10.2.0)(react@19.1.0)
     devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.18(yaml@2.8.1))
@@ -189,6 +180,12 @@ importers:
       '@types/react-dom':
         specifier: 19.1.1
         version: 19.1.1(@types/react@19.1.0)
+      '@youngro/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@youngro/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       autoprefixer:
         specifier: ^10
         version: 10.4.21(postcss@8.4.31)
@@ -210,43 +207,6 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
-
-  packages/chat-zustand:
-    dependencies:
-      '@types/react':
-        specifier: 19.1.0
-        version: 19.1.0
-      '@types/react-dom':
-        specifier: 19.1.1
-        version: 19.1.1(@types/react@19.1.0)
-      '@youngro/store-card':
-        specifier: workspace:*
-        version: link:../store-card
-      immer:
-        specifier: ^10.0.0
-        version: 10.2.0
-      zustand:
-        specifier: ^4.4.0
-        version: 4.5.7(@types/react@19.1.0)(immer@10.2.0)(react@18.3.1)
-    devDependencies:
-      '@vitejs/plugin-react':
-        specifier: ^4.0.0
-        version: 4.7.0(vite@5.4.21(@types/node@22.15.3))
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
-      typescript:
-        specifier: 5.9.2
-        version: 5.9.2
-      vite:
-        specifier: ^5.0.0
-        version: 5.4.21(@types/node@22.15.3)
-      vitest:
-        specifier: ^1.3.0
-        version: 1.6.1(@types/node@22.15.3)
 
   packages/design-tokens: {}
 
@@ -310,14 +270,11 @@ importers:
         specifier: ^8.40.0
         version: 8.40.0(eslint@9.34.0(jiti@1.21.7))(typescript@5.9.2)
 
-  packages/feature-youngro-card:
+  packages/feature-card:
     dependencies:
-      '@repo/ui':
+      '@youngro/ui':
         specifier: workspace:*
         version: link:../ui
-      '@youngro/store-card':
-        specifier: workspace:*
-        version: link:../store-card
       lucide-react:
         specifier: ^0.546.0
         version: 0.546.0(react@19.1.0)
@@ -327,6 +284,9 @@ importers:
       react-dom:
         specifier: '>=18'
         version: 19.1.0(react@19.1.0)
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@types/react':
         specifier: 19.1.0
@@ -335,26 +295,64 @@ importers:
         specifier: 19.1.1
         version: 19.1.1(@types/react@19.1.0)
 
-  packages/lib-utils: {}
+  packages/feature-chat:
+    dependencies:
+      '@types/react':
+        specifier: 19.1.0
+        version: 19.1.0
+      '@types/react-dom':
+        specifier: 19.1.1
+        version: 19.1.1(@types/react@19.1.0)
+      '@youngro/feature-card':
+        specifier: workspace:*
+        version: link:../feature-card
+      immer:
+        specifier: ^10.0.0
+        version: 10.2.0
+      zustand:
+        specifier: ^4.4.0
+        version: 4.5.7(@types/react@19.1.0)(immer@10.2.0)(react@18.3.1)
+    devDependencies:
+      '@vitejs/plugin-react':
+        specifier: ^4.0.0
+        version: 4.7.0(vite@5.4.21(@types/node@22.15.3))
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.21(@types/node@22.15.3)
+      vitest:
+        specifier: ^1.3.0
+        version: 1.6.1(@types/node@22.15.3)
 
-  packages/store-card:
+  packages/icons:
     dependencies:
       react:
         specifier: '>=18'
         version: 19.1.0
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
-      zustand:
-        specifier: '>=4'
-        version: 4.5.7(@types/react@19.1.0)(immer@10.2.0)(react@19.1.0)
     devDependencies:
+      '@svgr/core':
+        specifier: ^8.1.0
+        version: 8.1.0(typescript@5.9.2)
+      '@svgr/plugin-jsx':
+        specifier: ^8.1.0
+        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))
+      '@svgr/plugin-prettier':
+        specifier: ^8.1.0
+        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))
+      '@svgr/plugin-svgo':
+        specifier: ^8.1.0
+        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))(typescript@5.9.2)
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
-      '@types/react-dom':
-        specifier: 19.1.1
-        version: 19.1.1(@types/react@19.1.0)
 
   packages/typescript-config: {}
 
@@ -385,12 +383,6 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1
     devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
@@ -400,6 +392,12 @@ importers:
       '@types/react-dom':
         specifier: 19.1.1
         version: 19.1.1(@types/react@19.1.0)
+      '@youngro/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@youngro/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       autoprefixer:
         specifier: ^10
         version: 10.4.21(postcss@8.5.6)
@@ -419,27 +417,7 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  packages/youngro-icons:
-    dependencies:
-      react:
-        specifier: '>=18'
-        version: 19.1.0
-    devDependencies:
-      '@svgr/core':
-        specifier: ^8.1.0
-        version: 8.1.0(typescript@5.9.2)
-      '@svgr/plugin-jsx':
-        specifier: ^8.1.0
-        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))
-      '@svgr/plugin-prettier':
-        specifier: ^8.1.0
-        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))
-      '@svgr/plugin-svgo':
-        specifier: ^8.1.0
-        version: 8.1.0(@svgr/core@8.1.0(typescript@5.9.2))(typescript@5.9.2)
-      '@types/react':
-        specifier: 19.1.0
-        version: 19.1.0
+  packages/utils: {}
 
 packages:
 
@@ -4559,7 +4537,7 @@ snapshots:
       '@babel/types': 7.28.4
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.1
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -4643,7 +4621,7 @@ snapshots:
       '@babel/parser': 7.28.4
       '@babel/template': 7.27.2
       '@babel/types': 7.28.4
-      debug: 4.4.1
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -8796,7 +8774,7 @@ snapshots:
   vite-node@1.6.1(@types/node@22.15.3):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.1
+      debug: 4.4.3
       pathe: 1.1.2
       picocolors: 1.1.1
       vite: 5.4.21(@types/node@22.15.3)
@@ -8847,7 +8825,7 @@ snapshots:
       '@vitest/utils': 1.6.1
       acorn-walk: 8.3.4
       chai: 4.5.0
-      debug: 4.4.1
+      debug: 4.4.3
       execa: 8.0.1
       local-pkg: 0.5.1
       magic-string: 0.30.19

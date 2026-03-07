@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Settings } from "lucide-react";
 import useTurnToPage from "../../src/hooks/useTurnToPage";
-import { Button, Icon } from "@repo/ui";
+import { Button, Icon } from "@youngro/ui";
 import CrossBackground from "../../src/components/Backgrounds/CrossBackground";
 import dynamic from "next/dynamic";
 const AnimatedWave = dynamic(

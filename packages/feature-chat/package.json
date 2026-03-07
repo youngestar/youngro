@@ -1,5 +1,5 @@
 {
-  "name": "@youngro/chat-zustand",
+  "name": "@youngro/feature-chat",
   "version": "0.0.0",
   "private": true,
   "exports": {
@@ -16,9 +16,9 @@
   "dependencies": {
     "zustand": "^4.4.0",
     "immer": "^10.0.0",
-    "@youngro/store-card": "workspace:*",
     "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1"
+    "@types/react-dom": "19.1.1",
+    "@youngro/feature-card": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",

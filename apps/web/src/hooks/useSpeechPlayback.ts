@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 
 import { useSpeechStore } from "../store/speechStore";
 import {
@@ -7,7 +7,7 @@ import {
   type SpeechProviderConfig,
 } from "../store/providersStore";
 import { useSpeechResources } from "./useSpeechResources";
-import type { BaseMessage } from "@youngro/chat-zustand";
+import type { BaseMessage } from "@youngro/feature-chat";
 
 export type SpeechPlaybackStatus = "idle" | "loading" | "playing" | "error";
 

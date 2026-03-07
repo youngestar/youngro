@@ -1,6 +1,6 @@
 "use client";
 
-import { IconItem, Icon, PageHeader } from "@repo/ui";
+import { IconItem, Icon, PageHeader } from "@youngro/ui";
 import styles from "./page.module.css";
 import { Layers, Package, SmilePlus } from "lucide-react";
 import { useRouter } from "next/navigation";

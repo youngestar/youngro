@@ -12,7 +12,7 @@ import {
   Select,
   HeadlessSelect,
   ScrollArea,
-} from "@repo/ui";
+} from "@youngro/ui";
 import { Send, Trash2, Play, StopCircle, Check, Pause } from "lucide-react";
 
 export default function ComponentsDemo() {

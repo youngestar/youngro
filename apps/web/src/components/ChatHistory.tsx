@@ -9,8 +9,8 @@
 
 import React, { useMemo } from "react";
 import AiChatMessage from "./AIChatMessage";
-import { useChatStore } from "@youngro/chat-zustand";
-import type { BaseMessage } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
+import type { BaseMessage } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
 import { useChatAutoScroll } from "../hooks/useChatAutoScroll";
 

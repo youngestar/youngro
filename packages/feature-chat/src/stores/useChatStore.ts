@@ -1,6 +1,6 @@
 // HMR test: trivial comment to verify source-linked hot reload
 import { create } from "zustand";
-import { getRuntimeSystemPrompt } from "@youngro/store-card";
+import { getRuntimeSystemPrompt } from "@youngro/feature-card";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";

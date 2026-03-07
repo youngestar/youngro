@@ -1,5 +1,5 @@
 {
-  "name": "@youngro/feature-youngro-card",
+  "name": "@youngro/feature-card",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -30,9 +30,9 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@youngro/store-card": "workspace:*",
-    "@repo/ui": "workspace:*",
-    "lucide-react": "^0.546.0"
+    "@youngro/ui": "workspace:*",
+    "lucide-react": "^0.546.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

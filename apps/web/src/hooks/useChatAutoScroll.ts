@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 
 // 将 ChatHistory 的自动滚动逻辑原封抽取为一个 Hook
 // 暴露：endRef（用于定位滚动区域末端）、scrollToBottom（供“回到底部”按钮使用）、showBackToBottom（控制按钮显隐）

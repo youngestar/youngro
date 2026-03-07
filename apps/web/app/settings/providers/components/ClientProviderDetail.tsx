@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Field, Input } from "@repo/ui";
+import { Button, Field, Input } from "@youngro/ui";
 import ProviderPageHeader from "../../../../src/components/ProviderPageHeader";
 import {
   useProvidersStore,

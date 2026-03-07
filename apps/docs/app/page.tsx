@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, BrandLogo, Icon } from "@repo/ui";
+import { Button, BrandLogo, Icon } from "@youngro/ui";
 import { Globe, Square } from "lucide-react";
 import styles from "./page.module.css";
 

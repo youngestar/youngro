@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button, Field, Input, ScrollArea, RadioCard } from "@repo/ui";
+import { Button, Field, Input, ScrollArea, RadioCard } from "@youngro/ui";
 import {
   useProvidersStore,
   useProvidersHydrate,

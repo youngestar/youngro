@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@repo/ui";
+import { PageHeader } from "@youngro/ui";
 
 export interface ProviderPageHeaderProps {
   title: React.ReactNode;

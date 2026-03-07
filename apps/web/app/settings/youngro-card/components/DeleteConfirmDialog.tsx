@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@repo/ui";
+import { Button } from "@youngro/ui";
 import { SimpleModal } from "./SimpleModal";
 
 export function DeleteConfirmDialog({

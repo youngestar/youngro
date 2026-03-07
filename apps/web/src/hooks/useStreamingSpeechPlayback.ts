@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 
 import {
   useProvidersStore,

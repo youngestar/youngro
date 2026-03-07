@@ -1,6 +1,6 @@
 "use client";
 
-import { IconStatusItem, PageHeader } from "@repo/ui";
+import { IconStatusItem, PageHeader } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import { useModulesList } from "../../../src/hooks/useModulesList";

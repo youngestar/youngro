@@ -12,9 +12,9 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button, ScrollArea, Icon } from "@repo/ui";
+import { Textarea, Button, ScrollArea, Icon } from "@youngro/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send, Volume2, VolumeX } from "lucide-react";
 import {
