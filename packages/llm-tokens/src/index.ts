@@ -1,5 +1,5 @@
 /**
- * @youngro/emotion-tokens
+ * @youngro/llm-tokens
  * Minimal token specs and helpers for EMOTE/DELAY (and reserved MOTION) markers.
  *
  * Notes:

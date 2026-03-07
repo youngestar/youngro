@@ -14,7 +14,7 @@ import {
   createStreamTokenizer,
   stripTokens,
   type Token as EmotionToken,
-} from "../../../emotion-tokens/src/index";
+} from "@youngro/llm-tokens";
 const ENABLE_TOKEN_PARSE = true; // future: externalize via settings/feature flag
 const streamTokenizer = createStreamTokenizer();
 

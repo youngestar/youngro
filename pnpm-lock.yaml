@@ -210,18 +210,6 @@ importers:
 
   packages/design-tokens: {}
 
-  packages/emotion-tokens:
-    devDependencies:
-      '@types/node':
-        specifier: ^22.15.3
-        version: 22.15.3
-      typescript:
-        specifier: 5.9.2
-        version: 5.9.2
-      vitest:
-        specifier: ^2.1.9
-        version: 2.1.9(@types/node@22.15.3)
-
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
@@ -306,6 +294,9 @@ importers:
       '@youngro/feature-card':
         specifier: workspace:*
         version: link:../feature-card
+      '@youngro/llm-tokens':
+        specifier: workspace:*
+        version: link:../llm-tokens
       immer:
         specifier: ^10.0.0
         version: 10.2.0
@@ -353,6 +344,18 @@ importers:
       '@types/react':
         specifier: 19.1.0
         version: 19.1.0
+
+  packages/llm-tokens:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@22.15.3)
 
   packages/typescript-config: {}
 

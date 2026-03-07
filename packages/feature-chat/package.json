@@ -18,7 +18,8 @@
     "immer": "^10.0.0",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
-    "@youngro/feature-card": "workspace:*"
+    "@youngro/feature-card": "workspace:*",
+    "@youngro/llm-tokens": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",
