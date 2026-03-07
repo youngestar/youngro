@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { VoiceGatewayRequest, normalizeBaseUrl } from "../../shared";
-import tencentStaticVoiceTable from "../../../../../../data/tencentVoices.json";
+import tencentStaticVoiceTable from "../../../../../../src/data/tencentVoices.json";
 type TencentStaticVoiceRecord = {
   id: number;
   name: string;

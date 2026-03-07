@@ -20,9 +20,9 @@ import { Send, Volume2, VolumeX } from "lucide-react";
 import {
   useProvidersStore,
   useProvidersHydrate,
-} from "../store/providersStore";
-import { useConsciousnessStore } from "../store/consciousnessStore";
-import useStreamingSpeechPlayback from "../hooks/useStreamingSpeechPlayback";
+} from "../../../src/store/providersStore";
+import { useConsciousnessStore } from "../../../src/store/consciousnessStore";
+import useStreamingSpeechPlayback from "../../../src/hooks/useStreamingSpeechPlayback";
 
 export const InteractiveArea: React.FC = () => {
   const { send, sending, registerOnStreamEnd } = useChatStore();

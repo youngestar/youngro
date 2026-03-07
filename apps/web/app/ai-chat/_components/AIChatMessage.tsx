@@ -8,7 +8,7 @@
  * - loading 为真时展示占位内容（流式开头尚无文本）。
  */
 
-import MarkdownRenderer from "./MarkdownRenderer";
+import MarkdownRenderer from "../../../src/components/MarkdownRenderer";
 import clsx from "clsx";
 import Image from "next/image";
 

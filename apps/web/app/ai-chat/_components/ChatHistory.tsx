@@ -12,7 +12,7 @@ import AiChatMessage from "./AIChatMessage";
 import { useChatStore } from "@youngro/feature-chat";
 import type { BaseMessage } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
-import { useChatAutoScroll } from "../hooks/useChatAutoScroll";
+import { useChatAutoScroll } from "../../../src/hooks/useChatAutoScroll";
 
 export const ChatHistory: React.FC = () => {
   const { messages, sending, streamingMessage } = useChatStore();

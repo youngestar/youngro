@@ -1,6 +1,6 @@
 "use client";
 
-import InteractiveArea from "../../src/components/InteractiveArea";
+import InteractiveArea from "./_components/InteractiveArea";
 import { Button, Icon } from "@youngro/ui";
 import { useChatStore } from "@youngro/feature-chat";
 import { Trash2 } from "lucide-react";
