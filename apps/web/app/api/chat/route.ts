@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
         { error: "messages is required and must be a non-empty array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,12 +48,12 @@ export async function POST(req: Request) {
     const effectiveProviderId = providerId || "deepseek";
     const adapter = getChatAdapter(effectiveProviderId) || deepseekAdapter;
     const validation = await adapter.validateConfig(
-      (providerConfig as Record<string, unknown>) || {}
+      (providerConfig as Record<string, unknown>) || {},
     );
     if (!validation.valid) {
       return NextResponse.json(
         { message: `Provider config invalid: ${validation.errors.join(", ")}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       // For now listModels not used here; adapter only supports stream variant; fallback error
       return NextResponse.json(
         { message: "Non-stream mode not yet implemented for adapter" },
-        { status: 501 }
+        { status: 501 },
       );
     }
 
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     const streamIterable = adapter.chatStream(
       messages.map((m) => ({ role: m.role, content: m.content })),
       { model, ...(providerConfig as Record<string, unknown>) },
-      { signal: undefined }
+      { signal: undefined },
     );
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
     // 扁平化错误结构，方便前端提取 message
     return NextResponse.json(
       { status: e.status || 500, message: e.message, data: e.data },
-      { status: e.status || 500 }
+      { status: e.status || 500 },
     );
   }
 }

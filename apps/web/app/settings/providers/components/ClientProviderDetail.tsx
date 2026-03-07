@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Field, Input } from "@repo/ui";
+import { Button, Field, Input } from "@youngro/ui";
 import ProviderPageHeader from "../../../../src/components/ProviderPageHeader";
 import {
   useProvidersStore,
@@ -46,13 +46,13 @@ export default function ClientProviderDetail({
         (c as ChatProviderConfig).baseUrl ||
           (c as SpeechProviderConfig).baseUrl ||
           (c as TranscriptionProviderConfig).baseUrl ||
-          ""
+          "",
       );
       setExtraField(
         (c as SpeechProviderConfig).voiceId ||
           (c as TranscriptionProviderConfig).modelId ||
           (c as ChatProviderConfig).defaultModel ||
-          ""
+          "",
       );
       if (providerState.configured) {
         setLastValidatedAt(Date.now());

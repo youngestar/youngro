@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button, Field, Input, ScrollArea, RadioCard } from "@repo/ui";
+import { Button, Field, Input, ScrollArea, RadioCard } from "@youngro/ui";
 import {
   useProvidersStore,
   useProvidersHydrate,
@@ -18,7 +18,7 @@ export function ClientConsciousnessPage() {
   useConsciousnessHydrate();
 
   const providers = useProvidersStore((s) =>
-    s.getProvidersByCategory("chat").filter((p: ProviderState) => p.configured)
+    s.getProvidersByCategory("chat").filter((p: ProviderState) => p.configured),
   );
   const fetchModels = useProvidersStore((s) => s.fetchModels);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -36,14 +36,14 @@ export function ClientConsciousnessPage() {
 
   const activeProvider = useMemo(
     () => providers.find((p) => p.meta.id === activeProviderId),
-    [providers, activeProviderId]
+    [providers, activeProviderId],
   );
 
   const supportsModelListing = !!activeProvider; // chat providers 视为支持 list models
 
   const providerModels = useMemo(
     () => activeProvider?.resources.items ?? [],
-    [activeProvider?.resources.items]
+    [activeProvider?.resources.items],
   );
   const modelsStatus = activeProvider?.resources.status ?? "idle";
   const modelsError = activeProvider?.resources.error ?? null;
@@ -55,7 +55,7 @@ export function ClientConsciousnessPage() {
       (m) =>
         m.id.toLowerCase().includes(q) ||
         m.name.toLowerCase().includes(q) ||
-        (m.description && m.description.toLowerCase().includes(q))
+        (m.description && m.description.toLowerCase().includes(q)),
     );
   }, [providerModels, modelSearchQuery]);
 

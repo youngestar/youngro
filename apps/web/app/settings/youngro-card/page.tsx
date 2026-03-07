@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader, Icon, Button } from "@repo/ui";
+import { PageHeader, Icon, Button } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -15,7 +15,7 @@ import {
   DEFAULT_POST_HISTORY_INSTRUCTIONS,
   parseImportedCard,
   newYoungroCard,
-} from "@youngro/store-card";
+} from "@youngro/feature-card";
 import { CreateCardTile } from "./components/CreateCardTile";
 import { FileInput } from "./components/FileInput";
 import { CardListItem } from "./components/CardListItem";
@@ -63,12 +63,12 @@ function Content() {
       speechModel: currentSpeechModel,
       speechVoiceId: currentSpeechVoice,
     }),
-    [currentConsciousnessModel, currentSpeechModel, currentSpeechVoice]
+    [currentConsciousnessModel, currentSpeechModel, currentSpeechVoice],
   );
 
   const [search, setSearch] = React.useState("");
   const [sort, setSort] = React.useState<"nameAsc" | "nameDesc" | "recent">(
-    "recent"
+    "recent",
   );
   const entries = Object.entries(cards).filter(([, card]) => {
     const q = search.trim().toLowerCase();
@@ -252,7 +252,7 @@ function Content() {
             });
             const postHistoryInstructions = composePostHistoryInstructions(
               DEFAULT_POST_HISTORY_INSTRUCTIONS,
-              v.postHistoryInstructions
+              v.postHistoryInstructions,
             );
             const baseCard = {
               name: v.name,

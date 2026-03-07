@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Input, Icon, HeadlessSelect } from "@repo/ui";
+import { Input, Icon, HeadlessSelect } from "@youngro/ui";
 import { Search, ChevronDown } from "lucide-react";
 
 export interface ToolbarProps {

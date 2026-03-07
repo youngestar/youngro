@@ -65,26 +65,26 @@ Inspired by AIRI’s workflow but re-imagined in TypeScript, Youngro runs its co
 
 ```mermaid
 flowchart TD
-  subgraph Apps
+  subgraph AppsSection["Apps"]
     Web[apps/web (Next.js 15 + Turbopack)]
     Docs[apps/docs (Next.js 15)]
   end
 
-  subgraph Features & Stores
+  subgraph FeatureStores["Features & Stores"]
     ChatStore[@youngro/chat-zustand]
     CardStore[@youngro/store-card]
     FeatureCard[@youngro/feature-youngro-card]
     ProvidersStore[providersStore.ts]
   end
 
-  subgraph UI System
+  subgraph UISystem["UI System"]
     UI[@repo/ui]
     Tokens[@youngro/design-tokens]
     EmoTokens[@youngro/emotion-tokens]
     Icons[@youngro/youngro-icons]
   end
 
-  subgraph Tooling
+  subgraph ToolingStack["Tooling"]
     ESLint[@repo/eslint-config]
     TSConfig[@repo/typescript-config]
     Utils[@youngro/lib-utils]

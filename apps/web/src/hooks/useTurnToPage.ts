@@ -14,7 +14,7 @@ export const useTurnToPage = () => {
   return async (
     pathOrPathname: string,
     query?: Record<string, string | number | boolean | undefined>,
-    options?: TurnOptions
+    options?: TurnOptions,
   ) => {
     let path = pathOrPathname;
     if (query && Object.keys(query).length) {

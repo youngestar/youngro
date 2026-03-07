@@ -1,8 +1,8 @@
 "use client";
 
-import InteractiveArea from "../../src/components/InteractiveArea";
-import { Button, Icon } from "@repo/ui";
-import { useChatStore } from "@youngro/chat-zustand";
+import InteractiveArea from "./_components/InteractiveArea";
+import { Button, Icon } from "@youngro/ui";
+import { useChatStore } from "@youngro/feature-chat";
 import { Trash2 } from "lucide-react";
 import React from "react";
 
@@ -18,7 +18,7 @@ export default function Home() {
     return () =>
       window.removeEventListener(
         "youngro-card-activated",
-        handler as EventListener
+        handler as EventListener,
       );
   }, [applyActiveCardSystemPrompt]);
 

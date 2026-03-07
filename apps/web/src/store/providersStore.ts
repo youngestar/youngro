@@ -135,7 +135,7 @@ function getField(config: ProviderConfig, key: string): unknown {
 
 function hasRequiredFields(
   meta: ProviderMeta,
-  config: ProviderConfig
+  config: ProviderConfig,
 ): boolean {
   const req = requiredFieldsFor(meta);
   return req.every((f) => !!getField(config, f));
@@ -196,7 +196,7 @@ function createInitialState(): Record<string, ProviderState> {
           ttlMs: 10 * 60 * 1000,
         },
       } as ProviderState,
-    ])
+    ]),
   );
 }
 
@@ -239,7 +239,7 @@ function savePersisted(registry: Record<string, ProviderState>) {
       Object.entries(registry).map(([id, s]) => [
         id,
         { config: s.config, configured: s.configured },
-      ])
+      ]),
     ),
   };
   try {
@@ -274,7 +274,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
           const validateErrors = validateConfig(next[id].meta, persistedConfig);
           const meetsRequired = hasRequiredFields(
             next[id].meta,
-            persistedConfig
+            persistedConfig,
           );
           const wasValidated =
             persistedVersion >= 2 ? Boolean(p.configured) : false;

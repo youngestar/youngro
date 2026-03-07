@@ -224,39 +224,39 @@ export const allProviders: ProviderMeta[] = [
 ];
 
 export function getSpeechCapabilities(
-  meta?: ProviderMeta | null
+  meta?: ProviderMeta | null,
 ): SpeechProviderCapabilities {
   return meta?.capabilities?.speech ?? {};
 }
 
 export function speechProviderSupportsSSML(
-  meta?: ProviderMeta | null
+  meta?: ProviderMeta | null,
 ): boolean {
   return Boolean(meta?.capabilities?.speech?.supportsSSML);
 }
 
 export function speechProviderHasManagedModels(
-  meta?: ProviderMeta | null
+  meta?: ProviderMeta | null,
 ): boolean {
   return Boolean(meta?.capabilities?.speech?.models?.managed);
 }
 
 export function speechProviderHasManagedVoices(
-  meta?: ProviderMeta | null
+  meta?: ProviderMeta | null,
 ): boolean {
   return Boolean(meta?.capabilities?.speech?.voices?.managed);
 }
 
 export function speechProviderExposesModelMetadata(
   meta: ProviderMeta | null | undefined,
-  key: "exposesLanguages" | "exposesTags"
+  key: "exposesLanguages" | "exposesTags",
 ): boolean {
   return Boolean(meta?.capabilities?.speech?.models?.[key]);
 }
 
 export function speechProviderExposesVoiceMetadata(
   meta: ProviderMeta | null | undefined,
-  key: "exposesLanguages" | "exposesPreview"
+  key: "exposesLanguages" | "exposesPreview",
 ): boolean {
   return Boolean(meta?.capabilities?.speech?.voices?.[key]);
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 
 import { useSpeechStore } from "../store/speechStore";
 import {
@@ -7,7 +7,7 @@ import {
   type SpeechProviderConfig,
 } from "../store/providersStore";
 import { useSpeechResources } from "./useSpeechResources";
-import type { BaseMessage } from "@youngro/chat-zustand";
+import type { BaseMessage } from "@youngro/feature-chat";
 
 export type SpeechPlaybackStatus = "idle" | "loading" | "playing" | "error";
 
@@ -67,7 +67,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
   }));
 
   const providerState = useProvidersStore((state) =>
-    activeProviderId ? state.getProvider(activeProviderId) : undefined
+    activeProviderId ? state.getProvider(activeProviderId) : undefined,
   );
 
   const providerConfig = providerState?.config as
@@ -87,7 +87,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
 
   const latestAssistant = useMemo(
     () => findLatestAssistantMessage(messages),
-    [messages]
+    [messages],
   );
 
   const [status, setStatus] = useState<SpeechPlaybackStatus>("idle");
@@ -119,7 +119,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
     activeProviderId &&
       activeVoiceId &&
       providerState?.configured &&
-      providerConfig
+      providerConfig,
   );
 
   const synthesize = useCallback(
@@ -143,7 +143,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
               pitch,
               rate,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -199,7 +199,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
       pitch,
       rate,
       cleanupAudio,
-    ]
+    ],
   );
 
   useEffect(() => {

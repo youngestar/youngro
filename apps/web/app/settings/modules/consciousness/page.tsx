@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader } from "@repo/ui";
+import { PageHeader } from "@youngro/ui";
 import { ClientConsciousnessPage } from "./ClientConsciousnessPage";
 import { useRouter } from "next/navigation";
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useChatStore } from "@youngro/chat-zustand";
+import { useChatStore } from "@youngro/feature-chat";
 
 import {
   useProvidersStore,
@@ -68,7 +68,7 @@ function sleep(ms: number) {
 }
 
 function createTextPipeline(
-  onChunk: (chunk: TTSChunkItem) => Promise<void> | void
+  onChunk: (chunk: TTSChunkItem) => Promise<void> | void,
 ): TextPipeline {
   const pendingSpecials: string[] = [];
   let controller: ReadableStreamDefaultController<Uint8Array> | null = null;
@@ -153,7 +153,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
   }));
 
   const providerState = useProvidersStore((state) =>
-    activeProviderId ? state.getProvider(activeProviderId) : undefined
+    activeProviderId ? state.getProvider(activeProviderId) : undefined,
   );
 
   const providerConfig = providerState?.config as
@@ -183,9 +183,14 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
         activeProviderId &&
           activeVoiceId &&
           providerState?.configured &&
-          providerConfig
+          providerConfig,
       ),
-    [activeProviderId, activeVoiceId, providerState?.configured, providerConfig]
+    [
+      activeProviderId,
+      activeVoiceId,
+      providerState?.configured,
+      providerConfig,
+    ],
   );
 
   const [status, setStatus] = useState<StreamingSpeechStatus>("idle");
@@ -289,7 +294,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
       void audio.play().catch((error) => {
         console.error("audio play rejected", error);
         setErrorMessage(
-          error instanceof Error ? error.message : "语音播放失败"
+          error instanceof Error ? error.message : "语音播放失败",
         );
         setStatus("error");
         finalize();
@@ -305,7 +310,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
         scheduleNextPlayback();
       }
     },
-    [scheduleNextPlayback]
+    [scheduleNextPlayback],
   );
 
   const synthesizeChunk = useCallback(
@@ -333,7 +338,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
               pitch,
               rate,
             }),
-          }
+          },
         );
         if (!response.ok) {
           const payload = (await response.json().catch(() => null)) as {
@@ -366,7 +371,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
       useSSML,
       pitch,
       rate,
-    ]
+    ],
   );
 
   const processChunk = useCallback(
@@ -386,7 +391,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
         special: chunk.special ?? null,
       });
     },
-    [enqueuePlaybackItem, handleSpecialInstruction, synthesizeChunk]
+    [enqueuePlaybackItem, handleSpecialInstruction, synthesizeChunk],
   );
 
   const ensureChunkWorker = useCallback(() => {
@@ -424,7 +429,7 @@ export function useStreamingSpeechPlayback(): StreamingSpeechPlaybackState {
       });
       ensureChunkWorker();
     },
-    [ensureChunkWorker]
+    [ensureChunkWorker],
   );
 
   const enqueueChunkRef = useRef(enqueueChunk);

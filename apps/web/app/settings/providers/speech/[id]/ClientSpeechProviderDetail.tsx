@@ -9,7 +9,7 @@ import {
   RadioCard,
   ScrollArea,
   Textarea,
-} from "@repo/ui";
+} from "@youngro/ui";
 import ProviderPageHeader from "../../../../../src/components/ProviderPageHeader";
 import {
   useProvidersHydrate,
@@ -71,7 +71,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const [region, setRegion] = useState("");
   const [appId, setAppId] = useState<string | number | "">("");
   const [voiceTypeField, setVoiceTypeField] = useState<string | number | "">(
-    ""
+    "",
   );
   const [websiteType, setWebsiteType] = useState(DEFAULT_TENCENT_WEBSITE_TYPE);
   const [modelId, setModelId] = useState("");
@@ -263,7 +263,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
       (voice) =>
         voice.id.toLowerCase().includes(q) ||
         voice.name.toLowerCase().includes(q) ||
-        voice.info.toLowerCase().includes(q)
+        voice.info.toLowerCase().includes(q),
     );
   }, [voices, voiceQuery]);
 
@@ -381,7 +381,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
       setErrorMessage(
         isTencentProvider
           ? "请先填写 SecretId 和 SecretKey 以拉取腾讯云声线"
-          : "请先填写 API Key 以拉取声线"
+          : "请先填写 API Key 以拉取声线",
       );
       return;
     }
@@ -395,7 +395,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
       setErrorMessage(
         isTencentProvider
           ? "请先填写 SecretId 和 SecretKey"
-          : "请先填写 API Key"
+          : "请先填写 API Key",
       );
       return;
     }
@@ -416,7 +416,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     }
 
     const selectedVoiceMetadata = providerVoices?.find(
-      (voice) => voice.id === activeVoiceId
+      (voice) => voice.id === activeVoiceId,
     )?.metadata;
 
     const payload = {
@@ -439,7 +439,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -450,7 +450,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
         const message =
           errorPayload.error || `语音合成失败 (HTTP ${response.status})`;
         throw new Error(
-          errorPayload.detail ? `${message}: ${errorPayload.detail}` : message
+          errorPayload.detail ? `${message}: ${errorPayload.detail}` : message,
         );
       }
 

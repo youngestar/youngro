@@ -5,12 +5,12 @@ import type { ReactNode } from "react";
 import React from "react";
 import { Settings } from "lucide-react";
 import useTurnToPage from "../../src/hooks/useTurnToPage";
-import { Button, Icon } from "@repo/ui";
+import { Button, Icon } from "@youngro/ui";
 import CrossBackground from "../../src/components/Backgrounds/CrossBackground";
 import dynamic from "next/dynamic";
 const AnimatedWave = dynamic(
   () => import("../../src/components/Widgets/AnimatedWave"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {

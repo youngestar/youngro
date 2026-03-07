@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: [
-    "@youngro/chat-zustand",
-    "@repo/ui",
-    "@youngro/feature-youngro-card",
+    "@youngro/feature-chat",
+    "@youngro/ui",
+    "@youngro/feature-card",
   ],
   // Work around WasmHash issue in webpack by forcing a stable hash function
   // Note: This is ignored by Turbopack and causes a warning. Uncomment if using webpack.

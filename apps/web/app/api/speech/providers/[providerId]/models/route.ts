@@ -113,7 +113,7 @@ async function fetchElevenLabsModels(body: VoiceGatewayRequest) {
   if (!body.apiKey) {
     return NextResponse.json(
       { error: "请先在 Provider 中填写 ElevenLabs API Key" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -157,7 +157,7 @@ async function fetchElevenLabsModels(body: VoiceGatewayRequest) {
           description: model.description,
           metadata: {
             languages: model.languages?.map(
-              (lang) => lang?.language_id || lang?.language || lang?.name
+              (lang) => lang?.language_id || lang?.language || lang?.name,
             ),
           },
         } satisfies ModelInfoResponse;
@@ -184,20 +184,20 @@ async function fetchElevenLabsModels(body: VoiceGatewayRequest) {
         error: "请求 ElevenLabs 模型接口出错",
         detail: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ providerId: string }> }
+  context: { params: Promise<{ providerId: string }> },
 ) {
   const { providerId } = await context.params;
   if (!providerId) {
     return NextResponse.json(
       { error: "providerId is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

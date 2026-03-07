@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Button } from "@repo/ui";
+import { Button } from "@youngro/ui";
 
 export default function NotFound() {
   const router = useRouter();

@@ -55,7 +55,7 @@ export interface TTSChunkItem {
 }
 
 function createReaderFromString(
-  input: string
+  input: string,
 ): ReadableStreamDefaultReader<Uint8Array> {
   const encoder = new TextEncoder();
   return new ReadableStream<Uint8Array>({
@@ -68,12 +68,12 @@ function createReaderFromString(
 
 export async function* chunkTTSInput(
   input: string | ReaderLike,
-  options?: TTSInputChunkOptions
+  options?: TTSInputChunkOptions,
 ): AsyncGenerator<TTSInputChunk, void, unknown> {
   const { boost = 2, minimumWords = 4, maximumWords = 12 } = options ?? {};
 
   const iterator = readGraphemeClusters(
-    typeof input === "string" ? createReaderFromString(input) : input
+    typeof input === "string" ? createReaderFromString(input) : input,
   );
 
   const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
@@ -241,7 +241,7 @@ export async function* chunkTTSInput(
 export async function chunkEmitter(
   reader: ReaderLike,
   pendingSpecials: string[],
-  handler: (ttsSegment: TTSChunkItem) => Promise<void> | void
+  handler: (ttsSegment: TTSChunkItem) => Promise<void> | void,
 ): Promise<void> {
   const sanitizeChunk = (text: string) =>
     text
