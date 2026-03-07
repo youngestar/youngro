@@ -20,7 +20,7 @@ function generateSineWavePath(
   height: number,
   amplitude: number,
   waveLength: number,
-  direction: WaveDirection
+  direction: WaveDirection,
 ): string {
   const points: string[] = [];
   const numberOfWaves = Math.ceil(width / waveLength);
@@ -59,7 +59,7 @@ export function AnimatedWave({
       fullHeight,
       amplitude,
       waveLength,
-      direction
+      direction,
     );
     const svg = `<svg width="${waveLength}" height="${fullHeight}" xmlns="http://www.w3.org/2000/svg"><path d="${path}"/></svg>`;
     // Use URL-encoded SVG to avoid SSR/CSR divergence

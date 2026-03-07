@@ -18,7 +18,7 @@ export default function ProvidersPage() {
   const chat = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const speech = useProvidersStore((s) => s.getProvidersByCategory("speech"));
   const transcription = useProvidersStore((s) =>
-    s.getProvidersByCategory("transcription")
+    s.getProvidersByCategory("transcription"),
   );
   useScrollToHash({
     auto: true,

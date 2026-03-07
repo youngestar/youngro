@@ -27,12 +27,12 @@ export interface ProviderAdapterConfig {
 export interface ChatProviderAdapter {
   id: string;
   validateConfig(
-    config: ProviderAdapterConfig
+    config: ProviderAdapterConfig,
   ): Promise<ProviderValidationResult>;
   listModels(config: ProviderAdapterConfig): Promise<ProviderModelInfo[]>; // may be static
   chatStream(
     messages: Array<{ role: string; content: unknown }>,
     config: ProviderAdapterConfig & { model?: string },
-    options?: { signal?: AbortSignal }
+    options?: { signal?: AbortSignal },
   ): AsyncIterable<ChatStreamChunk>;
 }

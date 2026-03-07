@@ -26,7 +26,7 @@ interface SpeechResourcesResult {
   voiceStatus: VoiceStatus;
   fetchVoices: (
     force?: boolean,
-    overrideConfig?: SpeechProviderConfig
+    overrideConfig?: SpeechProviderConfig,
   ) => Promise<void>;
   fetchModels: (force?: boolean) => Promise<void>;
   modelsReady: boolean;
@@ -38,19 +38,19 @@ interface SpeechResourcesResult {
 }
 
 export function useSpeechResources(
-  args: UseSpeechResourcesArgs
+  args: UseSpeechResourcesArgs,
 ): SpeechResourcesResult {
   const providerId = args.providerId;
   const provider = useProvidersStore((state) =>
-    providerId ? state.registry[providerId] : undefined
+    providerId ? state.registry[providerId] : undefined,
   );
   const fetchModelsAction = useProvidersStore((state) => state.fetchModels);
 
   const voices = useSpeechStore((state) =>
-    providerId ? state.availableVoices[providerId] : undefined
+    providerId ? state.availableVoices[providerId] : undefined,
   );
   const voiceStatusBucket = useSpeechStore((state) =>
-    providerId ? state.voiceStatus[providerId] : undefined
+    providerId ? state.voiceStatus[providerId] : undefined,
   );
   const fetchVoicesAction = useSpeechStore((state) => state.fetchVoices);
   const voiceStatus = voiceStatusBucket?.status ?? "idle";
@@ -63,7 +63,7 @@ export function useSpeechResources(
       if (!providerId) return;
       await fetchModelsAction(providerId, force);
     },
-    [providerId, fetchModelsAction]
+    [providerId, fetchModelsAction],
   );
 
   const fetchVoices = useCallback(
@@ -73,7 +73,7 @@ export function useSpeechResources(
         provider.config) as SpeechProviderConfig;
       await fetchVoicesAction(providerId, config, { force });
     },
-    [providerId, provider, fetchVoicesAction]
+    [providerId, provider, fetchVoicesAction],
   );
 
   const derived = useMemo(
@@ -82,7 +82,7 @@ export function useSpeechResources(
       hasManagedModels: speechProviderHasManagedModels(provider?.meta),
       hasManagedVoices: speechProviderHasManagedVoices(provider?.meta),
     }),
-    [provider?.meta]
+    [provider?.meta],
   );
 
   return {

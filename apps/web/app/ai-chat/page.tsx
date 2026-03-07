@@ -18,7 +18,7 @@ export default function Home() {
     return () =>
       window.removeEventListener(
         "youngro-card-activated",
-        handler as EventListener
+        handler as EventListener,
       );
   }, [applyActiveCardSystemPrompt]);
 

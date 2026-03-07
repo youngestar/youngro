@@ -22,7 +22,7 @@ export function useModulesList() {
 
   const isSpeechConfigured = useMemo(() => {
     return Object.values(providers).some(
-      (provider) => provider.meta.category === "speech" && provider.configured
+      (provider) => provider.meta.category === "speech" && provider.configured,
     );
   }, [providers]);
 

@@ -41,11 +41,11 @@ interface ResolvedConnection {
 
 function resolveConnection(
   config: ProviderAdapterConfig,
-  options: OpenAICompatibleOptions
+  options: OpenAICompatibleOptions,
 ): ResolvedConnection {
   const apiKey = config.apiKey || readEnv(options.envApiKey);
   const envBase = readEnv(
-    `${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`
+    `${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`,
   );
   const baseUrl = config.baseUrl?.trim() || envBase || options.defaultBaseUrl;
   return { apiKey, baseUrl };
@@ -62,7 +62,7 @@ async function fetchJson<T>(url: string, init: RequestInit): Promise<T> {
 async function fetchModelListFromApi(
   apiKey: string,
   baseUrl: string,
-  headers?: Record<string, string>
+  headers?: Record<string, string>,
 ): Promise<ProviderModelInfo[]> {
   const url = `${trimEndSlash(baseUrl)}/models`;
   const body = await fetchJson<{
@@ -107,7 +107,7 @@ async function runChatCompletionProbe(params: {
 }
 
 export function createOpenAICompatibleAdapter(
-  options: OpenAICompatibleOptions
+  options: OpenAICompatibleOptions,
 ): ChatProviderAdapter {
   const {
     id,
@@ -117,7 +117,7 @@ export function createOpenAICompatibleAdapter(
   } = options;
 
   async function validateConfig(
-    config: ProviderAdapterConfig
+    config: ProviderAdapterConfig,
   ): Promise<ProviderValidationResult> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
 
@@ -164,7 +164,7 @@ export function createOpenAICompatibleAdapter(
           }
         } catch (err) {
           errors.push(
-            `${check} 校验失败: ${(err as Error).message || "未知错误"}`
+            `${check} 校验失败: ${(err as Error).message || "未知错误"}`,
           );
         }
       }
@@ -174,7 +174,7 @@ export function createOpenAICompatibleAdapter(
   }
 
   async function listModels(
-    config: ProviderAdapterConfig
+    config: ProviderAdapterConfig,
   ): Promise<ProviderModelInfo[]> {
     const staticModels = modelList.length ? modelList : undefined;
 
@@ -203,7 +203,7 @@ export function createOpenAICompatibleAdapter(
   async function* chatStream(
     messages: ChatMessageInput,
     config: ProviderAdapterConfig & { model?: string },
-    streamOptions?: { signal?: AbortSignal }
+    streamOptions?: { signal?: AbortSignal },
   ): AsyncIterable<ChatStreamChunk> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
     const normalizedBase = baseUrl ? trimEndSlash(baseUrl) : "";

@@ -74,7 +74,7 @@ export function coerceNumber(value: unknown): number | undefined {
 }
 
 export function resolveTencentProjectId(
-  input: string | number | undefined | null
+  input: string | number | undefined | null,
 ): number | undefined {
   if (input === undefined || input === null || `${input}`.trim() === "") {
     return undefined;
@@ -84,7 +84,7 @@ export function resolveTencentProjectId(
 
 export function resolveTencentVoiceType(
   request: VoiceGatewayRequest,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ): number | undefined {
   const direct = coerceNumber(request.voiceType);
   if (direct !== undefined) return direct;
@@ -94,7 +94,7 @@ export function resolveTencentVoiceType(
 }
 
 export function resolveTencentWebsiteType(
-  value: VoiceGatewayRequest["websiteType"]
+  value: VoiceGatewayRequest["websiteType"],
 ): number | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value === "string") {
@@ -120,10 +120,10 @@ export function normalizeTencentLanguages(voice: TencentVoiceRecord):
   if (Array.isArray(voice.LanguageCodes))
     candidates.push(...voice.LanguageCodes);
   candidates.push(
-    typeof voice.Language === "string" ? voice.Language : undefined
+    typeof voice.Language === "string" ? voice.Language : undefined,
   );
   candidates.push(
-    typeof voice.VoiceLanguage === "string" ? voice.VoiceLanguage : undefined
+    typeof voice.VoiceLanguage === "string" ? voice.VoiceLanguage : undefined,
   );
 
   for (const entry of candidates) {

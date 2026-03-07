@@ -42,7 +42,7 @@ export const IconStatusItem = React.forwardRef<
       className,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const iconNode = iconImageSrc ? (
       <img
@@ -50,14 +50,14 @@ export const IconStatusItem = React.forwardRef<
         src={iconImageSrc}
         className={clsx(
           "ui-icon-status-item-icon-image text-neutral-400/50 dark:text-neutral-600/50 group-hover:text-primary-500 dark:group-hover:text-primary-400",
-          iconColorClassName
+          iconColorClassName,
         )}
       />
     ) : icon ? (
       <div
         className={clsx(
           "ui-icon-status-item-icon text-neutral-400/50 dark:text-neutral-600/50 group-hover:text-primary-500 dark:group-hover:text-primary-400",
-          iconColorClassName
+          iconColorClassName,
         )}
       >
         {icon}
@@ -69,13 +69,13 @@ export const IconStatusItem = React.forwardRef<
         ref={ref}
         className={clsx(
           "ui-icon-status-item group flex flex-col rounded-xl border-2 bg-neutral-50 dark:bg-neutral-800 border-neutral-100 dark:border-neutral-800/25 hover:border-primary-500/30 dark:hover:border-primary-400/30 drop-shadow-none hover:shadow-sm active:shadow-none dark:hover:shadow-none transition-all duration-400",
-          className
+          className,
         )}
         {...rest}
       >
         <div
           className={clsx(
-            "ui-icon-status-item-link relative flex w-full h-full items-center overflow-hidden rounded-lg p-5 text-left bg-white dark:bg-neutral-900 transition-all duration-400 text-neutral-200/80 dark:text-neutral-700/40 group-hover:text-primary-300/50 dark:group-hover:text-primary-200/20"
+            "ui-icon-status-item-link relative flex w-full h-full items-center overflow-hidden rounded-lg p-5 text-left bg-white dark:bg-neutral-900 transition-all duration-400 text-neutral-200/80 dark:text-neutral-700/40 group-hover:text-primary-300/50 dark:group-hover:text-primary-200/20",
           )}
         >
           <div className="z-10 flex-1">
@@ -98,20 +98,20 @@ export const IconStatusItem = React.forwardRef<
           ) : configured ? (
             <div
               className={clsx(
-                "ui-icon-status-item-configured-dot bg-emerald-500 ring-4 ring-emerald-500/25 group-hover:scale-105"
+                "ui-icon-status-item-configured-dot bg-emerald-500 ring-4 ring-emerald-500/25 group-hover:scale-105",
               )}
             />
           ) : (
             <div
               className={clsx(
-                "ui-icon-status-item-configured-dot border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+                "ui-icon-status-item-configured-dot border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900",
               )}
             />
           )}
         </div>
       </a>
     );
-  }
+  },
 );
 
 IconStatusItem.displayName = "IconStatusItem";

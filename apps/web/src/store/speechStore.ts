@@ -50,7 +50,7 @@ interface SpeechStoreState {
   fetchVoices: (
     providerId: string,
     config: SpeechProviderConfig,
-    options?: VoiceFetchOptions
+    options?: VoiceFetchOptions,
   ) => Promise<VoiceInfo[]>;
 }
 
@@ -146,7 +146,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
               // Send full config so provider-specific fields (e.g. secretId/secretKey)
               // are available to the server-side proxy handler.
               body: JSON.stringify(config),
-            }
+            },
           );
 
           if (!response.ok) {
@@ -198,6 +198,6 @@ export const useSpeechStore = create<SpeechStoreState>()(
         availableVoices: state.availableVoices,
         voiceStatus: state.voiceStatus,
       }),
-    }
-  )
+    },
+  ),
 );

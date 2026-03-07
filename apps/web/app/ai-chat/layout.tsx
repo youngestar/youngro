@@ -10,7 +10,7 @@ import CrossBackground from "../../src/components/Backgrounds/CrossBackground";
 import dynamic from "next/dynamic";
 const AnimatedWave = dynamic(
   () => import("../../src/components/Widgets/AnimatedWave"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {

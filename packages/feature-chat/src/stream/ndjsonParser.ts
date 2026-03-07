@@ -16,7 +16,7 @@ export interface NDJSONParseOptions {
 
 export async function consumeNDJSONStream(
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  opts: NDJSONParseOptions
+  opts: NDJSONParseOptions,
 ): Promise<void> {
   const decoder = new TextDecoder();
   let buffer = "";

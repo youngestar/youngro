@@ -43,11 +43,11 @@ export const InteractiveArea: React.FC = () => {
   }, [activeProviderId, providers]);
 
   const providerState = useProvidersStore((s) =>
-    s.getProvider(fallbackProviderId)
+    s.getProvider(fallbackProviderId),
   );
   const models = useMemo(
     () => providerState?.resources.items ?? [],
-    [providerState?.resources.items]
+    [providerState?.resources.items],
   );
   const providerConfig = useMemo(() => {
     const cfg = providerState?.config;

@@ -127,11 +127,11 @@ const SAMPLE_TEXT = "你好，我是 Youngro 的语音助手。";
 export function ClientSpeechPage() {
   useProvidersHydrate();
   const speechProviders = useProvidersStore((s) =>
-    s.getProvidersByCategory("speech")
+    s.getProvidersByCategory("speech"),
   );
   const configuredSpeechProviders = useMemo(
     () => speechProviders.filter((provider) => provider.configured),
-    [speechProviders]
+    [speechProviders],
   );
   const fetchProviderModels = useProvidersStore((s) => s.fetchModels);
 
@@ -251,7 +251,7 @@ export function ClientSpeechPage() {
       (m) =>
         m.id.toLowerCase().includes(q) ||
         m.name.toLowerCase().includes(q) ||
-        (m.description && m.description.toLowerCase().includes(q))
+        (m.description && m.description.toLowerCase().includes(q)),
     );
   }, [providerModels, modelSearch]);
 
@@ -282,7 +282,7 @@ export function ClientSpeechPage() {
   const voiceLoadError = voicesError ?? null;
   const canFetchVoices = Boolean(
     activeProviderId &&
-      (activeProvider?.config as SpeechProviderConfig | undefined)?.apiKey
+      (activeProvider?.config as SpeechProviderConfig | undefined)?.apiKey,
   );
 
   const filteredVoices = useMemo<DemoVoice[]>(() => {
@@ -292,7 +292,7 @@ export function ClientSpeechPage() {
       (voice) =>
         voice.id.toLowerCase().includes(q) ||
         voice.name.toLowerCase().includes(q) ||
-        voice.description.toLowerCase().includes(q)
+        voice.description.toLowerCase().includes(q),
     );
   }, [availableVoices, voiceSearch]);
 
@@ -341,7 +341,7 @@ export function ClientSpeechPage() {
     }
 
     const rawVoice = providerVoices?.find(
-      (voice) => voice.id === activeVoiceId
+      (voice) => voice.id === activeVoiceId,
     );
     if (!rawVoice) {
       setErrorMessage("尚未从 Provider 拉取真实声线，无法生成试听");
@@ -366,7 +366,7 @@ export function ClientSpeechPage() {
             rate,
             modelId: activeModelId,
           }),
-        }
+        },
       );
 
       const payload = (await response.json().catch(() => null)) as {
@@ -392,7 +392,7 @@ export function ClientSpeechPage() {
 
       const blob = base64ToBlob(
         payload.audio,
-        payload.mimeType || "audio/mpeg"
+        payload.mimeType || "audio/mpeg",
       );
       const objectUrl = URL.createObjectURL(blob);
       setAudioUrl(objectUrl);
@@ -623,7 +623,7 @@ export function ClientSpeechPage() {
                             "rounded-2xl border p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60",
                             activeVoiceId === voice.id
                               ? "border-primary-200 bg-primary-50 shadow-sm dark:border-primary-900/60 dark:bg-primary-900/10"
-                              : "border-neutral-100 bg-neutral-50 hover:border-primary-200 dark:border-neutral-800 dark:bg-neutral-950/40"
+                              : "border-neutral-100 bg-neutral-50 hover:border-primary-200 dark:border-neutral-800 dark:bg-neutral-950/40",
                           )}
                         >
                           <div className="flex items-start justify-between gap-3">
