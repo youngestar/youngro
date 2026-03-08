@@ -22,8 +22,7 @@ const textarea = cva(
       intent: {
         // default matches InteractiveArea visual by default
         default: "",
-        destructive:
-          "ring-1 ring-red-300 focus:ring-2 focus:ring-red-400 dark:ring-red-400/60",
+        destructive: "ring-1 ring-red-300 focus:ring-2 focus:ring-red-400 dark:ring-red-400/60",
       },
       size: {
         sm: "text-sm p-2",
@@ -34,8 +33,7 @@ const textarea = cva(
         // No focus ring visuals
         none: "",
         // Brand-colored subtle ring
-        brand:
-          "focus:ring-2 focus:ring-primary-400/40 dark:focus:ring-primary-300/40",
+        brand: "focus:ring-2 focus:ring-primary-400/40 dark:focus:ring-primary-300/40",
       },
     },
     defaultVariants: {
@@ -44,7 +42,7 @@ const textarea = cva(
       size: "md",
       focusStyle: "brand",
     },
-  },
+  }
 );
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> &
@@ -72,7 +70,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       style,
       ...props
     },
-    ref,
+    ref
   ) => {
     const innerRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -82,14 +80,12 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       if (typeof ref === "function") {
         ref(innerRef.current);
       } else {
-        (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current =
-          innerRef.current;
+        (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current = innerRef.current;
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const parsePx = (v: string) =>
-      v && v !== "normal" && v !== "none" ? parseFloat(v) : NaN;
+    const parsePx = (v: string) => (v && v !== "normal" && v !== "none" ? parseFloat(v) : NaN);
 
     const adjustHeight = useCallback(() => {
       if (!autoResize) return;
@@ -103,11 +99,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         const fontSize = parsePx(cs.fontSize) || 16;
         lineHeight = fontSize * 1.2; // 经验值
       }
-      const paddingY =
-        (parsePx(cs.paddingTop) || 0) + (parsePx(cs.paddingBottom) || 0);
-      const borderY =
-        (parsePx(cs.borderTopWidth) || 0) +
-        (parsePx(cs.borderBottomWidth) || 0);
+      const paddingY = (parsePx(cs.paddingTop) || 0) + (parsePx(cs.paddingBottom) || 0);
+      const borderY = (parsePx(cs.borderTopWidth) || 0) + (parsePx(cs.borderBottomWidth) || 0);
 
       // 从 props 计算 max 高度
       let maxPx = Number.POSITIVE_INFINITY;
@@ -124,9 +117,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       // 从 props 和 CSS 计算 min 高度
       const minByRows = lineHeight * Math.max(1, minRows) + paddingY + borderY;
       const cssMin = parsePx(cs.minHeight);
-      const minPx = Number.isFinite(cssMin)
-        ? Math.max(cssMin, minByRows)
-        : minByRows;
+      const minPx = Number.isFinite(cssMin) ? Math.max(cssMin, minByRows) : minByRows;
 
       // 先置为 auto 以获取真实 scrollHeight
       el.style.height = "auto";
@@ -166,13 +157,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         onInput={handleInput}
         onChange={handleChange}
         style={style}
-        className={clsx(
-          textarea({ tone, intent, size, focusStyle }),
-          className,
-        )}
+        className={clsx(textarea({ tone, intent, size, focusStyle }), className)}
       />
     );
-  },
+  }
 );
 Textarea.displayName = "Textarea";
 

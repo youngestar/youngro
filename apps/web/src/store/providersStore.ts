@@ -5,10 +5,7 @@
 
 import { create } from "zustand";
 import { useEffect } from "react"; // useEffect for hydration
-import type {
-  ProviderMeta,
-  ProviderCategory,
-} from "../data/settings/providers";
+import type { ProviderMeta, ProviderCategory } from "../data/settings/providers";
 import { allProviders } from "../data/settings/providers";
 import { getChatAdapter } from "../lib/providers/registry";
 import type { ProviderAdapterConfig } from "../lib/providers/adapter";
@@ -97,46 +94,27 @@ function getField(config: ProviderConfig, key: string): unknown {
     case "apiKey":
       return "apiKey" in config ? config.apiKey : undefined;
     case "baseUrl":
-      return "baseUrl" in config
-        ? (config as ChatProviderConfig).baseUrl
-        : undefined;
+      return "baseUrl" in config ? (config as ChatProviderConfig).baseUrl : undefined;
     case "voiceId":
-      return "voiceId" in config
-        ? (config as SpeechProviderConfig).voiceId
-        : undefined;
+      return "voiceId" in config ? (config as SpeechProviderConfig).voiceId : undefined;
     case "modelId":
-      return "modelId" in config
-        ? (config as TranscriptionProviderConfig).modelId
-        : undefined;
+      return "modelId" in config ? (config as TranscriptionProviderConfig).modelId : undefined;
     case "defaultModel":
-      return "defaultModel" in config
-        ? (config as ChatProviderConfig).defaultModel
-        : undefined;
+      return "defaultModel" in config ? (config as ChatProviderConfig).defaultModel : undefined;
     case "secretId":
-      return "secretId" in config
-        ? (config as SpeechProviderConfig).secretId
-        : undefined;
+      return "secretId" in config ? (config as SpeechProviderConfig).secretId : undefined;
     case "secretKey":
-      return "secretKey" in config
-        ? (config as SpeechProviderConfig).secretKey
-        : undefined;
+      return "secretKey" in config ? (config as SpeechProviderConfig).secretKey : undefined;
     case "region":
-      return "region" in config
-        ? (config as SpeechProviderConfig).region
-        : undefined;
+      return "region" in config ? (config as SpeechProviderConfig).region : undefined;
     case "websiteType":
-      return "websiteType" in config
-        ? (config as SpeechProviderConfig).websiteType
-        : undefined;
+      return "websiteType" in config ? (config as SpeechProviderConfig).websiteType : undefined;
     default:
       return undefined;
   }
 }
 
-function hasRequiredFields(
-  meta: ProviderMeta,
-  config: ProviderConfig,
-): boolean {
+function hasRequiredFields(meta: ProviderMeta, config: ProviderConfig): boolean {
   const req = requiredFieldsFor(meta);
   return req.every((f) => !!getField(config, f));
 }
@@ -144,10 +122,7 @@ function hasRequiredFields(
 function shallowEqualConfig(a: ProviderConfig, b: ProviderConfig): boolean {
   const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
   for (const key of keys) {
-    if (
-      (a as Record<string, unknown>)[key] !==
-      (b as Record<string, unknown>)[key]
-    ) {
+    if ((a as Record<string, unknown>)[key] !== (b as Record<string, unknown>)[key]) {
       return false;
     }
   }
@@ -165,8 +140,7 @@ function validateConfig(meta: ProviderMeta, config: ProviderConfig): string[] {
     try {
       const u = new URL(baseUrl);
       if (!baseUrl.endsWith("/")) errs.push("Base URL 必须以 / 结尾");
-      if (!u.protocol.startsWith("http"))
-        errs.push("Base URL 协议需为 http/https");
+      if (!u.protocol.startsWith("http")) errs.push("Base URL 协议需为 http/https");
     } catch {
       errs.push("Base URL 非法或不是绝对 URL");
     }
@@ -196,7 +170,7 @@ function createInitialState(): Record<string, ProviderState> {
           ttlMs: 10 * 60 * 1000,
         },
       } as ProviderState,
-    ]),
+    ])
   );
 }
 
@@ -215,10 +189,7 @@ function loadPersisted(): PersistShape | null {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     type LoosePersist = {
-      registry?: Record<
-        string,
-        { config: ProviderConfig; configured: boolean }
-      >;
+      registry?: Record<string, { config: ProviderConfig; configured: boolean }>;
       version?: number;
     };
     const parsed = JSON.parse(raw) as LoosePersist;
@@ -239,7 +210,7 @@ function savePersisted(registry: Record<string, ProviderState>) {
       Object.entries(registry).map(([id, s]) => [
         id,
         { config: s.config, configured: s.configured },
-      ]),
+      ])
     ),
   };
   try {
@@ -272,14 +243,9 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
         if (next[id]) {
           const persistedConfig = p.config || {};
           const validateErrors = validateConfig(next[id].meta, persistedConfig);
-          const meetsRequired = hasRequiredFields(
-            next[id].meta,
-            persistedConfig,
-          );
-          const wasValidated =
-            persistedVersion >= 2 ? Boolean(p.configured) : false;
-          const configured =
-            wasValidated && meetsRequired && validateErrors.length === 0;
+          const meetsRequired = hasRequiredFields(next[id].meta, persistedConfig);
+          const wasValidated = persistedVersion >= 2 ? Boolean(p.configured) : false;
+          const configured = wasValidated && meetsRequired && validateErrors.length === 0;
           next[id] = {
             ...next[id],
             config: persistedConfig,
@@ -298,9 +264,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
       const config = { ...cur.config, ...patch };
       const configChanged = !shallowEqualConfig(cur.config, config);
       const validateErrors = validateConfig(cur.meta, config);
-      const configured = configChanged
-        ? false
-        : cur.configured && validateErrors.length === 0;
+      const configured = configChanged ? false : cur.configured && validateErrors.length === 0;
       const next = {
         ...state.registry,
         [id]: { ...cur, config, configured, validateErrors },
@@ -357,8 +321,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
               error?: string;
               detail?: string;
             };
-            const remoteMessage =
-              errorPayload.error || `远程验证失败 (HTTP ${response.status})`;
+            const remoteMessage = errorPayload.error || `远程验证失败 (HTTP ${response.status})`;
             validateErrors = errorPayload.detail
               ? [remoteMessage, errorPayload.detail]
               : [remoteMessage];
@@ -395,8 +358,7 @@ export const useProvidersStore = create<ProvidersStore>()((set, get) => ({
     if (!st) return;
     const now = Date.now();
     const age = now - (st.resources.fetchedAt || 0);
-    if (!force && st.resources.status === "success" && age < st.resources.ttlMs)
-      return; // fresh
+    if (!force && st.resources.status === "success" && age < st.resources.ttlMs) return; // fresh
     // mark loading
     set((s) => ({
       registry: {

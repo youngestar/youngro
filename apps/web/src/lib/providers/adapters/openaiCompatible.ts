@@ -41,12 +41,10 @@ interface ResolvedConnection {
 
 function resolveConnection(
   config: ProviderAdapterConfig,
-  options: OpenAICompatibleOptions,
+  options: OpenAICompatibleOptions
 ): ResolvedConnection {
   const apiKey = config.apiKey || readEnv(options.envApiKey);
-  const envBase = readEnv(
-    `${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`,
-  );
+  const envBase = readEnv(`${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`);
   const baseUrl = config.baseUrl?.trim() || envBase || options.defaultBaseUrl;
   return { apiKey, baseUrl };
 }
@@ -62,7 +60,7 @@ async function fetchJson<T>(url: string, init: RequestInit): Promise<T> {
 async function fetchModelListFromApi(
   apiKey: string,
   baseUrl: string,
-  headers?: Record<string, string>,
+  headers?: Record<string, string>
 ): Promise<ProviderModelInfo[]> {
   const url = `${trimEndSlash(baseUrl)}/models`;
   const body = await fetchJson<{
@@ -82,11 +80,7 @@ async function fetchModelListFromApi(
   }));
 }
 
-async function runChatCompletionProbe(params: {
-  apiKey: string;
-  baseUrl: string;
-  model: string;
-}) {
+async function runChatCompletionProbe(params: { apiKey: string; baseUrl: string; model: string }) {
   const endpoint = `${trimEndSlash(params.baseUrl)}/chat/completions`;
   await fetchJson(endpoint, {
     method: "POST",
@@ -107,7 +101,7 @@ async function runChatCompletionProbe(params: {
 }
 
 export function createOpenAICompatibleAdapter(
-  options: OpenAICompatibleOptions,
+  options: OpenAICompatibleOptions
 ): ChatProviderAdapter {
   const {
     id,
@@ -116,9 +110,7 @@ export function createOpenAICompatibleAdapter(
     validationChecks = ["model_list", "chat_completions"],
   } = options;
 
-  async function validateConfig(
-    config: ProviderAdapterConfig,
-  ): Promise<ProviderValidationResult> {
+  async function validateConfig(config: ProviderAdapterConfig): Promise<ProviderValidationResult> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
 
     const errors: string[] = [];
@@ -163,9 +155,7 @@ export function createOpenAICompatibleAdapter(
             });
           }
         } catch (err) {
-          errors.push(
-            `${check} 校验失败: ${(err as Error).message || "未知错误"}`,
-          );
+          errors.push(`${check} 校验失败: ${(err as Error).message || "未知错误"}`);
         }
       }
     }
@@ -173,9 +163,7 @@ export function createOpenAICompatibleAdapter(
     return { valid: errors.length === 0, errors };
   }
 
-  async function listModels(
-    config: ProviderAdapterConfig,
-  ): Promise<ProviderModelInfo[]> {
+  async function listModels(config: ProviderAdapterConfig): Promise<ProviderModelInfo[]> {
     const staticModels = modelList.length ? modelList : undefined;
 
     const { apiKey, baseUrl } = resolveConnection(config, options);
@@ -203,7 +191,7 @@ export function createOpenAICompatibleAdapter(
   async function* chatStream(
     messages: ChatMessageInput,
     config: ProviderAdapterConfig & { model?: string },
-    streamOptions?: { signal?: AbortSignal },
+    streamOptions?: { signal?: AbortSignal }
   ): AsyncIterable<ChatStreamChunk> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
     const normalizedBase = baseUrl ? trimEndSlash(baseUrl) : "";

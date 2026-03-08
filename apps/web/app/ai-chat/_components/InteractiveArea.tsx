@@ -5,22 +5,13 @@
  * - 上方显示消息历史，下方提供输入与发送。
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { useChatStore } from "@youngro/feature-chat";
 import { ChatHistory } from "./ChatHistory";
 import { Textarea, Button, ScrollArea, Icon } from "@youngro/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send, Volume2, VolumeX } from "lucide-react";
-import {
-  useProvidersStore,
-  useProvidersHydrate,
-} from "../../../src/store/providersStore";
+import { useProvidersStore, useProvidersHydrate } from "../../../src/store/providersStore";
 import { useConsciousnessStore } from "../../../src/store/consciousnessStore";
 import useStreamingSpeechPlayback from "../../../src/hooks/useStreamingSpeechPlayback";
 
@@ -33,8 +24,7 @@ export const InteractiveArea: React.FC = () => {
   useProvidersHydrate();
   const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const fetchModels = useProvidersStore((s) => s.fetchModels);
-  const { activeProviderId, activeModelId, customModelName } =
-    useConsciousnessStore();
+  const { activeProviderId, activeModelId, customModelName } = useConsciousnessStore();
 
   const fallbackProviderId = useMemo(() => {
     if (activeProviderId) return activeProviderId;
@@ -42,12 +32,10 @@ export const InteractiveArea: React.FC = () => {
     return configured?.meta.id || "deepseek";
   }, [activeProviderId, providers]);
 
-  const providerState = useProvidersStore((s) =>
-    s.getProvider(fallbackProviderId),
-  );
+  const providerState = useProvidersStore((s) => s.getProvider(fallbackProviderId));
   const models = useMemo(
     () => providerState?.resources.items ?? [],
-    [providerState?.resources.items],
+    [providerState?.resources.items]
   );
   const providerConfig = useMemo(() => {
     const cfg = providerState?.config;
@@ -160,14 +148,9 @@ export const InteractiveArea: React.FC = () => {
                             : "需先配置语音 Provider"
                         }
                         disabled={!speechPlaybackReady}
-                        onClick={() =>
-                          setSpeechAutoplayEnabled(!speechAutoplayEnabled)
-                        }
+                        onClick={() => setSpeechAutoplayEnabled(!speechAutoplayEnabled)}
                       >
-                        <Icon
-                          icon={speechAutoplayEnabled ? Volume2 : VolumeX}
-                          size="sm"
-                        />
+                        <Icon icon={speechAutoplayEnabled ? Volume2 : VolumeX} size="sm" />
                       </Button>
                       <Button
                         intent="primary"
@@ -175,9 +158,7 @@ export const InteractiveArea: React.FC = () => {
                         aria-label="发送"
                         title="发送"
                         disabled={
-                          sending ||
-                          !messageInput.trim() ||
-                          (!selectedModel && models.length === 0)
+                          sending || !messageInput.trim() || (!selectedModel && models.length === 0)
                         }
                         onClick={() => void handleSend()}
                       >

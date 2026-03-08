@@ -3,15 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
-import {
-  Button,
-  Checkbox,
-  Field,
-  Input,
-  RadioCard,
-  ScrollArea,
-  Textarea,
-} from "@youngro/ui";
+import { Button, Checkbox, Field, Input, RadioCard, ScrollArea, Textarea } from "@youngro/ui";
 import {
   useProvidersHydrate,
   useProvidersStore,
@@ -126,12 +118,10 @@ const SAMPLE_TEXT = "你好，我是 Youngro 的语音助手。";
 
 export function ClientSpeechPage() {
   useProvidersHydrate();
-  const speechProviders = useProvidersStore((s) =>
-    s.getProvidersByCategory("speech"),
-  );
+  const speechProviders = useProvidersStore((s) => s.getProvidersByCategory("speech"));
   const configuredSpeechProviders = useMemo(
     () => speechProviders.filter((provider) => provider.configured),
-    [speechProviders],
+    [speechProviders]
   );
   const fetchProviderModels = useProvidersStore((s) => s.fetchModels);
 
@@ -170,9 +160,7 @@ export function ClientSpeechPage() {
     modelsStatus,
   } = useSpeechResources({ providerId: activeProviderId });
 
-  const providerConfig = activeProvider?.config as
-    | SpeechProviderConfig
-    | undefined;
+  const providerConfig = activeProvider?.config as SpeechProviderConfig | undefined;
 
   const effectiveModelsStatus = modelsStatus;
 
@@ -251,13 +239,11 @@ export function ClientSpeechPage() {
       (m) =>
         m.id.toLowerCase().includes(q) ||
         m.name.toLowerCase().includes(q) ||
-        (m.description && m.description.toLowerCase().includes(q)),
+        (m.description && m.description.toLowerCase().includes(q))
     );
   }, [providerModels, modelSearch]);
 
-  const displayModels = showAllModels
-    ? filteredModels
-    : filteredModels.slice(0, 9);
+  const displayModels = showAllModels ? filteredModels : filteredModels.slice(0, 9);
 
   const availableVoices = useMemo<DemoVoice[]>(() => {
     if (providerVoices?.length) {
@@ -281,8 +267,7 @@ export function ClientSpeechPage() {
   const voiceLoadState = voiceStatus;
   const voiceLoadError = voicesError ?? null;
   const canFetchVoices = Boolean(
-    activeProviderId &&
-      (activeProvider?.config as SpeechProviderConfig | undefined)?.apiKey,
+    activeProviderId && (activeProvider?.config as SpeechProviderConfig | undefined)?.apiKey
   );
 
   const filteredVoices = useMemo<DemoVoice[]>(() => {
@@ -292,7 +277,7 @@ export function ClientSpeechPage() {
       (voice) =>
         voice.id.toLowerCase().includes(q) ||
         voice.name.toLowerCase().includes(q) ||
-        voice.description.toLowerCase().includes(q),
+        voice.description.toLowerCase().includes(q)
     );
   }, [availableVoices, voiceSearch]);
 
@@ -340,9 +325,7 @@ export function ClientSpeechPage() {
       return;
     }
 
-    const rawVoice = providerVoices?.find(
-      (voice) => voice.id === activeVoiceId,
-    );
+    const rawVoice = providerVoices?.find((voice) => voice.id === activeVoiceId);
     if (!rawVoice) {
       setErrorMessage("尚未从 Provider 拉取真实声线，无法生成试听");
       return;
@@ -351,23 +334,20 @@ export function ClientSpeechPage() {
     setErrorMessage(null);
     setIsGenerating(true);
     try {
-      const response = await fetch(
-        `/api/speech/providers/${activeProviderId}/synthesize`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...providerConfig,
-            text: trimmedText,
-            ssmlEnabled: useSSML,
-            voiceId: activeVoiceId,
-            voiceMetadata: rawVoice.metadata,
-            pitch,
-            rate,
-            modelId: activeModelId,
-          }),
-        },
-      );
+      const response = await fetch(`/api/speech/providers/${activeProviderId}/synthesize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...providerConfig,
+          text: trimmedText,
+          ssmlEnabled: useSSML,
+          voiceId: activeVoiceId,
+          voiceMetadata: rawVoice.metadata,
+          pitch,
+          rate,
+          modelId: activeModelId,
+        }),
+      });
 
       const payload = (await response.json().catch(() => null)) as {
         audio?: string;
@@ -377,8 +357,7 @@ export function ClientSpeechPage() {
       } | null;
 
       if (!response.ok) {
-        const remoteError =
-          payload?.error || payload?.detail || response.statusText;
+        const remoteError = payload?.error || payload?.detail || response.statusText;
         throw new Error(remoteError || "生成试听失败");
       }
 
@@ -390,10 +369,7 @@ export function ClientSpeechPage() {
         URL.revokeObjectURL(audioUrl);
       }
 
-      const blob = base64ToBlob(
-        payload.audio,
-        payload.mimeType || "audio/mpeg",
-      );
+      const blob = base64ToBlob(payload.audio, payload.mimeType || "audio/mpeg");
       const objectUrl = URL.createObjectURL(blob);
       setAudioUrl(objectUrl);
     } catch (error) {
@@ -432,14 +408,9 @@ export function ClientSpeechPage() {
                     {configuredSpeechProviders.map((provider) => {
                       const isActive = provider.meta.id === activeProviderId;
                       return (
-                        <div
-                          key={provider.meta.id}
-                          className="flex min-w-[16rem] flex-col gap-2"
-                        >
+                        <div key={provider.meta.id} className="flex min-w-[16rem] flex-col gap-2">
                           <RadioCard
-                            label={
-                              provider.meta.localizedName ?? provider.meta.id
-                            }
+                            label={provider.meta.localizedName ?? provider.meta.id}
                             description={provider.meta.localizedDescription}
                             icon={provider.meta.icon}
                             checked={isActive}
@@ -460,9 +431,7 @@ export function ClientSpeechPage() {
                       }}
                       className="relative flex min-w-[12rem] flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-100 bg-white p-4 text-sm text-neutral-500 transition-all hover:border-primary-500/40 dark:border-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-400"
                     >
-                      <span className="text-base font-medium">
-                        管理 / 新增 Provider
-                      </span>
+                      <span className="text-base font-medium">管理 / 新增 Provider</span>
                       <span className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                         前往 Provider 设置
                       </span>
@@ -558,9 +527,7 @@ export function ClientSpeechPage() {
                     size="sm"
                     onClick={() => setShowAllModels((prev) => !prev)}
                   >
-                    {showAllModels
-                      ? "收起模型"
-                      : `展开全部 ${filteredModels.length} 个模型`}
+                    {showAllModels ? "收起模型" : `展开全部 ${filteredModels.length} 个模型`}
                   </Button>
                 </div>
               )}
@@ -623,7 +590,7 @@ export function ClientSpeechPage() {
                             "rounded-2xl border p-4 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/60",
                             activeVoiceId === voice.id
                               ? "border-primary-200 bg-primary-50 shadow-sm dark:border-primary-900/60 dark:bg-primary-900/10"
-                              : "border-neutral-100 bg-neutral-50 hover:border-primary-200 dark:border-neutral-800 dark:bg-neutral-950/40",
+                              : "border-neutral-100 bg-neutral-50 hover:border-primary-200 dark:border-neutral-800 dark:bg-neutral-950/40"
                           )}
                         >
                           <div className="flex items-start justify-between gap-3">
@@ -716,10 +683,7 @@ export function ClientSpeechPage() {
               </Field>
 
               <label className="mt-2 flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                <Checkbox
-                  checked={useSSML}
-                  onChange={(e) => setUseSSML(e.target.checked)}
-                />
+                <Checkbox checked={useSSML} onChange={(e) => setUseSSML(e.target.checked)} />
                 启用 SSML 模式
               </label>
             </div>
@@ -729,9 +693,7 @@ export function ClientSpeechPage() {
         <div className="basis-full min-w-0 lg:basis-[55%] lg:max-w-[55%]">
           <div className="space-y-4 rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950/40">
             <div className="flex items-center gap-3">
-              <div className="rounded-full bg-primary-500/10 p-2 text-primary-500">
-                🗣️
-              </div>
+              <div className="rounded-full bg-primary-500/10 p-2 text-primary-500">🗣️</div>
               <div>
                 <h3 className="text-base font-medium text-neutral-700 dark:text-neutral-100">
                   播报测试
@@ -769,11 +731,7 @@ export function ClientSpeechPage() {
                 {isGenerating ? "生成中…" : "生成试听"}
               </Button>
               {audioUrl && (
-                <Button
-                  type="button"
-                  intent="subtle"
-                  onClick={handleStopPreview}
-                >
+                <Button type="button" intent="subtle" onClick={handleStopPreview}>
                   停止
                 </Button>
               )}
@@ -782,9 +740,7 @@ export function ClientSpeechPage() {
               </span>
             </div>
 
-            {audioUrl && (
-              <audio className="w-full" controls autoPlay src={audioUrl} />
-            )}
+            {audioUrl && <audio className="w-full" controls autoPlay src={audioUrl} />}
 
             {errorMessage && (
               <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-200">

@@ -56,11 +56,7 @@ async function createProcessor(langs: BundledLanguage[]): Promise<Processor> {
   };
 
   const { unified } = unifiedModule;
-  const remarkRehypePlugin = remarkRehype as unknown as Plugin<
-    [],
-    MdastRoot,
-    HastRoot
-  >;
+  const remarkRehypePlugin = remarkRehype as unknown as Plugin<[], MdastRoot, HastRoot>;
   const rehypeShikiPlugin = rehypeShiki as unknown as Plugin<
     [
       {
@@ -99,11 +95,7 @@ const fallback = async () => {
   const rehypeKatex = (await import("rehype-katex")).default;
   const rehypeStringify = (await import("rehype-stringify")).default;
 
-  const remarkRehypePlugin = remarkRehype as unknown as Plugin<
-    [],
-    MdastRoot,
-    HastRoot
-  >;
+  const remarkRehypePlugin = remarkRehype as unknown as Plugin<[], MdastRoot, HastRoot>;
   return unified()
     .use(remarkParse)
     .use(remarkMath)

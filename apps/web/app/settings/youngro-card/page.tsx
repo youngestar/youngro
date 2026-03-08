@@ -29,13 +29,13 @@ import { useSpeechStore } from "../../../src/store/speechStore";
 
 function Content() {
   const router = useRouter();
-  const { cards, activeCardId, addCard, removeCard, setActiveCard } =
-    useYoungroCards();
-  const { activeModelId: consciousnessModelId, customModelName } =
-    useConsciousnessStore((state) => ({
+  const { cards, activeCardId, addCard, removeCard, setActiveCard } = useYoungroCards();
+  const { activeModelId: consciousnessModelId, customModelName } = useConsciousnessStore(
+    (state) => ({
       activeModelId: state.activeModelId,
       customModelName: state.customModelName,
-    }));
+    })
+  );
   const {
     activeModelId: speechModelId,
     activeVoiceId,
@@ -51,11 +51,8 @@ function Content() {
   const currentConsciousnessModel =
     (customModelName?.trim() || consciousnessModelId || "").trim() || "未指定";
   const currentSpeechModel = (speechModelId || "").trim() || "未指定";
-  const preferredVoiceId = speechProviderId
-    ? voiceSelections[speechProviderId] || ""
-    : "";
-  const currentSpeechVoice =
-    (activeVoiceId || preferredVoiceId || "").trim() || "未指定";
+  const preferredVoiceId = speechProviderId ? voiceSelections[speechProviderId] || "" : "";
+  const currentSpeechVoice = (activeVoiceId || preferredVoiceId || "").trim() || "未指定";
 
   const currentModuleDefaults = React.useMemo(
     () => ({
@@ -63,13 +60,11 @@ function Content() {
       speechModel: currentSpeechModel,
       speechVoiceId: currentSpeechVoice,
     }),
-    [currentConsciousnessModel, currentSpeechModel, currentSpeechVoice],
+    [currentConsciousnessModel, currentSpeechModel, currentSpeechVoice]
   );
 
   const [search, setSearch] = React.useState("");
-  const [sort, setSort] = React.useState<"nameAsc" | "nameDesc" | "recent">(
-    "recent",
-  );
+  const [sort, setSort] = React.useState<"nameAsc" | "nameDesc" | "recent">("recent");
   const entries = Object.entries(cards).filter(([, card]) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
@@ -183,8 +178,7 @@ function Content() {
 
           {hasResults &&
             sorted.map(([id, card]) => {
-              const y = (card.extensions as { youngro: YoungroExtension })
-                .youngro;
+              const y = (card.extensions as { youngro: YoungroExtension }).youngro;
               return (
                 <CardListItem
                   key={id}
@@ -252,7 +246,7 @@ function Content() {
             });
             const postHistoryInstructions = composePostHistoryInstructions(
               DEFAULT_POST_HISTORY_INSTRUCTIONS,
-              v.postHistoryInstructions,
+              v.postHistoryInstructions
             );
             const baseCard = {
               name: v.name,

@@ -11,13 +11,7 @@ export interface FieldProps {
   children?: React.ReactNode;
 }
 
-export const Field: React.FC<FieldProps> = ({
-  label,
-  help,
-  error,
-  className,
-  children,
-}) => {
+export const Field: React.FC<FieldProps> = ({ label, help, error, className, children }) => {
   return (
     <div className={clsx("space-y-1", className)}>
       {label && (
@@ -26,11 +20,7 @@ export const Field: React.FC<FieldProps> = ({
         </label>
       )}
       {children}
-      {help && (
-        <p className="text-xs text-primary-400 dark:text-primary-300/70">
-          {help}
-        </p>
-      )}
+      {help && <p className="text-xs text-primary-400 dark:text-primary-300/70">{help}</p>}
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );

@@ -39,8 +39,7 @@ module.exports = {
         },
         "primary-foreground": "hsl(var(--primary-foreground) / <alpha-value>)",
         complementary: "hsl(var(--complementary) / <alpha-value>)",
-        "complementary-foreground":
-          "hsl(var(--complementary-foreground) / <alpha-value>)",
+        "complementary-foreground": "hsl(var(--complementary-foreground) / <alpha-value>)",
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
       },
@@ -71,7 +70,5 @@ module.exports = {
     },
   },
   plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
-  safelist: tokens.safelistAllPrimaryBackgrounds
-    ? tokens.safelistAllPrimaryBackgrounds()
-    : [],
+  safelist: tokens.safelistAllPrimaryBackgrounds ? tokens.safelistAllPrimaryBackgrounds() : [],
 };

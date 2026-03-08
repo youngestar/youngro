@@ -1,43 +1,43 @@
 {
-    "name":  "@youngro/icons",
-    "version":  "0.0.0",
-    "private":  true,
-    "main":  "dist/index.js",
-    "type":  "module",
-    "scripts":  {
-                    "build":  "node ./src/build-icons.mjs",
-                    "prepare":  "pnpm run build"
-                },
-    "files":  [
-                  "dist",
-                  "src"
-              ],
-    "peerDependencies":  {
-                             "react":  "\u003e=18"
-                         },
-    "devDependencies":  {
-                            "@svgr/core":  "^8.1.0",
-                            "@svgr/plugin-jsx":  "^8.1.0",
-                            "@svgr/plugin-prettier":  "^8.1.0",
-                            "@svgr/plugin-svgo":  "^8.1.0",
-                            "@types/react":  "18.3.3"
-                        },
-    "exports":  {
-                    ".":  {
-                              "types":  "./src/generated/index.d.ts",
-                              "import":  "./dist/index.js",
-                              "default":  "./dist/index.js"
-                          },
-                    "./react":  {
-                                    "types":  "./src/generated/index.d.ts",
-                                    "import":  "./dist/index.js",
-                                    "default":  "./dist/index.js"
-                                },
-                    "./dist":  {
-                                   "types":  "./src/generated/index.d.ts",
-                                   "import":  "./dist/index.js",
-                                   "default":  "./dist/index.js"
-                               }
-                },
-    "types":  "src/generated/index.d.ts"
+  "name": "@youngro/icons",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node ./src/build-icons.mjs",
+    "prepare": "pnpm run build"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-prettier": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
+    "@types/react": "18.3.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/generated/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./src/generated/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist": {
+      "types": "./src/generated/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "types": "src/generated/index.d.ts"
 }

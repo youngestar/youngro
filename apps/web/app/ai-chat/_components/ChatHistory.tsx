@@ -19,10 +19,7 @@ export const ChatHistory: React.FC = () => {
 
   // 仅展示用户可见的消息（隐藏 system 提示）
   // 过滤隐藏 system 消息，避免在 UI 中暴露系统提示词
-  const displayMessages = useMemo(
-    () => messages.filter((m) => m.role !== "system"),
-    [messages],
-  );
+  const displayMessages = useMemo(() => messages.filter((m) => m.role !== "system"), [messages]);
 
   const { endRef, scrollToBottom, showBackToBottom } = useChatAutoScroll();
 
@@ -50,13 +47,10 @@ export const ChatHistory: React.FC = () => {
       {/* 普通历史消息 */}
       {displayMessages.map((message: BaseMessage, index: number) => {
         const role: "user" | "assistant" | "error" =
-          message.role === "user" ||
-          message.role === "assistant" ||
-          message.role === "error"
+          message.role === "user" || message.role === "assistant" || message.role === "error"
             ? message.role
             : "assistant";
-        const content: string =
-          typeof message.content === "string" ? message.content : "";
+        const content: string = typeof message.content === "string" ? message.content : "";
         return (
           <AiChatMessage
             key={message.id ?? index}

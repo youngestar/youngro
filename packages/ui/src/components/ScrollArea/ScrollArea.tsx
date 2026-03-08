@@ -4,9 +4,7 @@ import * as React from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import clsx from "clsx";
 
-export type ScrollAreaProps = React.ComponentPropsWithoutRef<
-  typeof ScrollAreaPrimitive.Root
-> & {
+export type ScrollAreaProps = React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
   variant?: "default" | "contrast" | "textarea";
   thickness?: "sm" | "md" | "lg";
   viewportClassName?: string;
@@ -36,12 +34,11 @@ export const ScrollArea = React.forwardRef<
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const isContrast = variant === "contrast";
     const isTextareaTone = variant === "textarea";
-    const thicknessClsVertical =
-      thickness === "lg" ? "w-3" : thickness === "sm" ? "w-2" : "w-2.5"; // md default ≈ 10px
+    const thicknessClsVertical = thickness === "lg" ? "w-3" : thickness === "sm" ? "w-2" : "w-2.5"; // md default ≈ 10px
     const thicknessClsHorizontal =
       thickness === "lg" ? "h-3" : thickness === "sm" ? "h-2" : "h-2.5";
     return (
@@ -65,7 +62,7 @@ export const ScrollArea = React.forwardRef<
               : isTextareaTone
                 ? "bg-primary-50/50 dark:bg-primary-950/70"
                 : undefined,
-            scrollbarClassName,
+            scrollbarClassName
           )}
         >
           <ScrollAreaPrimitive.Thumb
@@ -76,7 +73,7 @@ export const ScrollArea = React.forwardRef<
                 : isTextareaTone
                   ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
-              thumbClassName,
+              thumbClassName
             )}
           />
         </ScrollAreaPrimitive.Scrollbar>
@@ -90,7 +87,7 @@ export const ScrollArea = React.forwardRef<
               : isTextareaTone
                 ? "bg-primary-200/20 dark:bg-primary-400/20 hover:bg-primary-200/30 dark:hover:bg-primary-400/30"
                 : undefined,
-            scrollbarClassName,
+            scrollbarClassName
           )}
         >
           <ScrollAreaPrimitive.Thumb
@@ -101,14 +98,14 @@ export const ScrollArea = React.forwardRef<
                 : isTextareaTone
                   ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
                   : "bg-border",
-              thumbClassName,
+              thumbClassName
             )}
           />
         </ScrollAreaPrimitive.Scrollbar>
         <ScrollAreaPrimitive.Corner />
       </ScrollAreaPrimitive.Root>
     );
-  },
+  }
 );
 ScrollArea.displayName = "ScrollArea";
 

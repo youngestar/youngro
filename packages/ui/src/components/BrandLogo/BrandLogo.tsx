@@ -25,14 +25,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <picture className={className}>
         <source media="(prefers-color-scheme: dark)" srcSet={srcDark} />
-        <img
-          src={srcLight}
-          alt={alt}
-          loading={loading}
-          width={width}
-          height={height}
-          {...rest}
-        />
+        <img src={srcLight} alt={alt} loading={loading} width={width} height={height} {...rest} />
       </picture>
     );
   }

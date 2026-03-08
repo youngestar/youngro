@@ -124,12 +124,10 @@ export function nextToken(input: string, from = 0): Token | null {
   if (m[1]) {
     const name = m[1]!;
     const tok: EmoteToken = { kind: "emote", raw, start, end, name };
-    if ((KNOWN_EMOTIONS as readonly string[]).includes(name))
-      tok.known = name as KnownEmotion;
+    if ((KNOWN_EMOTIONS as readonly string[]).includes(name)) tok.known = name as KnownEmotion;
     return tok;
   }
-  if (m[2])
-    return { kind: "delay", raw, start, end, seconds: parseFloat(m[2]!) };
+  if (m[2]) return { kind: "delay", raw, start, end, seconds: parseFloat(m[2]!) };
   if (m[3]) return { kind: "motion", raw, start, end, name: m[3]! };
   return null;
 }
@@ -138,11 +136,7 @@ export function nextToken(input: string, from = 0): Token | null {
  * sliceWithoutTokens
  * Utility to slice a substring and then strip tokens within that slice only.
  */
-export function sliceWithoutTokens(
-  input: string,
-  start: number,
-  end?: number,
-): string {
+export function sliceWithoutTokens(input: string, start: number, end?: number): string {
   return stripTokens(input.slice(start, end));
 }
 

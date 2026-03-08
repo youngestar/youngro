@@ -45,7 +45,7 @@ export const HeaderLink: React.FC<HeaderLinkProps> = ({
       href={href}
       className={clsx(
         "inline-flex items-center gap-2 px-2 text-2xl outline-none text-nowrap",
-        className,
+        className
       )}
       {...rest}
     >
@@ -60,9 +60,7 @@ export const HeaderLink: React.FC<HeaderLinkProps> = ({
       ) : null}
 
       {title ? (
-        <span className={clsx("font-semibold select-none", titleClassName)}>
-          {title}
-        </span>
+        <span className={clsx("font-semibold select-none", titleClassName)}>{title}</span>
       ) : null}
     </a>
   );

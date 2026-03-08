@@ -6,9 +6,7 @@
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        messages: [
-          { role: "user", content: "你好，简单自我介绍一下，50字以内。" },
-        ],
+        messages: [{ role: "user", content: "你好，简单自我介绍一下，50字以内。" }],
         model: "deepseek-chat",
         stream: false,
       }),

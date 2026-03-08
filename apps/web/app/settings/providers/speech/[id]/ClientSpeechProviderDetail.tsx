@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Button,
-  Checkbox,
-  Field,
-  Input,
-  RadioCard,
-  ScrollArea,
-  Textarea,
-} from "@youngro/ui";
+import { Button, Checkbox, Field, Input, RadioCard, ScrollArea, Textarea } from "@youngro/ui";
 import ProviderPageHeader from "../../../../../src/components/ProviderPageHeader";
 import {
   useProvidersHydrate,
@@ -20,10 +12,7 @@ import {
 import { useSpeechStore } from "../../../../../src/store/speechStore";
 import { useSpeechResources } from "../../../../../src/hooks/useSpeechResources";
 
-const VOICE_PRESETS: Record<
-  string,
-  Array<{ id: string; name: string; info: string }>
-> = {
+const VOICE_PRESETS: Record<string, Array<{ id: string; name: string; info: string }>> = {
   elevenlabs: [
     { id: "clara", name: "Clara", info: "温柔女声 · 英语" },
     { id: "ava", name: "Ava", info: "清亮女声 · 多语言" },
@@ -70,9 +59,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const [secretKey, setSecretKey] = useState("");
   const [region, setRegion] = useState("");
   const [appId, setAppId] = useState<string | number | "">("");
-  const [voiceTypeField, setVoiceTypeField] = useState<string | number | "">(
-    "",
-  );
+  const [voiceTypeField, setVoiceTypeField] = useState<string | number | "">("");
   const [websiteType, setWebsiteType] = useState(DEFAULT_TENCENT_WEBSITE_TYPE);
   const [modelId, setModelId] = useState("");
   const [voiceQuery, setVoiceQuery] = useState("");
@@ -88,9 +75,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
-  const [testStatus, setTestStatus] = useState<
-    "idle" | "testing" | "success" | "error"
-  >("idle");
+  const [testStatus, setTestStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
   const [lastValidatedAt, setLastValidatedAt] = useState<number | null>(null);
 
   const meta = providerState?.meta;
@@ -203,20 +188,12 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     if (config.voiceId && !activeVoiceId) {
       setActiveVoiceId(config.voiceId);
     }
-  }, [
-    providerId,
-    providerState,
-    activeVoiceId,
-    setActiveVoiceId,
-    speechStoreActiveProviderId,
-  ]);
+  }, [providerId, providerState, activeVoiceId, setActiveVoiceId, speechStoreActiveProviderId]);
 
   useEffect(() => {
     if (!providerState) return;
-    const justConfigured =
-      providerState.configured && !prevConfiguredRef.current;
-    const justInvalidated =
-      !providerState.configured && prevConfiguredRef.current;
+    const justConfigured = providerState.configured && !prevConfiguredRef.current;
+    const justInvalidated = !providerState.configured && prevConfiguredRef.current;
     if (justConfigured) {
       setTestStatus("success");
       setLastValidatedAt(Date.now());
@@ -238,9 +215,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     return VOICE_PRESETS[id] || VOICE_PRESETS.default;
   }, [providerId]) as Array<{ id: string; name: string; info: string }>;
 
-  const voices = useMemo<
-    Array<{ id: string; name: string; info: string }>
-  >(() => {
+  const voices = useMemo<Array<{ id: string; name: string; info: string }>>(() => {
     if (providerVoices?.length) {
       return providerVoices.map((voice) => ({
         id: voice.id,
@@ -254,16 +229,14 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     return fallbackVoices;
   }, [providerVoices, fallbackVoices]);
 
-  const filteredVoices = useMemo<
-    Array<{ id: string; name: string; info: string }>
-  >(() => {
+  const filteredVoices = useMemo<Array<{ id: string; name: string; info: string }>>(() => {
     if (!voiceQuery.trim()) return voices;
     const q = voiceQuery.toLowerCase();
     return voices.filter(
       (voice) =>
         voice.id.toLowerCase().includes(q) ||
         voice.name.toLowerCase().includes(q) ||
-        voice.info.toLowerCase().includes(q),
+        voice.info.toLowerCase().includes(q)
     );
   }, [voices, voiceQuery]);
 
@@ -280,8 +253,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   const credentialStatus = providerState?.validating
     ? {
         label: "校验中...",
-        className:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/60",
+        className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/60",
       }
     : providerState?.configured
       ? {
@@ -381,7 +353,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
       setErrorMessage(
         isTencentProvider
           ? "请先填写 SecretId 和 SecretKey 以拉取腾讯云声线"
-          : "请先填写 API Key 以拉取声线",
+          : "请先填写 API Key 以拉取声线"
       );
       return;
     }
@@ -392,11 +364,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
   async function handleGeneratePreview() {
     if (!providerId) return;
     if (!hasVoiceCredentials) {
-      setErrorMessage(
-        isTencentProvider
-          ? "请先填写 SecretId 和 SecretKey"
-          : "请先填写 API Key",
-      );
+      setErrorMessage(isTencentProvider ? "请先填写 SecretId 和 SecretKey" : "请先填写 API Key");
       return;
     }
 
@@ -416,7 +384,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     }
 
     const selectedVoiceMetadata = providerVoices?.find(
-      (voice) => voice.id === activeVoiceId,
+      (voice) => voice.id === activeVoiceId
     )?.metadata;
 
     const payload = {
@@ -433,25 +401,19 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
     setErrorMessage(null);
     setIsGenerating(true);
     try {
-      const response = await fetch(
-        `/api/speech/providers/${providerId}/synthesize`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetch(`/api/speech/providers/${providerId}/synthesize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => ({}))) as {
           error?: string;
           detail?: string;
         };
-        const message =
-          errorPayload.error || `语音合成失败 (HTTP ${response.status})`;
-        throw new Error(
-          errorPayload.detail ? `${message}: ${errorPayload.detail}` : message,
-        );
+        const message = errorPayload.error || `语音合成失败 (HTTP ${response.status})`;
+        throw new Error(errorPayload.detail ? `${message}: ${errorPayload.detail}` : message);
       }
 
       const data = (await response.json()) as {
@@ -516,9 +478,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
                   填写 {meta.localizedName} 的 API Key、Base URL 以及默认声线。
                 </p>
               </div>
-              <span
-                className={`rounded-md border px-2 py-1 text-xs ${credentialStatus.className}`}
-              >
+              <span className={`rounded-md border px-2 py-1 text-xs ${credentialStatus.className}`}>
                 {credentialStatus.label}
               </span>
             </div>
@@ -638,15 +598,11 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
               {testStatus === "success" && (
                 <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   验证成功
-                  {lastValidatedAt
-                    ? ` · ${new Date(lastValidatedAt).toLocaleTimeString()}`
-                    : ""}
+                  {lastValidatedAt ? ` · ${new Date(lastValidatedAt).toLocaleTimeString()}` : ""}
                 </span>
               )}
               {testStatus === "error" && (
-                <span className="text-xs text-rose-500">
-                  验证失败，请检查输入。
-                </span>
+                <span className="text-xs text-rose-500">验证失败，请检查输入。</span>
               )}
             </div>
           </section>
@@ -720,9 +676,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
           <section className="rounded-2xl border border-neutral-200/70 bg-white/70 p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/40">
             <div className="flex flex-col gap-1">
               <h2 className="text-base font-medium">试听与调节</h2>
-              <p className="text-sm text-neutral-500">
-                接入后可在此输入文本/SSML 并试听效果。
-              </p>
+              <p className="text-sm text-neutral-500">接入后可在此输入文本/SSML 并试听效果。</p>
             </div>
 
             <div className="mt-4 flex flex-col gap-3">
@@ -734,10 +688,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
                   placeholder="输入待合成文本"
                 />
               </Field>
-              <Field
-                label="SSML 输入"
-                help="勾选后启用 SSML，未勾选时忽略此内容"
-              >
+              <Field label="SSML 输入" help="勾选后启用 SSML，未勾选时忽略此内容">
                 <Textarea
                   minRows={3}
                   value={ssmlInput}
@@ -778,34 +729,18 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  intent="primary"
-                  disabled={isGenerating}
-                  onClick={handleGeneratePreview}
-                >
+                <Button intent="primary" disabled={isGenerating} onClick={handleGeneratePreview}>
                   {isGenerating ? "生成中..." : "生成试听"}
                 </Button>
-                <Button
-                  intent="default"
-                  disabled={!audioUrl}
-                  onClick={handleStopPreview}
-                >
+                <Button intent="default" disabled={!audioUrl} onClick={handleStopPreview}>
                   停止播放
                 </Button>
                 {errorMessage && (
-                  <span className="text-xs text-amber-600 dark:text-amber-400">
-                    {errorMessage}
-                  </span>
+                  <span className="text-xs text-amber-600 dark:text-amber-400">{errorMessage}</span>
                 )}
               </div>
 
-              {audioUrl && (
-                <audio
-                  controls
-                  src={audioUrl ?? undefined}
-                  className="mt-2 w-full"
-                />
-              )}
+              {audioUrl && <audio controls src={audioUrl ?? undefined} className="mt-2 w-full" />}
             </div>
           </section>
         </div>

@@ -13,18 +13,8 @@ export type { FieldProps } from "./Field";
 export { Select } from "./Select";
 export type { SelectProps, SelectOption } from "./Select";
 export { HeadlessSelect } from "./Select/HeadlessSelect";
-export type {
-  HeadlessSelectOption,
-  HeadlessSelectProps,
-} from "./Select/HeadlessSelect";
-export {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "./Card";
+export type { HeadlessSelectOption, HeadlessSelectProps } from "./Select/HeadlessSelect";
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./Card";
 export { Icon } from "./Icon";
 export type { IconProps } from "./Icon";
 export { BrandLogo } from "./BrandLogo";

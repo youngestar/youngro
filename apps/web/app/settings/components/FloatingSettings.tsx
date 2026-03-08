@@ -20,9 +20,7 @@ export function FloatingSettings() {
   return (
     <div
       aria-hidden
-      className={
-        "pointer-events-none fixed z-[-1] flex items-center justify-center"
-      }
+      className={"pointer-events-none fixed z-[-1] flex items-center justify-center"}
       style={{
         // mirror: top="calc(100dvh - 12rem)", right="-2.5rem" (right--10), size-60 (15rem)
         top: "calc(100dvh - 12rem)",
@@ -30,9 +28,7 @@ export function FloatingSettings() {
         width: "15rem",
         height: "15rem",
         color: "#E4E4E4",
-        transform: mounted
-          ? "scale(1) rotate(0deg)"
-          : "scale(0.9) rotate(180deg)",
+        transform: mounted ? "scale(1) rotate(0deg)" : "scale(0.9) rotate(180deg)",
         opacity: mounted ? 1 : 0,
         transition: "transform 500ms ease, opacity 500ms ease",
       }}

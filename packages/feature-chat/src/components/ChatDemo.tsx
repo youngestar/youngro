@@ -24,9 +24,7 @@ export function ChatDemo() {
         {messages.map((m) => (
           <div key={m.id} style={{ marginBottom: 8 }}>
             <strong>{m.role}:</strong>{" "}
-            {typeof m.content === "string"
-              ? m.content
-              : JSON.stringify(m.content)}
+            {typeof m.content === "string" ? m.content : JSON.stringify(m.content)}
           </div>
         ))}
         {sending && streamingMessage && (

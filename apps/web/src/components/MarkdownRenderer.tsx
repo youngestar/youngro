@@ -15,10 +15,7 @@ export interface MarkdownRendererProps {
   className?: string;
 }
 
-export default function MarkdownRenderer({
-  content = "",
-  className,
-}: MarkdownRendererProps) {
+export default function MarkdownRenderer({ content = "", className }: MarkdownRendererProps) {
   const [html, setHtml] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -45,10 +42,7 @@ export default function MarkdownRenderer({
     };
   }, [content]);
 
-  if (html === null)
-    return <div className={className}>{/* loading 占位 */}</div>;
+  if (html === null) return <div className={className}>{/* loading 占位 */}</div>;
 
-  return (
-    <div className={className} dangerouslySetInnerHTML={{ __html: html }} />
-  );
+  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }

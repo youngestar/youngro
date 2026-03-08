@@ -120,9 +120,7 @@ export async function chatStreaming(params: {
                   ? (rec.error as Record<string, unknown>)
                   : undefined;
               const m =
-                errObj?.message && typeof errObj.message === "string"
-                  ? errObj.message
-                  : undefined;
+                errObj?.message && typeof errObj.message === "string" ? errObj.message : undefined;
               params.onEvent({
                 type: "error",
                 error: { message: m || "error" },
@@ -157,9 +155,7 @@ export async function chatStreaming(params: {
                 ? (rec.error as Record<string, unknown>)
                 : undefined;
             const m =
-              errObj?.message && typeof errObj.message === "string"
-                ? errObj.message
-                : undefined;
+              errObj?.message && typeof errObj.message === "string" ? errObj.message : undefined;
             params.onEvent({ type: "error", error: { message: m || "error" } });
           }
         }

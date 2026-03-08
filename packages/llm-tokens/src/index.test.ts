@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseTokens,
-  stripTokens,
-  nextToken,
-  KNOWN_EMOTIONS,
-  ANY_TOKEN_RE,
-} from "./index";
+import { parseTokens, stripTokens, nextToken, KNOWN_EMOTIONS, ANY_TOKEN_RE } from "./index";
 
 describe("emotion-tokens basic parsing", () => {
   it("parses mixed emote and delay tokens", () => {

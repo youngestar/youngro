@@ -22,25 +22,13 @@ const radio = cva(
       intent: "default",
       size: "md",
     },
-  },
+  }
 );
 
-export type RadioProps = React.InputHTMLAttributes<HTMLInputElement> &
-  VariantProps<typeof radio>;
+export type RadioProps = React.InputHTMLAttributes<HTMLInputElement> & VariantProps<typeof radio>;
 
-export const Radio: React.FC<RadioProps> = ({
-  className,
-  intent,
-  size,
-  ...props
-}) => {
-  return (
-    <input
-      type="radio"
-      {...props}
-      className={clsx(radio({ intent, size }), className)}
-    />
-  );
+export const Radio: React.FC<RadioProps> = ({ className, intent, size, ...props }) => {
+  return <input type="radio" {...props} className={clsx(radio({ intent, size }), className)} />;
 };
 
 export default Radio;

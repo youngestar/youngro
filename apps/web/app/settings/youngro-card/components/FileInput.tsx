@@ -55,12 +55,7 @@ export function FileInput({ onFiles }: { onFiles: (files: FileList) => void }) {
       <p className="font-medium text-neutral-600 dark:text-neutral-300">
         {dragOver ? "释放以导入（.json）" : "导入卡片（.json）"}
       </p>
-      <input
-        type="file"
-        accept=".json"
-        className="hidden"
-        onChange={onChange}
-      />
+      <input type="file" accept=".json" className="hidden" onChange={onChange} />
     </label>
   );
 }

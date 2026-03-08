@@ -18,7 +18,7 @@ export function ClientConsciousnessPage() {
   useConsciousnessHydrate();
 
   const providers = useProvidersStore((s) =>
-    s.getProvidersByCategory("chat").filter((p: ProviderState) => p.configured),
+    s.getProvidersByCategory("chat").filter((p: ProviderState) => p.configured)
   );
   const fetchModels = useProvidersStore((s) => s.fetchModels);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -36,14 +36,14 @@ export function ClientConsciousnessPage() {
 
   const activeProvider = useMemo(
     () => providers.find((p) => p.meta.id === activeProviderId),
-    [providers, activeProviderId],
+    [providers, activeProviderId]
   );
 
   const supportsModelListing = !!activeProvider; // chat providers 视为支持 list models
 
   const providerModels = useMemo(
     () => activeProvider?.resources.items ?? [],
-    [activeProvider?.resources.items],
+    [activeProvider?.resources.items]
   );
   const modelsStatus = activeProvider?.resources.status ?? "idle";
   const modelsError = activeProvider?.resources.error ?? null;
@@ -55,13 +55,11 @@ export function ClientConsciousnessPage() {
       (m) =>
         m.id.toLowerCase().includes(q) ||
         m.name.toLowerCase().includes(q) ||
-        (m.description && m.description.toLowerCase().includes(q)),
+        (m.description && m.description.toLowerCase().includes(q))
     );
   }, [providerModels, modelSearchQuery]);
 
-  const displayedModels = showAllModels
-    ? filteredModels
-    : filteredModels.slice(0, 12);
+  const displayedModels = showAllModels ? filteredModels : filteredModels.slice(0, 12);
 
   const hasConfiguredProviders = providers.length > 0;
 
@@ -156,9 +154,7 @@ export function ClientConsciousnessPage() {
               onClick={handleRefreshModels}
               disabled={modelsStatus === "loading" || isRefreshing}
             >
-              {modelsStatus === "loading" || isRefreshing
-                ? "重新拉取中…"
-                : "重新拉取模型"}
+              {modelsStatus === "loading" || isRefreshing ? "重新拉取中…" : "重新拉取模型"}
             </Button>
           </div>
 
@@ -210,8 +206,7 @@ export function ClientConsciousnessPage() {
 
                   {filteredModels.length === 0 && modelSearchQuery && (
                     <div className="py-8 text-center text-sm text-neutral-500">
-                      没有找到匹配 「
-                      <span className="font-mono">{modelSearchQuery}</span>
+                      没有找到匹配 「<span className="font-mono">{modelSearchQuery}</span>
                       」的模型。
                     </div>
                   )}
@@ -246,9 +241,7 @@ export function ClientConsciousnessPage() {
                     customModelName,
                   });
                 }}
-                disabled={
-                  !activeProviderId || (!activeModelId && !customModelName)
-                }
+                disabled={!activeProviderId || (!activeModelId && !customModelName)}
               >
                 保存
               </Button>

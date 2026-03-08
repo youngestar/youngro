@@ -34,12 +34,5 @@ export default function ProviderPageHeader({
     router.back();
   };
 
-  return (
-    <PageHeader
-      title={titleNode}
-      subtitle={subtitle}
-      showBackButton
-      onBack={handleBack}
-    />
-  );
+  return <PageHeader title={titleNode} subtitle={subtitle} showBackButton onBack={handleBack} />;
 }

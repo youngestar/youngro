@@ -41,15 +41,13 @@ export interface ChatState {
       model?: string;
       providerId?: string;
       providerConfig?: Record<string, unknown>;
-    },
+    }
   ) => Promise<void>;
   cancel: () => void;
   cleanup: () => void;
   registerOnTokenLiteral: (cb: (s: string) => void) => () => void;
   registerOnStreamEnd: (cb: () => void) => () => void;
-  registerOnStreamingTokens: (
-    cb: (payload: StreamingChunkPayload) => void,
-  ) => () => void;
+  registerOnStreamingTokens: (cb: (payload: StreamingChunkPayload) => void) => () => void;
   registerOnStreamFlush: (cb: () => void) => () => void;
   // sync system prompt from active Youngro card
   applyActiveCardSystemPrompt: () => void;
@@ -75,7 +73,7 @@ export const useChatStore = create<ChatState>()(
           model?: string;
           providerId?: string;
           providerConfig?: Record<string, unknown>;
-        },
+        }
       ) => {
         if (!text) return;
         const id = String(Date.now());
@@ -167,8 +165,7 @@ export const useChatStore = create<ChatState>()(
                 let textDelta = rawChunk;
                 let tokenPayload: EmotionToken[] = [];
                 if (ENABLE_TOKEN_PARSE) {
-                  const { textDelta: parsed, tokens } =
-                    streamTokenizer.ingest(rawChunk);
+                  const { textDelta: parsed, tokens } = streamTokenizer.ingest(rawChunk);
                   textDelta = parsed;
                   tokenPayload = tokens;
                 }
@@ -177,8 +174,7 @@ export const useChatStore = create<ChatState>()(
                   set((st) => {
                     if (!st.streamingMessage) return;
                     st.streamingMessage.content += visible;
-                    st.streamingMessage.slices =
-                      st.streamingMessage.slices || [];
+                    st.streamingMessage.slices = st.streamingMessage.slices || [];
                     st.streamingMessage.slices.push({
                       type: "text",
                       text: visible,
@@ -192,15 +188,12 @@ export const useChatStore = create<ChatState>()(
               } else if (t === "finish") {
                 if (ENABLE_TOKEN_PARSE) {
                   const flushResult = streamTokenizer.flush();
-                  const flushText = flushResult.textDelta
-                    ? stripTokens(flushResult.textDelta)
-                    : "";
+                  const flushText = flushResult.textDelta ? stripTokens(flushResult.textDelta) : "";
                   if (flushText) {
                     set((st) => {
                       if (!st.streamingMessage) return;
                       st.streamingMessage.content += flushText;
-                      st.streamingMessage.slices =
-                        st.streamingMessage.slices || [];
+                      st.streamingMessage.slices = st.streamingMessage.slices || [];
                       st.streamingMessage.slices.push({
                         type: "text",
                         text: flushText,
@@ -222,9 +215,7 @@ export const useChatStore = create<ChatState>()(
                     st.streamingMessage.slices.length > 0
                   ) {
                     if (typeof st.streamingMessage.content === "string") {
-                      st.streamingMessage.content = stripTokens(
-                        st.streamingMessage.content,
-                      );
+                      st.streamingMessage.content = stripTokens(st.streamingMessage.content);
                     }
                     st.messages.push({
                       ...(st.streamingMessage as BaseMessage),
@@ -306,13 +297,11 @@ export const useChatStore = create<ChatState>()(
             }
             if (textDelta || tokens.length) {
               get().onStreamingTokens.forEach((cb) =>
-                cb({ text: textDelta ? stripTokens(textDelta) : "", tokens }),
+                cb({ text: textDelta ? stripTokens(textDelta) : "", tokens })
               );
             }
             if (typeof s.streamingMessage.content === "string") {
-              s.streamingMessage.content = stripTokens(
-                s.streamingMessage.content,
-              );
+              s.streamingMessage.content = stripTokens(s.streamingMessage.content);
             }
           }
           s.streamingMessage = null;
@@ -428,8 +417,8 @@ export const useChatStore = create<ChatState>()(
         (state as any).messages = cleaned;
         return state as ChatState;
       },
-    },
-  ),
+    }
+  )
 );
 
 // 从 localStorage 读取激活的 Youngro 卡片（若有）
@@ -446,8 +435,7 @@ function getActiveYoungroCardFromStorage():
   if (typeof window === "undefined") return null;
   try {
     const rawCards = window.localStorage.getItem("youngro-cards");
-    const activeId =
-      window.localStorage.getItem("youngro-card-active-id") || "";
+    const activeId = window.localStorage.getItem("youngro-card-active-id") || "";
     if (!rawCards || !activeId) return null;
     const map = JSON.parse(rawCards) as Record<string, any>;
     return map[activeId] || null;

@@ -10,12 +10,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <PageHeader
-          title="设置"
-          subtitle="Settings"
-          showBackButton
-          onBack={() => router.back()}
-        />
+        <PageHeader title="设置" subtitle="Settings" showBackButton onBack={() => router.back()} />
         <div className="flex flex-col gap-4 pb-12">
           <IconItem
             title="角色卡"

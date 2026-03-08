@@ -72,8 +72,7 @@ export function useScrollToHash({
     };
     window.addEventListener("hashchange", onHashChange);
 
-    let popStateHandler: ((this: Window, ev: PopStateEvent) => void) | null =
-      null;
+    let popStateHandler: ((this: Window, ev: PopStateEvent) => void) | null = null;
     if (queryParam) {
       popStateHandler = () => {
         retries = 0;
@@ -91,15 +90,7 @@ export function useScrollToHash({
         window.clearTimeout(timerRef.current);
       }
     };
-  }, [
-    auto,
-    offset,
-    behavior,
-    maxRetries,
-    retryDelay,
-    queryParam,
-    clearQueryParam,
-  ]);
+  }, [auto, offset, behavior, maxRetries, retryDelay, queryParam, clearQueryParam]);
 }
 
 export default useScrollToHash;

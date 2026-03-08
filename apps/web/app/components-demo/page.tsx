@@ -60,28 +60,13 @@ export default function ComponentsDemo() {
           <div className="flex items-center gap-3">
             <span className="text-xs w-24 text-neutral-500">size</span>
             <div className="flex items-center gap-4">
-              <Button
-                iconOnly
-                size="sm"
-                intent="default"
-                aria-label="播放（小）"
-              >
+              <Button iconOnly size="sm" intent="default" aria-label="播放（小）">
                 <Icon icon={Play} />
               </Button>
-              <Button
-                iconOnly
-                size="md"
-                intent="default"
-                aria-label="播放（中）"
-              >
+              <Button iconOnly size="md" intent="default" aria-label="播放（中）">
                 <Icon icon={Play} />
               </Button>
-              <Button
-                iconOnly
-                size="lg"
-                intent="default"
-                aria-label="播放（大）"
-              >
+              <Button iconOnly size="lg" intent="default" aria-label="播放（大）">
                 <Icon icon={Play} />
               </Button>
             </div>
@@ -108,37 +93,22 @@ export default function ComponentsDemo() {
 
       <section style={{ marginTop: 16 }}>
         <h2>Textarea</h2>
-        <Textarea
-          value={textVal}
-          onChange={(e) => setTextVal(e.target.value)}
-          rows={4}
-        />
+        <Textarea value={textVal} onChange={(e) => setTextVal(e.target.value)} rows={4} />
       </section>
 
       <section style={{ marginTop: 16 }}>
         <h2>Checkbox / Radio</h2>
         <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Checkbox
-            checked={checked}
-            onChange={(e) => setChecked(e.target.checked)}
-          />
+          <Checkbox checked={checked} onChange={(e) => setChecked(e.target.checked)} />
           Toggle
         </label>
         <div style={{ marginTop: 8 }}>
           <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Radio
-              name="r"
-              checked={radio === "a"}
-              onChange={() => setRadio("a")}
-            />
+            <Radio name="r" checked={radio === "a"} onChange={() => setRadio("a")} />
             Option A
           </label>
           <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Radio
-              name="r"
-              checked={radio === "b"}
-              onChange={() => setRadio("b")}
-            />
+            <Radio name="r" checked={radio === "b"} onChange={() => setRadio("b")} />
             Option B
           </label>
         </div>
@@ -146,34 +116,19 @@ export default function ComponentsDemo() {
 
       <section style={{ marginTop: 16 }}>
         <h2>Field wrapper</h2>
-        <Field
-          label="用户名"
-          help="示例帮助文本"
-          error={inputVal.length > 10 ? "太长" : undefined}
-        >
-          <Input
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-          />
+        <Field label="用户名" help="示例帮助文本" error={inputVal.length > 10 ? "太长" : undefined}>
+          <Input value={inputVal} onChange={(e) => setInputVal(e.target.value)} />
         </Field>
       </section>
 
       <section style={{ marginTop: 16 }}>
         <h2>Native Select</h2>
-        <Select
-          options={options}
-          value={sel}
-          onChange={(e) => setSel(e.target.value)}
-        />
+        <Select options={options} value={sel} onChange={(e) => setSel(e.target.value)} />
       </section>
 
       <section style={{ marginTop: 16 }}>
         <h2>Headless Select (Radix)</h2>
-        <HeadlessSelect
-          options={options}
-          value={hs}
-          onValueChange={(v: string) => setHs(v)}
-        />
+        <HeadlessSelect options={options} value={hs} onValueChange={(v: string) => setHs(v)} />
       </section>
 
       <section style={{ marginTop: 16 }}>

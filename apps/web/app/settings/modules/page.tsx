@@ -11,12 +11,7 @@ export default function SettingsModulesPage() {
 
   return (
     <section className={styles.page}>
-      <PageHeader
-        title="模块"
-        subtitle="Modules"
-        showBackButton
-        onBack={() => router.back()}
-      />
+      <PageHeader title="模块" subtitle="Modules" showBackButton onBack={() => router.back()} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {modulesList.map((module, index) => {
           const ModuleIcon = module.icon;
@@ -27,11 +22,7 @@ export default function SettingsModulesPage() {
               href={module.href}
               title={module.name}
               description={module.description}
-              icon={
-                ModuleIcon ? (
-                  <ModuleIcon className="h-full w-full" />
-                ) : undefined
-              }
+              icon={ModuleIcon ? <ModuleIcon className="h-full w-full" /> : undefined}
               iconColorClassName={module.iconColorClassName}
               iconImageSrc={module.iconImageSrc}
               configured={module.configured}

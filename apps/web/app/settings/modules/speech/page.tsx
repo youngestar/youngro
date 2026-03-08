@@ -9,12 +9,7 @@ export default function ConsciousnessPage() {
   return (
     <div className="flex flex-col p-6">
       {" "}
-      <PageHeader
-        title="发声模块"
-        subtitle="speech"
-        showBackButton
-        onBack={() => router.back()}
-      />
+      <PageHeader title="发声模块" subtitle="speech" showBackButton onBack={() => router.back()} />
       <ClientSpeechPage />
     </div>
   );

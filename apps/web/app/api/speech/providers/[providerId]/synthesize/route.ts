@@ -54,10 +54,7 @@ function mapPitchToVolume(pitch?: number) {
 }
 
 function ensureSessionId() {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -65,10 +62,7 @@ function ensureSessionId() {
 
 async function synthesizeTencentCloud(body: SpeechSynthesisRequest) {
   if (!body.secretId || !body.secretKey) {
-    return NextResponse.json(
-      { error: "请填写 SecretId 与 SecretKey" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "请填写 SecretId 与 SecretKey" }, { status: 400 });
   }
 
   if (!body.text || !body.text.trim()) {
@@ -79,7 +73,7 @@ async function synthesizeTencentCloud(body: SpeechSynthesisRequest) {
   if (voiceType === undefined) {
     return NextResponse.json(
       { error: "当前声线缺少 voiceType 信息，请重新拉取声线列表后重试" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -102,15 +96,10 @@ async function synthesizeTencentCloud(body: SpeechSynthesisRequest) {
     const mappedVolume = mapPitchToVolume(body.pitch);
     if (mappedVolume !== undefined) params.Volume = mappedVolume;
 
-    const response = await (
-      client as unknown as TencentTextToVoiceClient
-    ).TextToVoice(params);
+    const response = await (client as unknown as TencentTextToVoiceClient).TextToVoice(params);
 
     if (!response?.Audio) {
-      return NextResponse.json(
-        { error: "腾讯云未返回音频数据" },
-        { status: 502 },
-      );
+      return NextResponse.json({ error: "腾讯云未返回音频数据" }, { status: 502 });
     }
 
     return NextResponse.json({
@@ -124,21 +113,15 @@ async function synthesizeTencentCloud(body: SpeechSynthesisRequest) {
         error: "请求腾讯云合成失败",
         detail: error instanceof Error ? error.message : String(error),
       },
-      { status: 502 },
+      { status: 502 }
     );
   }
 }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ providerId: string }> },
-) {
+export async function POST(request: Request, context: { params: Promise<{ providerId: string }> }) {
   const { providerId } = await context.params;
   if (!providerId) {
-    return NextResponse.json(
-      { error: "providerId is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "providerId is required" }, { status: 400 });
   }
 
   let body: SpeechSynthesisRequest = {};
@@ -152,9 +135,6 @@ export async function POST(
     case "tencent-cloud-speech":
       return synthesizeTencentCloud(body);
     default:
-      return NextResponse.json(
-        { error: `Provider '${providerId}' 合成尚未实现` },
-        { status: 501 },
-      );
+      return NextResponse.json({ error: `Provider '${providerId}' 合成尚未实现` }, { status: 501 });
   }
 }
