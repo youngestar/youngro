@@ -156,7 +156,7 @@ function Content() {
           title="Youngro 卡片"
           subtitle="Youngro Card"
           showBackButton
-          onBack={() => router.back()}
+          onBack={() => router.replace("/settings")}
         />
 
         <div className="mt-3">

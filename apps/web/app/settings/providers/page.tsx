@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader, IconStatusItem } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
@@ -32,7 +33,7 @@ export default function ProvidersPage() {
           title="服务来源"
           subtitle="Providers"
           showBackButton
-          onBack={() => router.back()}
+          onBack={() => router.replace("/settings")}
         />
 
         {/* Intro banner */}
@@ -71,6 +72,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
@@ -102,6 +104,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
@@ -133,6 +136,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}

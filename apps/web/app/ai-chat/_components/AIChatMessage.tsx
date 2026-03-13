@@ -1,4 +1,3 @@
-// HMR test: touch from web component to observe compile log
 "use client";
 
 /**
@@ -8,6 +7,7 @@
  * - loading 为真时展示占位内容（流式开头尚无文本）。
  */
 
+import React from "react";
 import MarkdownRenderer from "../../../src/components/MarkdownRenderer";
 import clsx from "clsx";
 import Image from "next/image";
@@ -19,18 +19,15 @@ export interface CommonContentPart {
 }
 
 export interface AiChatMessageProps {
+  id?: string;
   name: string;
   role: "user" | "assistant" | "error";
   content: string | CommonContentPart[];
   loading?: boolean;
+  cacheKey?: string;
 }
 
-export default function AiChatMessage({
-  name,
-  role,
-  content,
-  loading = false,
-}: AiChatMessageProps) {
+function AiChatMessage({ name, role, content, loading = false, cacheKey }: AiChatMessageProps) {
   const isUser = role === "user";
   const isAssistant = role === "assistant";
   const isError = role === "error";
@@ -73,7 +70,12 @@ export default function AiChatMessage({
           <div className="flex flex-col gap-2 mt-1">
             {content.map((part, i) =>
               part.type === "text" ? (
-                <MarkdownRenderer key={i} content={part.text || ""} className={textClass} />
+                <MarkdownRenderer
+                  key={i}
+                  content={part.text || ""}
+                  className={textClass}
+                  cacheKey={cacheKey ? `${cacheKey}:${i}` : undefined}
+                />
               ) : (
                 <Image
                   key={i}
@@ -85,9 +87,22 @@ export default function AiChatMessage({
             )}
           </div>
         ) : (
-          <MarkdownRenderer content={content} className={textClass} />
+          <MarkdownRenderer content={content} className={textClass} cacheKey={cacheKey} />
         )}
       </div>
     </div>
   );
 }
+
+function areEqual(prev: AiChatMessageProps, next: AiChatMessageProps) {
+  return (
+    prev.id === next.id &&
+    prev.name === next.name &&
+    prev.role === next.role &&
+    prev.loading === next.loading &&
+    prev.cacheKey === next.cacheKey &&
+    prev.content === next.content
+  );
+}
+
+export default React.memo(AiChatMessage, areEqual);

@@ -3,6 +3,12 @@
 import * as React from "react";
 import clsx from "clsx";
 
+type IconItemLinkComponent = React.ElementType<{
+  href: string;
+  className?: string;
+  children?: React.ReactNode;
+}>;
+
 export interface IconItemProps {
   title: string;
   description: string;
@@ -18,6 +24,7 @@ export interface IconItemProps {
   iconTemplate?: boolean;
   className?: string;
   children?: React.ReactNode;
+  linkComponent?: IconItemLinkComponent;
 }
 
 /**
@@ -32,9 +39,12 @@ export function IconItem({
   iconTemplate,
   className,
   children,
+  linkComponent,
 }: IconItemProps) {
+  const LinkComponent = linkComponent ?? "a";
+
   return (
-    <a
+    <LinkComponent
       href={to}
       className={clsx(
         "menu-icon-item group relative flex w-full cursor-pointer items-center overflow-hidden rounded-lg p-5 text-left transition-all duration-400",
@@ -100,6 +110,6 @@ export function IconItem({
           "group-hover:w-[85%] group-hover:opacity-100"
         )}
       />
-    </a>
+    </LinkComponent>
   );
 }

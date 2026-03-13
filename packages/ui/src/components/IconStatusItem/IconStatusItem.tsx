@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { Check } from "lucide-react";
 import "./IconStatusItem.css";
 
+type IconStatusItemLinkComponent = React.ElementType<any>;
+
 export interface IconStatusItemProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   title: string;
   description?: string;
@@ -18,6 +20,7 @@ export interface IconStatusItemProps extends React.AnchorHTMLAttributes<HTMLAnch
   configured?: boolean;
   /** Show legacy badge text instead of dot (default false mimics AIRI) */
   legacyBadge?: boolean;
+  linkComponent?: IconStatusItemLinkComponent;
 }
 
 /**
@@ -35,11 +38,13 @@ export const IconStatusItem = React.forwardRef<HTMLAnchorElement, IconStatusItem
       iconImageSrc,
       configured = false,
       legacyBadge = false,
+      linkComponent,
       className,
       ...rest
     },
     ref
   ) => {
+    const LinkComponent = (linkComponent ?? "a") as React.ElementType;
     const iconNode = iconImageSrc ? (
       <img
         alt=""
@@ -61,7 +66,7 @@ export const IconStatusItem = React.forwardRef<HTMLAnchorElement, IconStatusItem
     ) : null;
 
     return (
-      <a
+      <LinkComponent
         ref={ref}
         className={clsx(
           "ui-icon-status-item group flex flex-col rounded-xl border-2 bg-neutral-50 dark:bg-neutral-800 border-neutral-100 dark:border-neutral-800/25 hover:border-primary-500/30 dark:hover:border-primary-400/30 drop-shadow-none hover:shadow-sm active:shadow-none dark:hover:shadow-none transition-all duration-400",
@@ -105,7 +110,7 @@ export const IconStatusItem = React.forwardRef<HTMLAnchorElement, IconStatusItem
             />
           )}
         </div>
-      </a>
+      </LinkComponent>
     );
   }
 );

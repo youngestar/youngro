@@ -28,7 +28,7 @@ export default function ProviderPageHeader({
 
   const handleBack = () => {
     if (backHref) {
-      router.push(backHref);
+      router.replace(backHref);
       return;
     }
     router.back();

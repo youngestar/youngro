@@ -157,6 +157,7 @@ export default function ClientProviderDetail({ category, id }: { category: strin
         title={meta.localizedName}
         subtitle={category}
         icon={Icon ? <Icon className="h-6 w-6 opacity-80" /> : undefined}
+        backHref="/settings/providers"
       />
 
       <div className="flex flex-col gap-6 rounded-xl bg-neutral-50 p-4 dark:bg-black/30">

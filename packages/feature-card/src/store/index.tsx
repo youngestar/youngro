@@ -201,6 +201,7 @@ function persist(state: YoungroCardState) {
 
 export function YoungroCardProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<YoungroCardState>(() => loadInitial());
+  const [hasLoaded, setHasLoaded] = React.useState(false);
   const stateRef = React.useRef(state);
 
   React.useEffect(() => {
@@ -234,13 +235,19 @@ export function YoungroCardProvider({ children }: { children: React.ReactNode })
       }
     } catch {
       // fallback: keep empty state and let user add
+    } finally {
+      setHasLoaded(true);
     }
   }, []);
 
   React.useEffect(() => {
-    persist(state);
     stateRef.current = state;
   }, [state]);
+
+  React.useEffect(() => {
+    if (!hasLoaded) return;
+    persist(state);
+  }, [hasLoaded, state]);
 
   const actions = React.useMemo<YoungroCardActions>(
     () => ({

@@ -8,7 +8,7 @@
 import React, { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { useChatStore } from "@youngro/feature-chat";
 import { ChatHistory } from "./ChatHistory";
-import { Textarea, Button, ScrollArea, Icon } from "@youngro/ui";
+import { Textarea, Button, Icon } from "@youngro/ui";
 import styles from "./InteractiveArea.module.css";
 import { Send, Volume2, VolumeX } from "lucide-react";
 import { useProvidersStore, useProvidersHydrate } from "../../../src/store/providersStore";
@@ -98,20 +98,13 @@ export const InteractiveArea: React.FC = () => {
   }, [models, activeModelId, customModelName]);
 
   return (
-    <div className="flex flex-col items-center pt-4 w-full h-full">
-      <div className="w-full h-[85dvh] py-4">
+    <div className="flex h-full w-full min-h-0 flex-col items-center pt-4">
+      <div className="h-[85dvh] min-h-0 w-full py-4">
         <div className="h-full mx-auto w-[600px] max-w-[95%] min-w-[30%] rounded-xl border-4 border-primary-200/20 dark:border-primary-400/20 bg-primary-50/50 dark:bg-primary-950/70 backdrop-blur-md">
-          <div className="flex flex-col h-full w-full">
-            <ScrollArea
-              variant="textarea"
-              thickness="md"
-              className="flex-1 min-h-[40vh] px-2 [&_[data-orientation=horizontal]]:!hidden"
-              viewportClassName="scroll-viewport !overflow-x-hidden"
-            >
-              <div className="px-2 py-2 max-w-full">
-                <ChatHistory />
-              </div>
-            </ScrollArea>
+          <div className="flex h-full min-h-0 w-full flex-col">
+            <div className="flex-1 min-h-0 px-2 py-2">
+              <ChatHistory />
+            </div>
             <div className="flex flex-col gap-2 p-2">
               <div className="flex-1 flex flex-col">
                 <div className="rounded-xl bg-primary-200/20 dark:bg-primary-400/20 focus-within:ring-2 focus-within:ring-primary-400/40 dark:focus-within:ring-primary-300/40">

@@ -466,6 +466,7 @@ export default function ClientSpeechProviderDetail({ id }: Props) {
         title={meta.localizedName}
         subtitle="speech"
         icon={Icon ? <Icon className="h-6 w-6 opacity-80" /> : undefined}
+        backHref="/settings/providers"
       />
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
