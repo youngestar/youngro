@@ -11,67 +11,138 @@ import DOMPurify from "dompurify";
 import { processMarkdown, processMarkdownSync } from "../lib/markdownProcessor";
 
 const htmlCache = new Map<string, string>();
+const STREAMING_RENDER_INTERVAL_MS = 100;
 
 export interface MarkdownRendererProps {
   content?: string | null;
   className?: string;
   cacheKey?: string;
+  isStreaming?: boolean;
 }
 
 export default function MarkdownRenderer({
   content = "",
   className,
   cacheKey,
+  isStreaming = false,
 }: MarkdownRendererProps) {
   const [html, setHtml] = React.useState<string | null>(null);
-  const resolvedCacheKey = React.useMemo(() => {
-    if (!cacheKey) return null;
-    return `${cacheKey}:${content ?? ""}`;
-  }, [cacheKey, content]);
+  const latestContentRef = React.useRef(content ?? "");
+  const lastStreamingRenderedContentRef = React.useRef<string>("");
+  const requestIdRef = React.useRef(0);
+  const streamRenderInFlightRef = React.useRef(false);
+  const streamRenderPendingRef = React.useRef(false);
 
   React.useEffect(() => {
-    let mounted = true;
+    latestContentRef.current = content ?? "";
+  }, [content]);
+
+  const resolvedCacheKey = React.useMemo(() => {
+    if (!cacheKey || isStreaming) return null;
+    return `${cacheKey}:${content ?? ""}`;
+  }, [cacheKey, content, isStreaming]);
+
+  React.useEffect(() => {
+    if (!isStreaming) return;
+
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const renderStreamingOnce = async () => {
+      const nextContent = latestContentRef.current;
+      if (nextContent === lastStreamingRenderedContentRef.current) {
+        return;
+      }
+
+      if (streamRenderInFlightRef.current) {
+        streamRenderPendingRef.current = true;
+        return;
+      }
+
+      streamRenderInFlightRef.current = true;
+      const requestId = ++requestIdRef.current;
+
+      try {
+        const out = await processMarkdownSync(nextContent);
+        if (cancelled || requestId !== requestIdRef.current) return;
+
+        const clean = DOMPurify.sanitize(out);
+        lastStreamingRenderedContentRef.current = nextContent;
+        setHtml(clean);
+      } catch {
+        // Incomplete markdown is expected while streaming.
+      } finally {
+        streamRenderInFlightRef.current = false;
+
+        if (!cancelled && streamRenderPendingRef.current) {
+          streamRenderPendingRef.current = false;
+          void renderStreamingOnce();
+        }
+      }
+    };
+
+    void renderStreamingOnce();
+    intervalId = setInterval(() => {
+      void renderStreamingOnce();
+    }, STREAMING_RENDER_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      streamRenderPendingRef.current = false;
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isStreaming]);
+
+  React.useEffect(() => {
+    if (isStreaming) return;
+
+    let cancelled = false;
+    const requestId = ++requestIdRef.current;
 
     if (resolvedCacheKey) {
       const cached = htmlCache.get(resolvedCacheKey);
       if (cached) {
         setHtml(cached);
         return () => {
-          mounted = false;
+          cancelled = true;
         };
       }
     }
-
-    setHtml(null);
 
     const commitHtml = (out: string) => {
       const clean = DOMPurify.sanitize(out);
       if (resolvedCacheKey) {
         htmlCache.set(resolvedCacheKey, clean);
       }
-      if (mounted) {
+      if (!cancelled && requestId === requestIdRef.current) {
         setHtml(clean);
       }
     };
 
-    // async processing with highlighting when available
-    processMarkdown(content ?? "")
-      .then((out: string) => {
-        if (!mounted) return;
+    const renderFinal = async () => {
+      try {
+        const out = await processMarkdown(content ?? "");
+        if (cancelled || requestId !== requestIdRef.current) return;
         commitHtml(out);
-      })
-      .catch(() => {
-        // fallback: sync basic processing
-        processMarkdownSync(content ?? "").then((out: string) => {
-          if (!mounted) return;
+      } catch {
+        try {
+          const out = await processMarkdownSync(content ?? "");
+          if (cancelled || requestId !== requestIdRef.current) return;
           commitHtml(out);
-        });
-      });
+        } catch {
+          if (!cancelled && requestId === requestIdRef.current) {
+            setHtml(DOMPurify.sanitize(content ?? ""));
+          }
+        }
+      }
+    };
+
+    void renderFinal();
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
-  }, [content, resolvedCacheKey]);
+  }, [content, isStreaming, resolvedCacheKey]);
 
   if (html === null) return <div className={className}>{/* loading 占位 */}</div>;
 

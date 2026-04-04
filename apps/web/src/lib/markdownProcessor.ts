@@ -4,6 +4,7 @@ import type { Root as HastRoot } from "hast";
 import type { BundledLanguage } from "shiki";
 
 const processorCache = new Map<string, Promise<Processor>>();
+let fallbackProcessorPromise: Promise<Processor> | null = null;
 const langRegex = /```(.{2,})\s/g;
 
 // Allow disabling Shiki highlighting during build/CI via env flag.
@@ -87,7 +88,7 @@ function getProcessor(langs: BundledLanguage[]): Promise<Processor> {
   return processorCache.get(cacheKey)!;
 }
 
-const fallback = async () => {
+async function createFallbackProcessor(): Promise<Processor> {
   const { unified } = await import("unified");
   const remarkParse = (await import("remark-parse")).default;
   const remarkMath = (await import("remark-math")).default;
@@ -102,19 +103,26 @@ const fallback = async () => {
     .use(remarkRehypePlugin)
     .use([rehypeKatex])
     .use([rehypeStringify]);
-};
+}
+
+function getFallbackProcessor(): Promise<Processor> {
+  if (!fallbackProcessorPromise) {
+    fallbackProcessorPromise = createFallbackProcessor();
+  }
+  return fallbackProcessorPromise;
+}
 
 export async function processMarkdown(markdown: string): Promise<string> {
   try {
     // If Shiki is disabled via env, always use fallback (no syntax highlighting).
     if (SHIKI_DISABLED) {
-      const fb = await fallback();
+      const fb = await getFallbackProcessor();
       return fb.processSync(markdown).toString();
     }
 
     // fast path when there are no fences
     if (!/`{3,}/.test(markdown)) {
-      const fb = await fallback();
+      const fb = await getFallbackProcessor();
       return fb.processSync(markdown).toString();
     }
 
@@ -129,7 +137,7 @@ export async function processMarkdown(markdown: string): Promise<string> {
   } catch (err) {
     // fallback to simpler pipeline
     void err;
-    const fb = await fallback();
+    const fb = await getFallbackProcessor();
     return fb.processSync(markdown).toString();
   }
 }
@@ -137,6 +145,6 @@ export async function processMarkdown(markdown: string): Promise<string> {
 export async function processMarkdownSync(markdown: string): Promise<string> {
   // We can't synchronously run the shiki pipeline here reliably since shiki is async;
   // use a simple fallback synchronous pipeline by calling unified sync processors.
-  const fb = await fallback();
+  const fb = await getFallbackProcessor();
   return fb.processSync(markdown).toString();
 }

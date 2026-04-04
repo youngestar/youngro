@@ -25,9 +25,17 @@ export interface AiChatMessageProps {
   content: string | CommonContentPart[];
   loading?: boolean;
   cacheKey?: string;
+  isStreaming?: boolean;
 }
 
-function AiChatMessage({ name, role, content, loading = false, cacheKey }: AiChatMessageProps) {
+function AiChatMessage({
+  name,
+  role,
+  content,
+  loading = false,
+  cacheKey,
+  isStreaming = false,
+}: AiChatMessageProps) {
   const isUser = role === "user";
   const isAssistant = role === "assistant";
   const isError = role === "error";
@@ -75,6 +83,7 @@ function AiChatMessage({ name, role, content, loading = false, cacheKey }: AiCha
                   content={part.text || ""}
                   className={textClass}
                   cacheKey={cacheKey ? `${cacheKey}:${i}` : undefined}
+                  isStreaming={isStreaming}
                 />
               ) : (
                 <Image
@@ -87,7 +96,12 @@ function AiChatMessage({ name, role, content, loading = false, cacheKey }: AiCha
             )}
           </div>
         ) : (
-          <MarkdownRenderer content={content} className={textClass} cacheKey={cacheKey} />
+          <MarkdownRenderer
+            content={content}
+            className={textClass}
+            cacheKey={cacheKey}
+            isStreaming={isStreaming}
+          />
         )}
       </div>
     </div>
@@ -101,6 +115,7 @@ function areEqual(prev: AiChatMessageProps, next: AiChatMessageProps) {
     prev.role === next.role &&
     prev.loading === next.loading &&
     prev.cacheKey === next.cacheKey &&
+    prev.isStreaming === next.isStreaming &&
     prev.content === next.content
   );
 }

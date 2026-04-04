@@ -237,51 +237,65 @@ export function createOpenAICompatibleAdapter(
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          if (!trimmed.startsWith("data:")) continue;
-          const dataStr = trimmed.slice(5).trim();
-          if (dataStr === "[DONE]") {
-            yield { type: "finish" };
-            continue;
-          }
-          try {
-            const json = JSON.parse(dataStr);
-            const delta = json?.choices?.[0]?.delta?.content;
-            if (typeof delta === "string") {
-              yield { type: "text-delta", text: delta };
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            if (!trimmed.startsWith("data:")) continue;
+            const dataStr = trimmed.slice(5).trim();
+            if (dataStr === "[DONE]") {
+              // OpenAI 风格 SSE 以 [DONE] 作为结束标记，
+              // 这里直接返回，避免下游收到重复的 finish 事件。
+              yield { type: "finish" };
+              return;
             }
-          } catch {
-            // ignore
+            try {
+              const json = JSON.parse(dataStr);
+              const delta = json?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") {
+                yield { type: "text-delta", text: delta };
+              }
+            } catch {
+              // ignore
+            }
           }
         }
-      }
 
-      if (buffer.trim().startsWith("data:")) {
-        const leftover = buffer.trim().slice(5).trim();
-        if (leftover && leftover !== "[DONE]") {
-          try {
-            const json = JSON.parse(leftover);
-            const delta = json?.choices?.[0]?.delta?.content;
-            if (typeof delta === "string") {
-              yield { type: "text-delta", text: delta };
+        // 在流结束时补做一次 decoder flush，避免最后一个 chunk 恰好落在半个字符上；
+        // 如果缓冲区里还残留一条 SSE 负载，则在这里完成最后一次解析。
+        buffer += decoder.decode();
+        if (buffer.trim().startsWith("data:")) {
+          const leftover = buffer.trim().slice(5).trim();
+          if (leftover && leftover !== "[DONE]") {
+            try {
+              const json = JSON.parse(leftover);
+              const delta = json?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") {
+                yield { type: "text-delta", text: delta };
+              }
+            } catch {
+              // ignore leftover parse errors
             }
-          } catch {
-            // ignore leftover parse errors
           }
         }
-      }
 
-      yield { type: "finish" };
+        // 部分兼容 Provider 会直接 EOF，不显式发送 [DONE]，
+        // 因此在正常读到流结束时仍补发一次 finish。
+        yield { type: "finish" };
+      } finally {
+        try {
+          reader.releaseLock();
+        } catch {
+          // ignore reader state errors during teardown
+        }
+      }
     } catch (e) {
       yield { type: "error", error: (e as Error).message };
     }

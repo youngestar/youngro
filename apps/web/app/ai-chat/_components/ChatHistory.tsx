@@ -11,10 +11,18 @@ import React, { useMemo } from "react";
 import { useChatStore } from "@youngro/feature-chat";
 import type { BaseMessage } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
+import { shallow } from "zustand/shallow";
 import { VirtualChatList, type VirtualChatItem } from "./VirtualChatList";
 
 export const ChatHistory: React.FC = () => {
-  const { messages, sending, streamingMessage } = useChatStore();
+  const { messages, sending, streamingMessage } = useChatStore(
+    (state) => ({
+      messages: state.messages,
+      sending: state.sending,
+      streamingMessage: state.streamingMessage,
+    }),
+    shallow
+  );
 
   // 仅展示用户可见的消息（隐藏 system 提示）
   // 过滤隐藏 system 消息，避免在 UI 中暴露系统提示词
@@ -60,6 +68,7 @@ export const ChatHistory: React.FC = () => {
             ? message.content
             : "",
         cacheKey: message.id,
+        isStreaming: false,
       };
     });
 
@@ -71,6 +80,7 @@ export const ChatHistory: React.FC = () => {
         role: "assistant",
         content: streamingMessage.content || "",
         loading: !streamingMessage.content,
+        isStreaming: true,
       });
     }
 
