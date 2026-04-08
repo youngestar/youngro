@@ -13,10 +13,22 @@ import { processMarkdown, processMarkdownSync } from "../lib/markdownProcessor";
 const htmlCache = new Map<string, string>();
 const STREAMING_RENDER_INTERVAL_MS = 100;
 
+type FallbackMode = "empty" | "plain-text";
+
+interface HtmlState {
+  html: string | null;
+  key: string;
+}
+
+function buildContentKey(cacheKey: string | undefined, content: string) {
+  return `${cacheKey ?? "__content__"}:${content}`;
+}
+
 export interface MarkdownRendererProps {
   content?: string | null;
   className?: string;
   cacheKey?: string;
+  fallbackMode?: FallbackMode;
   isStreaming?: boolean;
 }
 
@@ -24,23 +36,57 @@ export default function MarkdownRenderer({
   content = "",
   className,
   cacheKey,
+  fallbackMode = "empty",
   isStreaming = false,
 }: MarkdownRendererProps) {
-  const [html, setHtml] = React.useState<string | null>(null);
-  const latestContentRef = React.useRef(content ?? "");
+  const normalizedContent = content ?? "";
+  const contentKey = React.useMemo(
+    () => buildContentKey(cacheKey, normalizedContent),
+    [cacheKey, normalizedContent]
+  );
+  const resolvedCacheKey = React.useMemo(() => {
+    if (!cacheKey || isStreaming) return null;
+    return contentKey;
+  }, [cacheKey, contentKey, isStreaming]);
+  const cachedHtml = React.useMemo(
+    () => (resolvedCacheKey ? (htmlCache.get(resolvedCacheKey) ?? null) : null),
+    [resolvedCacheKey]
+  );
+  const [htmlState, setHtmlState] = React.useState<HtmlState>(() => ({
+    html: cachedHtml,
+    key: contentKey,
+  }));
+  const latestContentRef = React.useRef(normalizedContent);
   const lastStreamingRenderedContentRef = React.useRef<string>("");
   const requestIdRef = React.useRef(0);
   const streamRenderInFlightRef = React.useRef(false);
   const streamRenderPendingRef = React.useRef(false);
+  const currentHtml = isStreaming
+    ? htmlState.html
+    : htmlState.key === contentKey
+      ? htmlState.html
+      : cachedHtml;
 
   React.useEffect(() => {
-    latestContentRef.current = content ?? "";
-  }, [content]);
+    latestContentRef.current = normalizedContent;
+  }, [normalizedContent]);
 
-  const resolvedCacheKey = React.useMemo(() => {
-    if (!cacheKey || isStreaming) return null;
-    return `${cacheKey}:${content ?? ""}`;
-  }, [cacheKey, content, isStreaming]);
+  React.useEffect(() => {
+    if (isStreaming) {
+      return;
+    }
+
+    setHtmlState((current) => {
+      if (current.key === contentKey && current.html === cachedHtml) {
+        return current;
+      }
+
+      return {
+        html: cachedHtml,
+        key: contentKey,
+      };
+    });
+  }, [cachedHtml, contentKey, isStreaming]);
 
   React.useEffect(() => {
     if (!isStreaming) return;
@@ -61,6 +107,7 @@ export default function MarkdownRenderer({
 
       streamRenderInFlightRef.current = true;
       const requestId = ++requestIdRef.current;
+      const nextContentKey = buildContentKey(cacheKey, nextContent);
 
       try {
         const out = await processMarkdownSync(nextContent);
@@ -68,7 +115,7 @@ export default function MarkdownRenderer({
 
         const clean = DOMPurify.sanitize(out);
         lastStreamingRenderedContentRef.current = nextContent;
-        setHtml(clean);
+        setHtmlState({ html: clean, key: nextContentKey });
       } catch {
         // Incomplete markdown is expected while streaming.
       } finally {
@@ -91,7 +138,7 @@ export default function MarkdownRenderer({
       streamRenderPendingRef.current = false;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isStreaming]);
+  }, [cacheKey, isStreaming]);
 
   React.useEffect(() => {
     if (isStreaming) return;
@@ -99,14 +146,10 @@ export default function MarkdownRenderer({
     let cancelled = false;
     const requestId = ++requestIdRef.current;
 
-    if (resolvedCacheKey) {
-      const cached = htmlCache.get(resolvedCacheKey);
-      if (cached) {
-        setHtml(cached);
-        return () => {
-          cancelled = true;
-        };
-      }
+    if (cachedHtml !== null) {
+      return () => {
+        cancelled = true;
+      };
     }
 
     const commitHtml = (out: string) => {
@@ -115,23 +158,26 @@ export default function MarkdownRenderer({
         htmlCache.set(resolvedCacheKey, clean);
       }
       if (!cancelled && requestId === requestIdRef.current) {
-        setHtml(clean);
+        setHtmlState({ html: clean, key: contentKey });
       }
     };
 
     const renderFinal = async () => {
       try {
-        const out = await processMarkdown(content ?? "");
+        const out = await processMarkdown(normalizedContent);
         if (cancelled || requestId !== requestIdRef.current) return;
         commitHtml(out);
       } catch {
         try {
-          const out = await processMarkdownSync(content ?? "");
+          const out = await processMarkdownSync(normalizedContent);
           if (cancelled || requestId !== requestIdRef.current) return;
           commitHtml(out);
         } catch {
           if (!cancelled && requestId === requestIdRef.current) {
-            setHtml(DOMPurify.sanitize(content ?? ""));
+            setHtmlState({
+              html: DOMPurify.sanitize(normalizedContent),
+              key: contentKey,
+            });
           }
         }
       }
@@ -142,9 +188,19 @@ export default function MarkdownRenderer({
     return () => {
       cancelled = true;
     };
-  }, [content, isStreaming, resolvedCacheKey]);
+  }, [cachedHtml, contentKey, isStreaming, normalizedContent, resolvedCacheKey]);
 
-  if (html === null) return <div className={className}>{/* loading 占位 */}</div>;
+  if (currentHtml === null) {
+    if (fallbackMode === "plain-text") {
+      return (
+        <div className={className} style={{ overflowWrap: "anywhere", whiteSpace: "pre-wrap" }}>
+          {normalizedContent}
+        </div>
+      );
+    }
 
-  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <div className={className}>{/* loading 占位 */}</div>;
+  }
+
+  return <div className={className} dangerouslySetInnerHTML={{ __html: currentHtml }} />;
 }

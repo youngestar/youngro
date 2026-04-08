@@ -21,6 +21,19 @@ export { BrandLogo } from "./BrandLogo";
 export type { BrandLogoProps } from "./BrandLogo";
 export { ScrollArea } from "./ScrollArea";
 export type { ScrollAreaProps } from "./ScrollArea";
+export { VirtuosoLite } from "./VirtuosoLite";
+export type {
+  IncreaseViewportBy,
+  ListRange,
+  Overscan,
+  ScrollAlign,
+  ScrollBehavior,
+  ScrollDirection,
+  ScrollToIndexLocation,
+  VirtuosoItem,
+  VirtuosoLiteHandle,
+  VirtuosoLiteProps,
+} from "./VirtuosoLite";
 export { IconItem } from "./Menu";
 export type { IconItemProps } from "./Menu";
 export { HeaderLink } from "./HeaderLink";

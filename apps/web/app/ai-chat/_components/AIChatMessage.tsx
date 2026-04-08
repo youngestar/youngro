@@ -83,6 +83,7 @@ function AiChatMessage({
                   content={part.text || ""}
                   className={textClass}
                   cacheKey={cacheKey ? `${cacheKey}:${i}` : undefined}
+                  fallbackMode="plain-text"
                   isStreaming={isStreaming}
                 />
               ) : (
@@ -100,6 +101,7 @@ function AiChatMessage({
             content={content}
             className={textClass}
             cacheKey={cacheKey}
+            fallbackMode="plain-text"
             isStreaming={isStreaming}
           />
         )}

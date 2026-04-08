@@ -14,6 +14,7 @@ import {
   ScrollArea,
 } from "@youngro/ui";
 import { Send, Trash2, Play, StopCircle, Check, Pause } from "lucide-react";
+import VirtuosoLiteChatDemo from "./_components/VirtuosoLiteChatDemo";
 
 export default function ComponentsDemo() {
   const [inputVal, setInputVal] = useState("");
@@ -145,6 +146,8 @@ export default function ComponentsDemo() {
           </ScrollArea>
         </div>
       </section>
+
+      <VirtuosoLiteChatDemo />
     </div>
   );
 }
