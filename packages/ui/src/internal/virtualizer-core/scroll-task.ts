@@ -1,4 +1,30 @@
-import type { ItemLocation, ScrollTask, ScrollTaskReason } from "./types";
+type ScrollAlign = "center" | "end" | "start";
+type ScrollBehavior = "auto" | "smooth";
+
+export interface ItemLocation {
+  align?: ScrollAlign;
+  behavior?: ScrollBehavior;
+  index: number;
+  offset?: number;
+}
+
+export type ScrollTaskReason = string;
+
+export interface ScrollTask {
+  attempts: number;
+  cancelledByUser: boolean;
+  finishedAt: number | null;
+  id: number;
+  reason: ScrollTaskReason;
+  startedAt: number;
+  status: "aligning" | "cancelled" | "failed" | "pending" | "settled";
+  target: {
+    align?: ScrollAlign;
+    behavior: ScrollBehavior;
+    index: number;
+    offset: number;
+  };
+}
 
 function normalizeItemLocation(target: ItemLocation): ScrollTask["target"] {
   return {

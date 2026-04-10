@@ -23,7 +23,6 @@
    and giving an intrinsic fallback size so late layout (e.g., images/math)
    doesn't cause large reflows while scrolling. */
 .stream-prose {
-  content-visibility: auto;
   contain-intrinsic-size: auto 320px; /* fallback height while off-screen */
 }
 

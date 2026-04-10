@@ -5,7 +5,25 @@ import type { BundledLanguage } from "shiki";
 
 const processorCache = new Map<string, Promise<Processor>>();
 let fallbackProcessorPromise: Promise<Processor> | null = null;
+let coreModulesPromise: Promise<MarkdownCoreModules> | null = null;
+let rehypeShikiPromise: Promise<ShikiRehypePlugin> | null = null;
 const langRegex = /```(.{2,})\s/g;
+
+interface MarkdownProcessorOptions {
+  highlight?: boolean;
+  langs?: BundledLanguage[];
+}
+
+interface MarkdownCoreModules {
+  unified: typeof import("unified").unified;
+  remarkParse: typeof import("remark-parse").default;
+  remarkMath: typeof import("remark-math").default;
+  remarkRehype: typeof import("remark-rehype").default;
+  rehypeKatex: typeof import("rehype-katex").default;
+  rehypeStringify: typeof import("rehype-stringify").default;
+}
+
+type ShikiRehypePlugin = typeof import("@shikijs/rehype").default;
 
 // Allow disabling Shiki highlighting during build/CI via env flag.
 // Any of these env vars set to '1' will force the fallback pipeline:
@@ -27,82 +45,98 @@ function extractLangs(markdown: string): BundledLanguage[] {
   return [...langs];
 }
 
-async function createProcessor(langs: BundledLanguage[]): Promise<Processor> {
-  // dynamic import heavy deps so they don't affect cold start
-  const [
-    unifiedModule,
-    remarkParse,
-    remarkMath,
-    remarkRehype,
-    rehypeKatex,
-    rehypeShiki,
-    rehypeStringify,
-  ] = await Promise.all([
-    import("unified"),
-    import("remark-parse").then((m) => m.default),
-    import("remark-math").then((m) => m.default),
-    import("remark-rehype").then((m) => m.default),
-    import("rehype-katex").then((m) => m.default),
-    import("@shikijs/rehype").then((m) => m.default),
-    import("rehype-stringify").then((m) => m.default),
-  ]);
+function loadCoreModules(): Promise<MarkdownCoreModules> {
+  if (!coreModulesPromise) {
+    coreModulesPromise = Promise.all([
+      import("unified"),
+      import("remark-parse").then((m) => m.default),
+      import("remark-math").then((m) => m.default),
+      import("remark-rehype").then((m) => m.default),
+      import("rehype-katex").then((m) => m.default),
+      import("rehype-stringify").then((m) => m.default),
+    ]).then(
+      ([unifiedModule, remarkParse, remarkMath, remarkRehype, rehypeKatex, rehypeStringify]) => ({
+        unified: unifiedModule.unified,
+        remarkParse,
+        remarkMath,
+        remarkRehype,
+        rehypeKatex,
+        rehypeStringify,
+      })
+    );
+  }
 
-  const options = {
-    themes: {
-      light: "github-light",
-      dark: "github-dark",
-    },
-    langs,
-    defaultLanguage: langs[0] || "javascript",
-  };
+  return coreModulesPromise;
+}
 
-  const { unified } = unifiedModule;
-  const remarkRehypePlugin = remarkRehype as unknown as Plugin<[], MdastRoot, HastRoot>;
-  const rehypeShikiPlugin = rehypeShiki as unknown as Plugin<
-    [
-      {
-        themes: { light: string; dark: string };
-        langs: BundledLanguage[];
-        defaultLanguage: BundledLanguage;
-      },
-    ],
-    HastRoot,
-    HastRoot
-  >;
+function loadRehypeShiki(): Promise<ShikiRehypePlugin> {
+  if (!rehypeShikiPromise) {
+    rehypeShikiPromise = import("@shikijs/rehype").then((m) => m.default);
+  }
 
-  return unified()
-    .use(remarkParse)
-    .use(remarkMath)
+  return rehypeShikiPromise;
+}
+
+async function createMarkdownProcessor({
+  highlight = false,
+  langs = [],
+}: MarkdownProcessorOptions): Promise<Processor> {
+  const core = await loadCoreModules();
+  const remarkRehypePlugin = core.remarkRehype as unknown as Plugin<[], MdastRoot, HastRoot>;
+
+  const processor = core
+    .unified()
+    .use(core.remarkParse)
+    .use(core.remarkMath)
     .use(remarkRehypePlugin)
-    .use([rehypeKatex])
-    .use([[rehypeShikiPlugin, options]])
-    .use([rehypeStringify]);
+    .use([core.rehypeKatex]);
+
+  if (highlight) {
+    const rehypeShiki = await loadRehypeShiki();
+    const rehypeShikiPlugin = rehypeShiki as unknown as Plugin<
+      [
+        {
+          themes: { light: string; dark: string };
+          langs: BundledLanguage[];
+          defaultLanguage: BundledLanguage;
+        },
+      ],
+      HastRoot,
+      HastRoot
+    >;
+
+    processor.use([
+      [
+        rehypeShikiPlugin,
+        {
+          themes: {
+            light: "github-light",
+            dark: "github-dark",
+          },
+          langs,
+          defaultLanguage: langs[0] || "javascript",
+        },
+      ],
+    ]);
+  }
+
+  return processor.use([core.rehypeStringify]);
 }
 
 function getProcessor(langs: BundledLanguage[]): Promise<Processor> {
   const cacheKey = [...langs].sort().join(",");
   if (!processorCache.has(cacheKey)) {
-    const processorPromise = createProcessor(langs);
+    const processorPromise = createMarkdownProcessor({
+      highlight: true,
+      langs,
+    });
     processorCache.set(cacheKey, processorPromise);
   }
   return processorCache.get(cacheKey)!;
 }
 
 async function createFallbackProcessor(): Promise<Processor> {
-  const { unified } = await import("unified");
-  const remarkParse = (await import("remark-parse")).default;
-  const remarkMath = (await import("remark-math")).default;
-  const remarkRehype = (await import("remark-rehype")).default;
-  const rehypeKatex = (await import("rehype-katex")).default;
-  const rehypeStringify = (await import("rehype-stringify")).default;
-
-  const remarkRehypePlugin = remarkRehype as unknown as Plugin<[], MdastRoot, HastRoot>;
-  return unified()
-    .use(remarkParse)
-    .use(remarkMath)
-    .use(remarkRehypePlugin)
-    .use([rehypeKatex])
-    .use([rehypeStringify]);
+  return createMarkdownProcessor({ highlight: false });
 }
 
 function getFallbackProcessor(): Promise<Processor> {

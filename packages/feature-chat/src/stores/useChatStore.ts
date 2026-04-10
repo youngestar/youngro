@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { getRuntimeSystemPrompt } from "@youngro/feature-card";
 import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { BaseMessage, AssistantMessage, StreamEvent } from "../types/chat";
+import type { BaseMessage, AssistantMessage } from "../types/chat";
 import { consumeNDJSONStream, classifyError } from "../stream/ndjsonParser";
 // Emotion/Delay tokens integration
 // Lazy import style: use require-like dynamic to avoid type resolution issues if package build not yet run.
@@ -106,7 +106,7 @@ export const useChatStore = create<ChatState>()(
           const current = get().messages;
           const msgs: Array<{
             role: "system" | "user" | "assistant" | "tool";
-            content: any;
+            content: BaseMessage["content"];
           }> = [];
           for (const m of current) {
             if (m.role === "error") continue;
@@ -386,18 +386,21 @@ export const useChatStore = create<ChatState>()(
       partialize: (s) => ({ messages: s.messages }),
       version: 3,
       // 迁移：确保首条为 system，并使用最新系统提示；并清洗历史消息中的控制标记
-      migrate: (persistedState: unknown, prevVersion: number) => {
-        const state = (persistedState as Partial<ChatState>) || {};
-        const msgs = Array.isArray((state as any).messages)
-          ? ([...(state as any).messages] as BaseMessage[])
-          : [];
+      migrate: (persistedState: unknown) => {
+        const state =
+          persistedState && typeof persistedState === "object"
+            ? (persistedState as Partial<ChatState>)
+            : {};
+        const msgs = Array.isArray(state.messages) ? ([...state.messages] as BaseMessage[]) : [];
 
         // 若无消息或首条非 system，则补上一条最新系统提示
         const first = msgs[0];
         if (!first || first.role !== "system") {
           const sys = generateInitialSystemMessage();
-          (state as any).messages = [sys, ...msgs];
-          return state as ChatState;
+          return {
+            ...state,
+            messages: [sys, ...msgs],
+          } as ChatState;
         }
 
         // 若首条为 system，但内容需要更新，则覆盖其 content
@@ -414,8 +417,10 @@ export const useChatStore = create<ChatState>()(
           }
           return m;
         });
-        (state as any).messages = cleaned;
-        return state as ChatState;
+        return {
+          ...state,
+          messages: cleaned,
+        } as ChatState;
       },
     }
   )
@@ -437,8 +442,9 @@ function getActiveYoungroCardFromStorage():
     const rawCards = window.localStorage.getItem("youngro-cards");
     const activeId = window.localStorage.getItem("youngro-card-active-id") || "";
     if (!rawCards || !activeId) return null;
-    const map = JSON.parse(rawCards) as Record<string, any>;
-    return map[activeId] || null;
+    const map = JSON.parse(rawCards) as Record<string, unknown>;
+    const active = map[activeId];
+    return active && typeof active === "object" ? (active as Record<string, unknown>) : null;
   } catch {
     return null;
   }
@@ -453,7 +459,22 @@ function generateSystemPrompt(): string {
   const header = `${fallbackCodeBlockHint}\n${fallbackMathHint}`;
 
   const active = getActiveYoungroCardFromStorage();
-  const base = active ? getRuntimeSystemPrompt(active as any) : "";
+  const runtimeCard = active
+    ? {
+        name: typeof active.name === "string" && active.name.trim() ? active.name : "Youngro",
+        version:
+          typeof active.version === "string" && active.version.trim() ? active.version : "1.0.0",
+        description: typeof active.description === "string" ? active.description : undefined,
+        personality: typeof active.personality === "string" ? active.personality : undefined,
+        scenario: typeof active.scenario === "string" ? active.scenario : undefined,
+        systemPrompt: typeof active.systemPrompt === "string" ? active.systemPrompt : undefined,
+        postHistoryInstructions:
+          typeof active.postHistoryInstructions === "string"
+            ? active.postHistoryInstructions
+            : undefined,
+      }
+    : null;
+  const base = runtimeCard ? getRuntimeSystemPrompt(runtimeCard) : "";
   const tail = base.trim();
   return tail ? `${header}\n${tail}` : header;
 }

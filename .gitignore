@@ -6,11 +6,9 @@ node_modules
 .pnp.js
 
 # Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
+!.env.example
+!**/.env.example
 
 # Testing
 coverage
@@ -26,6 +24,15 @@ coverage
 out/
 build
 dist
+*.tsbuildinfo
+
+# Workspace package lockfiles
+apps/**/pnpm-lock.yaml
+packages/**/pnpm-lock.yaml
+!/pnpm-lock.yaml
+
+# Local generated artifacts
+apps/web/app/tw-out.css
 
 
 # Debug

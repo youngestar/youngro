@@ -110,6 +110,9 @@ function VirtuosoLiteInner<T>(
 
   // 当前高度模型的优先级：固定高度 > 实测高度 > 单项估算 > 默认高度。
   const sizes = React.useMemo(() => {
+    // measuredSizesRef 是原地更新的，依赖 sizeVersion 来强制重新计算高度模型。
+    void sizeVersion;
+
     if (totalCount === 0) {
       return [] as number[];
     }
@@ -121,14 +124,7 @@ function VirtuosoLiteInner<T>(
 
       return measuredSizesRef.current.get(index) ?? heightEstimates?.[index] ?? estimatedItemHeight;
     });
-  }, [
-    defaultItemHeight,
-    estimatedItemHeight,
-    fixedItemHeight,
-    heightEstimates,
-    sizeVersion,
-    totalCount,
-  ]);
+  }, [estimatedItemHeight, fixedItemHeight, heightEstimates, sizeVersion, totalCount]);
 
   // 把高度模型转成前缀和，便于在像素位置和索引之间来回映射。
   const { offsets, total } = React.useMemo(() => buildOffsets(sizes), [sizes]);

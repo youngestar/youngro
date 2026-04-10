@@ -1,6 +1,9 @@
 {
   "extends": "@youngro/typescript-config/react-library.json",
   "compilerOptions": {
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
     "outDir": "dist"
   },
   "include": ["src"],

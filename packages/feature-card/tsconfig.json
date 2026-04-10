@@ -9,7 +9,8 @@
     "composite": false,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "paths": {}
+    "paths": {},
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]

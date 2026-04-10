@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "node ./src/build-icons.mjs",
-    "prepare": "pnpm run build"
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm exec eslint src/build-icons.mjs --max-warnings 0"
   },
   "files": [
     "dist",
@@ -20,7 +21,8 @@
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-prettier": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
-    "@types/react": "18.3.3"
+    "@types/react": "19.1.0",
+    "typescript": "5.9.2"
   },
   "exports": {
     ".": {

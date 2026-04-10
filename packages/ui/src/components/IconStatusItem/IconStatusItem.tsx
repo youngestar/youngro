@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { Check } from "lucide-react";
 import "./IconStatusItem.css";
 
-type IconStatusItemLinkComponent = React.ElementType<any>;
+type IconStatusItemLinkComponent = React.ElementType;
 
 export interface IconStatusItemProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   title: string;

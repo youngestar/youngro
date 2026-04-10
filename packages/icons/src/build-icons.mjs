@@ -1,3 +1,5 @@
+/* global URL, console, process */
+
 import { promises as fs } from "fs";
 import path from "path";
 import { transform } from "@svgr/core";
@@ -18,7 +20,7 @@ function pascalCase(name) {
 async function ensureDir(u) {
   try {
     await fs.mkdir(u, { recursive: true });
-  } catch (e) {
+  } catch {
     // ignore
   }
 }
@@ -82,7 +84,7 @@ async function build() {
     // replace ForwardRef default export with named forwardRef export + default
     // use explicit generic for forwardRef: forwardRef<SVGSVGElement, IconProps>(Inner)
     tsxComponent = tsxComponent.replace(
-      /const ForwardRef = forwardRef\([^\)]+\);\s*export default ForwardRef;?/,
+      /const ForwardRef = forwardRef\([^)]+\);\s*export default ForwardRef;?/,
       `export const ${compName} = forwardRef<SVGSVGElement, IconProps>(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
     );
 
@@ -108,7 +110,7 @@ async function build() {
     jsOut = jsOut.replace(new RegExp(`forwardRef\\(${compName}\\)`), `forwardRef(${innerName})`);
     // replace ForwardRef default export with named forwardRef export + default and add displayName
     jsOut = jsOut.replace(
-      /const ForwardRef = forwardRef\([^\)]+\);\s*export default ForwardRef;?/,
+      /const ForwardRef = forwardRef\([^)]+\);\s*export default ForwardRef;?/,
       `export const ${compName} = forwardRef(${innerName});\n${compName}.displayName = '${compName}';\nexport default ${compName};`
     );
     const distPath = new URL("./" + compName + ".js", distReactDir);

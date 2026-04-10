@@ -12,7 +12,36 @@ import { useChatStore } from "@youngro/feature-chat";
 import type { BaseMessage } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
 import { shallow } from "zustand/shallow";
+import type { CommonContentPart } from "./AIChatMessage";
 import { VirtualChatList, type VirtualChatItem } from "./VirtualChatList";
+
+function isCommonContentPart(value: unknown): value is CommonContentPart {
+  if (!value || typeof value !== "object") return false;
+
+  const part = value as Record<string, unknown>;
+
+  if (part.type === "text") {
+    return part.text === undefined || typeof part.text === "string";
+  }
+
+  if (part.type === "image_url") {
+    if (part.image_url === undefined) return true;
+    if (!part.image_url || typeof part.image_url !== "object") return false;
+
+    const imageUrl = part.image_url as Record<string, unknown>;
+    return typeof imageUrl.url === "string";
+  }
+
+  return false;
+}
+
+function toVirtualChatContent(content: BaseMessage["content"]): VirtualChatItem["content"] {
+  if (typeof content === "string") {
+    return content;
+  }
+
+  return content.every(isCommonContentPart) ? content : "";
+}
 
 export const ChatHistory: React.FC = () => {
   const { messages, sending, streamingMessage } = useChatStore(
@@ -62,11 +91,7 @@ export const ChatHistory: React.FC = () => {
         kind: "history",
         name: getMessageName(role),
         role,
-        content: Array.isArray(message.content)
-          ? (message.content as VirtualChatItem["content"])
-          : typeof message.content === "string"
-            ? message.content
-            : "",
+        content: toVirtualChatContent(message.content),
         cacheKey: message.id,
         isStreaming: false,
       };
@@ -78,7 +103,7 @@ export const ChatHistory: React.FC = () => {
         kind: "streaming",
         name: ASSISTANT_NAME,
         role: "assistant",
-        content: streamingMessage.content || "",
+        content: toVirtualChatContent(streamingMessage.content),
         loading: !streamingMessage.content,
         isStreaming: true,
       });

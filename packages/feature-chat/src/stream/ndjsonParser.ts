@@ -47,7 +47,7 @@ export async function consumeNDJSONStream(
       try {
         const obj = JSON.parse(last) as NDJSONChunk;
         opts.onChunk(obj);
-      } catch (e) {
+      } catch {
         // ignore trailing partial
       }
     }

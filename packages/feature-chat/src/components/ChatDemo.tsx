@@ -29,7 +29,10 @@ export function ChatDemo() {
         ))}
         {sending && streamingMessage && (
           <div style={{ marginTop: 8 }}>
-            <strong>assistant (streaming):</strong> {streamingMessage.content}
+            <strong>assistant (streaming):</strong>{" "}
+            {typeof streamingMessage.content === "string"
+              ? streamingMessage.content
+              : JSON.stringify(streamingMessage.content)}
           </div>
         )}
       </div>
