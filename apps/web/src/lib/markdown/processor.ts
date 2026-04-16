@@ -2,12 +2,13 @@ import type { Processor, Plugin } from "unified";
 import type { Root as MdastRoot } from "mdast";
 import type { Root as HastRoot } from "hast";
 import type { BundledLanguage } from "shiki";
+import { rehypeWrapTables } from "./plugins/rehypeWrapTables";
 
 const processorCache = new Map<string, Promise<Processor>>();
 let fallbackProcessorPromise: Promise<Processor> | null = null;
 let coreModulesPromise: Promise<MarkdownCoreModules> | null = null;
 let rehypeShikiPromise: Promise<ShikiRehypePlugin> | null = null;
-const langRegex = /```(.{2,})\s/g;
+const langRegex = /```([\w-]+)(?=[\s]|$)/g;
 
 interface MarkdownProcessorOptions {
   highlight?: boolean;
@@ -17,6 +18,7 @@ interface MarkdownProcessorOptions {
 interface MarkdownCoreModules {
   unified: typeof import("unified").unified;
   remarkParse: typeof import("remark-parse").default;
+  remarkGfm: typeof import("remark-gfm").default;
   remarkMath: typeof import("remark-math").default;
   remarkRehype: typeof import("remark-rehype").default;
   rehypeKatex: typeof import("rehype-katex").default;
@@ -35,29 +37,40 @@ const SHIKI_DISABLED =
   process.env.NEXT_DISABLE_SHIKI === "1" ||
   process.env.MARKDOWN_NO_SHIKI === "1";
 
+/** 从 Markdown 文本中提取所有 fenced code block 的语言集 */
 function extractLangs(markdown: string): BundledLanguage[] {
   const matches = markdown.matchAll(langRegex);
   const langs = new Set<BundledLanguage>();
-  langs.add("python");
   for (const match of matches) {
-    if (match[1]) langs.add(match[1] as BundledLanguage);
+    if (match[1]) langs.add(match[1].toLowerCase() as BundledLanguage);
   }
   return [...langs];
 }
 
+/** 懒加载 unified 核心生态及基础解析、GFM、公式插件 */
 function loadCoreModules(): Promise<MarkdownCoreModules> {
   if (!coreModulesPromise) {
     coreModulesPromise = Promise.all([
       import("unified"),
       import("remark-parse").then((m) => m.default),
+      import("remark-gfm").then((m) => m.default),
       import("remark-math").then((m) => m.default),
       import("remark-rehype").then((m) => m.default),
       import("rehype-katex").then((m) => m.default),
       import("rehype-stringify").then((m) => m.default),
     ]).then(
-      ([unifiedModule, remarkParse, remarkMath, remarkRehype, rehypeKatex, rehypeStringify]) => ({
+      ([
+        unifiedModule,
+        remarkParse,
+        remarkGfm,
+        remarkMath,
+        remarkRehype,
+        rehypeKatex,
+        rehypeStringify,
+      ]) => ({
         unified: unifiedModule.unified,
         remarkParse,
+        remarkGfm,
         remarkMath,
         remarkRehype,
         rehypeKatex,
@@ -69,6 +82,7 @@ function loadCoreModules(): Promise<MarkdownCoreModules> {
   return coreModulesPromise;
 }
 
+/** 按需懒加载 Shiki 代码高亮插件 */
 function loadRehypeShiki(): Promise<ShikiRehypePlugin> {
   if (!rehypeShikiPromise) {
     rehypeShikiPromise = import("@shikijs/rehype").then((m) => m.default);
@@ -77,6 +91,7 @@ function loadRehypeShiki(): Promise<ShikiRehypePlugin> {
   return rehypeShikiPromise;
 }
 
+/** 构建并装配 unified Markdown 处理器流水线 */
 async function createMarkdownProcessor({
   highlight = false,
   langs = [],
@@ -87,9 +102,11 @@ async function createMarkdownProcessor({
   const processor = core
     .unified()
     .use(core.remarkParse)
+    .use(core.remarkGfm)
     .use(core.remarkMath)
     .use(remarkRehypePlugin)
-    .use([core.rehypeKatex]);
+    .use([core.rehypeKatex])
+    .use(rehypeWrapTables);
 
   if (highlight) {
     const rehypeShiki = await loadRehypeShiki();
@@ -123,6 +140,7 @@ async function createMarkdownProcessor({
   return processor.use([core.rehypeStringify]);
 }
 
+/** 缓存并获取按需包含特定高亮语言的 Processor 实例 */
 function getProcessor(langs: BundledLanguage[]): Promise<Processor> {
   const cacheKey = [...langs].sort().join(",");
   if (!processorCache.has(cacheKey)) {
@@ -135,10 +153,12 @@ function getProcessor(langs: BundledLanguage[]): Promise<Processor> {
   return processorCache.get(cacheKey)!;
 }
 
+/** 创建不包含高亮插件的降级 Processor */
 async function createFallbackProcessor(): Promise<Processor> {
   return createMarkdownProcessor({ highlight: false });
 }
 
+/** 缓存并获取单例降级 Processor (无代码高亮) */
 function getFallbackProcessor(): Promise<Processor> {
   if (!fallbackProcessorPromise) {
     fallbackProcessorPromise = createFallbackProcessor();
@@ -146,24 +166,28 @@ function getFallbackProcessor(): Promise<Processor> {
   return fallbackProcessorPromise;
 }
 
+/**
+ * 异步处理 Markdown 到 HTML 字符串的主入口
+ * 根据内容自动判断是否加载高亮模块，并处理异常降级
+ */
 export async function processMarkdown(markdown: string): Promise<string> {
   try {
-    // If Shiki is disabled via env, always use fallback (no syntax highlighting).
+    // 检查环境变量
     if (SHIKI_DISABLED) {
       const fb = await getFallbackProcessor();
-      return fb.processSync(markdown).toString();
+      const result = await fb.process(markdown);
+      return result.toString();
     }
 
-    // fast path when there are no fences
+    // 检查是否含代码块
     if (!/`{3,}/.test(markdown)) {
       const fb = await getFallbackProcessor();
-      return fb.processSync(markdown).toString();
+      const result = await fb.process(markdown);
+      return result.toString();
     }
 
     const langs = extractLangs(markdown);
-    const langSet = new Set(langs);
-    langSet.add("python");
-    const languagesToLoad = Array.from(langSet);
+    const languagesToLoad = Array.from(new Set(langs));
 
     const processor = await getProcessor(languagesToLoad);
     const result = await processor.process(markdown);
@@ -172,13 +196,14 @@ export async function processMarkdown(markdown: string): Promise<string> {
     // fallback to simpler pipeline
     void err;
     const fb = await getFallbackProcessor();
-    return fb.processSync(markdown).toString();
+    const result = await fb.process(markdown);
+    return result.toString();
   }
 }
 
-export async function processMarkdownSync(markdown: string): Promise<string> {
-  // We can't synchronously run the shiki pipeline here reliably since shiki is async;
-  // use a simple fallback synchronous pipeline by calling unified sync processors.
+/** 提供基础内容的快捷同步渲染接口 (强制跳过高亮等异步流程) */
+export async function processStreamingMarkdown(markdown: string): Promise<string> {
   const fb = await getFallbackProcessor();
-  return fb.processSync(markdown).toString();
+  const result = await fb.process(markdown);
+  return result.toString();
 }

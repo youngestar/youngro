@@ -390,8 +390,6 @@ function VirtuosoLiteInner<T>(
     );
     const delta = desiredTop - scroller.scrollTop;
 
-    console.log(pendingTarget.index, scroller.scrollTop, actualTop, itemRect.height, desiredTop);
-
     if (
       Math.abs(delta) <= SCROLL_ALIGNMENT_EPSILON ||
       pendingTarget.attempts >= MAX_SCROLL_ALIGNMENT_ATTEMPTS

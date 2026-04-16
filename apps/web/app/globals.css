@@ -1,3 +1,4 @@
+@import "katex/dist/katex.min.css";
 @import "@youngro/design-tokens/styles/chromatic.css";
 @import "@youngro/design-tokens/styles/stage-background.css";
 
@@ -24,6 +25,28 @@
    doesn't cause large reflows while scrolling. */
 .stream-prose {
   contain-intrinsic-size: auto 320px; /* fallback height while off-screen */
+}
+
+/* Let markdown tables scroll inside a dedicated wrapper so the native table
+   layout stays intact while narrow chat bubbles remain stable on mobile. */
+.md-table-wrap {
+  margin: 1.5em 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.prose .md-table-wrap > table {
+  min-width: 100%;
+  width: max-content;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose .md-table-wrap th,
+.prose .md-table-wrap td {
+  vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 /* Set base font families so the injected CSS variables actually take effect globally */

@@ -53,6 +53,27 @@ export interface ChatState {
   applyActiveCardSystemPrompt: () => void;
 }
 
+function appendStreamingText(message: AssistantMessage, text: string) {
+  if (!text) return;
+
+  if (typeof message.content === "string") {
+    message.content += text;
+  }
+
+  message.slices = message.slices || [];
+  const lastSlice = message.slices[message.slices.length - 1];
+
+  if (lastSlice?.type === "text") {
+    lastSlice.text += text;
+    return;
+  }
+
+  message.slices.push({
+    type: "text",
+    text,
+  });
+}
+
 export const useChatStore = create<ChatState>()(
   persist(
     immer((set, get) => ({
@@ -173,12 +194,7 @@ export const useChatStore = create<ChatState>()(
                 if (visible) {
                   set((st) => {
                     if (!st.streamingMessage) return;
-                    st.streamingMessage.content += visible;
-                    st.streamingMessage.slices = st.streamingMessage.slices || [];
-                    st.streamingMessage.slices.push({
-                      type: "text",
-                      text: visible,
-                    });
+                    appendStreamingText(st.streamingMessage, visible);
                   });
                   get().onTokenLiteral.forEach((cb) => cb(visible));
                 }
@@ -192,12 +208,7 @@ export const useChatStore = create<ChatState>()(
                   if (flushText) {
                     set((st) => {
                       if (!st.streamingMessage) return;
-                      st.streamingMessage.content += flushText;
-                      st.streamingMessage.slices = st.streamingMessage.slices || [];
-                      st.streamingMessage.slices.push({
-                        type: "text",
-                        text: flushText,
-                      });
+                      appendStreamingText(st.streamingMessage, flushText);
                     });
                     get().onTokenLiteral.forEach((cb) => cb(flushText));
                   }
@@ -289,9 +300,7 @@ export const useChatStore = create<ChatState>()(
             if (textDelta) {
               const cleaned = stripTokens(textDelta);
               if (cleaned) {
-                s.streamingMessage.content += cleaned;
-                s.streamingMessage.slices = s.streamingMessage.slices || [];
-                s.streamingMessage.slices.push({ type: "text", text: cleaned });
+                appendStreamingText(s.streamingMessage, cleaned);
                 get().onTokenLiteral.forEach((cb) => cb(cleaned));
               }
             }

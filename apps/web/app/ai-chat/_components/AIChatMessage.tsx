@@ -26,6 +26,7 @@ export interface AiChatMessageProps {
   loading?: boolean;
   cacheKey?: string;
   isStreaming?: boolean;
+  streamSlices?: Array<{ type: "text"; text: string }>;
 }
 
 function AiChatMessage({
@@ -35,6 +36,7 @@ function AiChatMessage({
   loading = false,
   cacheKey,
   isStreaming = false,
+  streamSlices,
 }: AiChatMessageProps) {
   const isUser = role === "user";
   const isAssistant = role === "assistant";
@@ -103,6 +105,7 @@ function AiChatMessage({
             cacheKey={cacheKey}
             fallbackMode="plain-text"
             isStreaming={isStreaming}
+            streamSlices={streamSlices}
           />
         )}
       </div>
@@ -118,6 +121,7 @@ function areEqual(prev: AiChatMessageProps, next: AiChatMessageProps) {
     prev.loading === next.loading &&
     prev.cacheKey === next.cacheKey &&
     prev.isStreaming === next.isStreaming &&
+    prev.streamSlices === next.streamSlices &&
     prev.content === next.content
   );
 }

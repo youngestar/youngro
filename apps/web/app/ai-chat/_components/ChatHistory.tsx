@@ -9,7 +9,7 @@
 
 import React, { useMemo } from "react";
 import { useChatStore } from "@youngro/feature-chat";
-import type { BaseMessage } from "@youngro/feature-chat";
+import type { BaseMessage, ChatSliceText } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
 import { shallow } from "zustand/shallow";
 import type { CommonContentPart } from "./AIChatMessage";
@@ -41,6 +41,15 @@ function toVirtualChatContent(content: BaseMessage["content"]): VirtualChatItem[
   }
 
   return content.every(isCommonContentPart) ? content : "";
+}
+
+function isTextStreamSlice(slice: unknown): slice is ChatSliceText {
+  return (
+    !!slice &&
+    typeof slice === "object" &&
+    (slice as { type?: unknown }).type === "text" &&
+    typeof (slice as { text?: unknown }).text === "string"
+  );
 }
 
 export const ChatHistory: React.FC = () => {
@@ -106,6 +115,7 @@ export const ChatHistory: React.FC = () => {
         content: toVirtualChatContent(streamingMessage.content),
         loading: !streamingMessage.content,
         isStreaming: true,
+        streamSlices: streamingMessage.slices?.filter(isTextStreamSlice) ?? [],
       });
     }
 

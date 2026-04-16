@@ -16,22 +16,28 @@ import { useConsciousnessStore } from "../../../src/store/consciousnessStore";
 import useStreamingSpeechPlayback from "../../../src/hooks/useStreamingSpeechPlayback";
 
 export const InteractiveArea: React.FC = () => {
+  // 聊天核心状态与方法
   const { send, sending, registerOnStreamEnd } = useChatStore();
+  // 输入框状态与中文输入法（IME）防冲突标志
   const [messageInput, setMessageInput] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // 加载并获取大语言模型提供商 (Provider) 状态
   useProvidersHydrate();
   const providers = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const fetchModels = useProvidersStore((s) => s.fetchModels);
+
+  // 获取当前用户配置的"意识"偏好 (选择的提供商与模型)
   const { activeProviderId, activeModelId, customModelName } = useConsciousnessStore();
 
+  // 确定实际使用的 Provider ID（优先级：用户活动选择 > 首个已配置的 > 默认深海/deepseek）
   const fallbackProviderId = useMemo(() => {
     if (activeProviderId) return activeProviderId;
     const configured = providers.find((p) => p.configured);
     return configured?.meta.id || "deepseek";
   }, [activeProviderId, providers]);
 
+  // 从全局 store 获取选中 Provider 的配置和支持的模型列表
   const providerState = useProvidersStore((s) => s.getProvider(fallbackProviderId));
   const models = useMemo(
     () => providerState?.resources.items ?? [],
@@ -41,42 +47,45 @@ export const InteractiveArea: React.FC = () => {
     const cfg = providerState?.config;
     return cfg ? { ...cfg } : undefined;
   }, [providerState?.config]);
+
   const [fallbackModelId, setFallbackModelId] = useState<string>("");
+
+  // 流式语音（TTS）播报 Hook 及其状态
   const {
     enabled: speechAutoplayEnabled,
     setEnabled: setSpeechAutoplayEnabled,
     ready: speechPlaybackReady,
   } = useStreamingSpeechPlayback();
 
+  // 确定最终使用的聊天大模型 ID
   const selectedModel = useMemo(() => {
     if (customModelName?.trim()) return customModelName.trim();
     if (activeModelId) return activeModelId;
     return fallbackModelId || models[0]?.id || "";
   }, [activeModelId, customModelName, fallbackModelId, models]);
 
+  // 发送消息处理逻辑
   const handleSend = useCallback(() => {
-    if (isComposing || sending) return;
+    // 阻止发送：正在使用输入法 (中文拼音未确认) 或 消息正在回复中
+    if (sending) return;
     const text = messageInput.trim();
-    if (!text) return;
+    if (!text) return; // 空消息直接返回
+
     const modelToUse = selectedModel || models[0]?.id || undefined;
-    setMessageInput("");
+    setMessageInput(""); // 发送前清空输入框
+
+    // 触发底层的 send action
     void send(text, {
       model: modelToUse,
       providerId: fallbackProviderId,
       providerConfig,
     });
-    textareaRef.current?.focus();
-  }, [
-    isComposing,
-    sending,
-    messageInput,
-    send,
-    selectedModel,
-    fallbackProviderId,
-    models,
-    providerConfig,
-  ]);
 
+    // 发送完尝试将光标重新对焦到输入框
+    textareaRef.current?.focus();
+  }, [sending, messageInput, send, selectedModel, fallbackProviderId, models, providerConfig]);
+
+  // 监听大模型返回流结束事件，自动给输入框重新获取焦点
   useEffect(() => {
     const unsub = registerOnStreamEnd?.(() => {
       queueMicrotask(() => textareaRef.current?.focus());
@@ -86,10 +95,12 @@ export const InteractiveArea: React.FC = () => {
     };
   }, [registerOnStreamEnd]);
 
+  // 当 Provider 有变化时，主动触发请求拉取该提供商的全部可用模型列表
   useEffect(() => {
     if (fallbackProviderId) void fetchModels(fallbackProviderId);
   }, [fallbackProviderId, fetchModels]);
 
+  // 若没有指定活动模型/自定义模型名称，自动fallback选中返回的模型列表中的第一项
   useEffect(() => {
     if (!activeModelId && !customModelName && models.length) {
       const firstModel = models[0];
@@ -115,12 +126,10 @@ export const InteractiveArea: React.FC = () => {
                     focusStyle="none"
                     ref={textareaRef}
                     onChange={(e) => setMessageInput(e.target.value)}
-                    onCompositionStart={() => setIsComposing(true)}
-                    onCompositionEnd={() => setIsComposing(false)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                         e.preventDefault();
-                        void handleSend();
+                        handleSend();
                       }
                     }}
                   />
