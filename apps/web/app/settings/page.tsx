@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { IconItem, Icon, PageHeader } from "@youngro/ui";
 import styles from "./page.module.css";
 import { Layers, Package, SmilePlus } from "lucide-react";
@@ -14,13 +15,14 @@ export default function Home() {
           title="设置"
           subtitle="Settings"
           showBackButton
-          onBack={() => router.back()}
+          onBack={() => router.replace("/ai-chat")}
         />
         <div className="flex flex-col gap-4 pb-12">
           <IconItem
             title="角色卡"
             description="管理你的角色卡"
             to="/settings/youngro-card"
+            linkComponent={Link}
             icon="i-solar:settings-bold-duotone" // 字体图标类
             // 或者
             iconTemplate
@@ -31,6 +33,7 @@ export default function Home() {
             title="机体模块"
             description="思维, 发声, 记忆等模块设置"
             to="/settings/modules"
+            linkComponent={Link}
             icon="i-solar:settings-bold-duotone" // 字体图标类
             // 或者
             iconTemplate
@@ -41,6 +44,7 @@ export default function Home() {
             title="服务来源"
             description="管理 AI 服务来源"
             to="/settings/providers"
+            linkComponent={Link}
             icon="i-solar:settings-bold-duotone" // 字体图标类
             // 或者
             iconTemplate

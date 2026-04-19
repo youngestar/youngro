@@ -3,7 +3,7 @@
  * 不依赖 UI/feature/store，便于 SSR 或脚本环境复用。
  */
 
-export function invariant(condition: any, message: string): asserts condition {
+export function invariant(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new Error(`[invariant] ${message}`);
   }

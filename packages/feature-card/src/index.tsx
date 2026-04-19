@@ -42,10 +42,7 @@ export function CardDetailsPanel({
     <div>
       <div>
         <div className="border-b border-neutral-200 dark:border-neutral-700">
-          <div
-            className="flex justify-center -mb-px sm:justify-start space-x-1"
-            role="tablist"
-          >
+          <div className="flex justify-center -mb-px sm:justify-start space-x-1" role="tablist">
             <button
               className={`px-4 py-2 text-sm font-medium ${
                 tab === "details"
@@ -97,12 +94,7 @@ export function CardDetailsPanel({
           </Field>
           {card.description ? (
             <Field label="描述">
-              <Textarea
-                value={card.description}
-                readOnly
-                rows={3}
-                tone="plain"
-              />
+              <Textarea value={card.description} readOnly rows={3} tone="plain" />
             </Field>
           ) : null}
           {card.notes ? (
@@ -112,22 +104,12 @@ export function CardDetailsPanel({
           ) : null}
           {card.systemPrompt ? (
             <Field label="系统提示">
-              <Textarea
-                value={card.systemPrompt}
-                readOnly
-                rows={6}
-                tone="plain"
-              />
+              <Textarea value={card.systemPrompt} readOnly rows={6} tone="plain" />
             </Field>
           ) : null}
           {card.personality ? (
             <Field label="性格">
-              <Textarea
-                value={card.personality}
-                readOnly
-                rows={3}
-                tone="plain"
-              />
+              <Textarea value={card.personality} readOnly rows={3} tone="plain" />
             </Field>
           ) : null}
           {card.scenario ? (
@@ -153,25 +135,13 @@ export function CardDetailsPanel({
       ) : (
         <div className="space-y-4">
           <Field label="意识模型">
-            <Input
-              value={youngro?.modules?.consciousness?.model ?? "-"}
-              readOnly
-              tone="plain"
-            />
+            <Input value={youngro?.modules?.consciousness?.model ?? "-"} readOnly tone="plain" />
           </Field>
           <Field label="语音模型">
-            <Input
-              value={youngro?.modules?.speech?.model ?? "-"}
-              readOnly
-              tone="plain"
-            />
+            <Input value={youngro?.modules?.speech?.model ?? "-"} readOnly tone="plain" />
           </Field>
           <Field label="语音音色">
-            <Input
-              value={youngro?.modules?.speech?.voice_id ?? "-"}
-              readOnly
-              tone="plain"
-            />
+            <Input value={youngro?.modules?.speech?.voice_id ?? "-"} readOnly tone="plain" />
           </Field>
           {youngro?.modules?.vrm?.url ? (
             <Field label="VRM 模型 URL">
@@ -189,11 +159,7 @@ export function CardDetailsPanel({
   );
 }
 
-export function formatCardSummary(card: {
-  id: string;
-  title: string;
-  description?: string;
-}) {
+export function formatCardSummary(card: { id: string; title: string; description?: string }) {
   const desc = card.description?.trim();
   return desc ? `${card.title} — ${desc}` : card.title;
 }

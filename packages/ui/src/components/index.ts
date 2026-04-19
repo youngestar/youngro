@@ -13,24 +13,27 @@ export type { FieldProps } from "./Field";
 export { Select } from "./Select";
 export type { SelectProps, SelectOption } from "./Select";
 export { HeadlessSelect } from "./Select/HeadlessSelect";
-export type {
-  HeadlessSelectOption,
-  HeadlessSelectProps,
-} from "./Select/HeadlessSelect";
-export {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "./Card";
+export type { HeadlessSelectOption, HeadlessSelectProps } from "./Select/HeadlessSelect";
+export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./Card";
 export { Icon } from "./Icon";
 export type { IconProps } from "./Icon";
 export { BrandLogo } from "./BrandLogo";
 export type { BrandLogoProps } from "./BrandLogo";
 export { ScrollArea } from "./ScrollArea";
 export type { ScrollAreaProps } from "./ScrollArea";
+export { VirtuosoLite } from "./VirtuosoLite";
+export type {
+  IncreaseViewportBy,
+  ListRange,
+  Overscan,
+  ScrollAlign,
+  ScrollBehavior,
+  ScrollDirection,
+  ScrollToIndexLocation,
+  VirtuosoItem,
+  VirtuosoLiteHandle,
+  VirtuosoLiteProps,
+} from "./VirtuosoLite";
 export { IconItem } from "./Menu";
 export type { IconItemProps } from "./Menu";
 export { HeaderLink } from "./HeaderLink";

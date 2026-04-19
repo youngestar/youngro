@@ -11,8 +11,7 @@ const checkbox = cva(
     variants: {
       intent: {
         default: "",
-        destructive:
-          "accent-red-500 focus-visible:ring-red-400/70 dark:accent-red-400",
+        destructive: "accent-red-500 focus-visible:ring-red-400/70 dark:accent-red-400",
       },
       size: {
         sm: "h-4 w-4",
@@ -24,24 +23,15 @@ const checkbox = cva(
       intent: "default",
       size: "md",
     },
-  },
+  }
 );
 
 export type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> &
   VariantProps<typeof checkbox>;
 
-export const Checkbox: React.FC<CheckboxProps> = ({
-  className,
-  intent,
-  size,
-  ...props
-}) => {
+export const Checkbox: React.FC<CheckboxProps> = ({ className, intent, size, ...props }) => {
   return (
-    <input
-      type="checkbox"
-      {...props}
-      className={clsx(checkbox({ intent, size }), className)}
-    />
+    <input type="checkbox" {...props} className={clsx(checkbox({ intent, size }), className)} />
   );
 };
 

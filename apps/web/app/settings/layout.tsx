@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { HeaderLink } from "@youngro/ui";
 import FloatingSettings from "./components/FloatingSettings";
 
@@ -16,7 +17,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
       {/* Header */}
       <div className="w-full bg-[var(--background)]/80 backdrop-blur px-3 py-3">
         <div className="mx-auto flex items-center gap-2">
-          <HeaderLink href="/" title="YOUNGRO" />
+          <HeaderLink href="/ai-chat" title="YOUNGRO" linkComponent={Link} />
         </div>
       </div>
 

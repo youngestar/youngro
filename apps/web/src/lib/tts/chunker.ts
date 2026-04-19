@@ -54,9 +54,7 @@ export interface TTSChunkItem {
   special: string | null;
 }
 
-function createReaderFromString(
-  input: string,
-): ReadableStreamDefaultReader<Uint8Array> {
+function createReaderFromString(input: string): ReadableStreamDefaultReader<Uint8Array> {
   const encoder = new TextEncoder();
   return new ReadableStream<Uint8Array>({
     start(controller) {
@@ -68,12 +66,12 @@ function createReaderFromString(
 
 export async function* chunkTTSInput(
   input: string | ReaderLike,
-  options?: TTSInputChunkOptions,
+  options?: TTSInputChunkOptions
 ): AsyncGenerator<TTSInputChunk, void, unknown> {
   const { boost = 2, minimumWords = 4, maximumWords = 12 } = options ?? {};
 
   const iterator = readGraphemeClusters(
-    typeof input === "string" ? createReaderFromString(input) : input,
+    typeof input === "string" ? createReaderFromString(input) : input
   );
 
   const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
@@ -119,11 +117,7 @@ export async function* chunkTTSInput(
             next = await iterator.next();
             if (!next.done && next.value && next.value === ".") {
               afterNext = await iterator.next();
-              if (
-                !afterNext.done &&
-                afterNext.value &&
-                afterNext.value === "."
-              ) {
+              if (!afterNext.done && afterNext.value && afterNext.value === ".") {
                 value = "…";
                 next = undefined;
                 afterNext = undefined;
@@ -153,10 +147,7 @@ export async function* chunkTTSInput(
 
       const words = [...segmenter.segment(buffer)].filter((w) => w.isWordLike);
 
-      if (
-        chunkWordsCount > minimumWords &&
-        chunkWordsCount + words.length > maximumWords
-      ) {
+      if (chunkWordsCount > minimumWords && chunkWordsCount + words.length > maximumWords) {
         const text = kept ? chunk.trim() + value : chunk.trim();
         yield {
           text,
@@ -182,12 +173,7 @@ export async function* chunkTTSInput(
         yieldCount += 1;
         chunk = "";
         chunkWordsCount = 0;
-      } else if (
-        flush ||
-        hard ||
-        chunkWordsCount > maximumWords ||
-        yieldCount < boost
-      ) {
+      } else if (flush || hard || chunkWordsCount > maximumWords || yieldCount < boost) {
         const text = chunk.trim();
         yield {
           text,
@@ -241,13 +227,10 @@ export async function* chunkTTSInput(
 export async function chunkEmitter(
   reader: ReaderLike,
   pendingSpecials: string[],
-  handler: (ttsSegment: TTSChunkItem) => Promise<void> | void,
+  handler: (ttsSegment: TTSChunkItem) => Promise<void> | void
 ): Promise<void> {
   const sanitizeChunk = (text: string) =>
-    text
-      .replaceAll(TTS_SPECIAL_TOKEN, "")
-      .replaceAll(TTS_FLUSH_INSTRUCTION, "")
-      .trim();
+    text.replaceAll(TTS_SPECIAL_TOKEN, "").replaceAll(TTS_FLUSH_INSTRUCTION, "").trim();
 
   try {
     for await (const chunk of chunkTTSInput(reader)) {

@@ -13,7 +13,7 @@ export default function ConsciousnessPage() {
         title="意识模块"
         subtitle="consciousness"
         showBackButton
-        onBack={() => router.back()}
+        onBack={() => router.replace("/settings/modules")}
       />
       <ClientConsciousnessPage />
     </div>

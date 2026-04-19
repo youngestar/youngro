@@ -1,15 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader, IconStatusItem } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 // Metadata retained only if future localization merges are needed
 import { MessageSquare, User, Mic } from "lucide-react";
 import useScrollToHash from "../../../src/hooks/useScrollToHash";
-import {
-  useProvidersStore,
-  useProvidersHydrate,
-} from "../../../src/store/providersStore";
+import { useProvidersStore, useProvidersHydrate } from "../../../src/store/providersStore";
 
 export default function ProvidersPage() {
   const router = useRouter();
@@ -17,9 +15,7 @@ export default function ProvidersPage() {
 
   const chat = useProvidersStore((s) => s.getProvidersByCategory("chat"));
   const speech = useProvidersStore((s) => s.getProvidersByCategory("speech"));
-  const transcription = useProvidersStore((s) =>
-    s.getProvidersByCategory("transcription"),
-  );
+  const transcription = useProvidersStore((s) => s.getProvidersByCategory("transcription"));
   useScrollToHash({
     auto: true,
     offset: 16,
@@ -37,7 +33,7 @@ export default function ProvidersPage() {
           title="服务来源"
           subtitle="Providers"
           showBackButton
-          onBack={() => router.back()}
+          onBack={() => router.replace("/settings")}
         />
 
         {/* Intro banner */}
@@ -76,6 +72,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
@@ -107,6 +104,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}
@@ -118,10 +116,7 @@ export default function ProvidersPage() {
         </div>
 
         {/* Transcription providers */}
-        <div
-          id="transcription"
-          className="my-5 flex flex-row items-center gap-2"
-        >
+        <div id="transcription" className="my-5 flex flex-row items-center gap-2">
           <Mic className="h-10 w-10 text-neutral-500 dark:text-neutral-400" />
           <div>
             <div>
@@ -141,6 +136,7 @@ export default function ProvidersPage() {
               <IconStatusItem
                 key={ps.meta.id}
                 href={`/settings/providers/${ps.meta.category}/${ps.meta.id}`}
+                linkComponent={Link}
                 title={ps.meta.localizedName || "Unknown"}
                 description={ps.meta.localizedDescription}
                 icon={Icon ? <Icon className="h-full w-full" /> : undefined}

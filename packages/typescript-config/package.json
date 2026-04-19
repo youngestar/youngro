@@ -1,9 +1,12 @@
 {
-    "name":  "@youngro/typescript-config",
-    "version":  "0.0.0",
-    "private":  true,
-    "license":  "MIT",
-    "publishConfig":  {
-                          "access":  "public"
-                      }
+  "name": "@youngro/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "pnpm exec prettier --check ."
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -28,18 +28,11 @@ export default function ProviderPageHeader({
 
   const handleBack = () => {
     if (backHref) {
-      router.push(backHref);
+      router.replace(backHref);
       return;
     }
     router.back();
   };
 
-  return (
-    <PageHeader
-      title={titleNode}
-      subtitle={subtitle}
-      showBackButton
-      onBack={handleBack}
-    />
-  );
+  return <PageHeader title={titleNode} subtitle={subtitle} showBackButton onBack={handleBack} />;
 }

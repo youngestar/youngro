@@ -4,27 +4,67 @@
  * ChatHistory（消息历史列表）
  * - 仅渲染用户可见的消息（过滤 system）。
  * - 在 assistant 正在流式回复时，额外渲染一条“进行中”的消息。
- * - 集成自动滚动 Hook：提供“回到底部”按钮与底部哨兵位。
+ * - 将消息整理为虚拟列表数据，交给 VirtualChatList 渲染。
  */
 
 import React, { useMemo } from "react";
-import AiChatMessage from "./AIChatMessage";
 import { useChatStore } from "@youngro/feature-chat";
-import type { BaseMessage } from "@youngro/feature-chat";
+import type { BaseMessage, ChatSliceText } from "@youngro/feature-chat";
 import { useTranslation } from "react-i18next";
-import { useChatAutoScroll } from "../../../src/hooks/useChatAutoScroll";
+import { shallow } from "zustand/shallow";
+import type { CommonContentPart } from "./AIChatMessage";
+import { VirtualChatList, type VirtualChatItem } from "./VirtualChatList";
+
+function isCommonContentPart(value: unknown): value is CommonContentPart {
+  if (!value || typeof value !== "object") return false;
+
+  const part = value as Record<string, unknown>;
+
+  if (part.type === "text") {
+    return part.text === undefined || typeof part.text === "string";
+  }
+
+  if (part.type === "image_url") {
+    if (part.image_url === undefined) return true;
+    if (!part.image_url || typeof part.image_url !== "object") return false;
+
+    const imageUrl = part.image_url as Record<string, unknown>;
+    return typeof imageUrl.url === "string";
+  }
+
+  return false;
+}
+
+function toVirtualChatContent(content: BaseMessage["content"]): VirtualChatItem["content"] {
+  if (typeof content === "string") {
+    return content;
+  }
+
+  return content.every(isCommonContentPart) ? content : "";
+}
+
+function isTextStreamSlice(slice: unknown): slice is ChatSliceText {
+  return (
+    !!slice &&
+    typeof slice === "object" &&
+    (slice as { type?: unknown }).type === "text" &&
+    typeof (slice as { text?: unknown }).text === "string"
+  );
+}
 
 export const ChatHistory: React.FC = () => {
-  const { messages, sending, streamingMessage } = useChatStore();
+  const { messages, sending, streamingMessage } = useChatStore(
+    (state) => ({
+      messages: state.messages,
+      sending: state.sending,
+      streamingMessage: state.streamingMessage,
+    }),
+    shallow
+  );
 
   // 仅展示用户可见的消息（隐藏 system 提示）
   // 过滤隐藏 system 消息，避免在 UI 中暴露系统提示词
-  const displayMessages = useMemo(
-    () => messages.filter((m) => m.role !== "system"),
-    [messages],
-  );
-
-  const { endRef, scrollToBottom, showBackToBottom } = useChatAutoScroll();
+  const displayMessages = useMemo(() => messages.filter((m) => m.role !== "system"), [messages]);
 
   const { t } = useTranslation();
 
@@ -32,69 +72,55 @@ export const ChatHistory: React.FC = () => {
   const ASSISTANT_NAME = t("stage.chat.message.character-name.airi", {
     defaultValue: "爱丽",
   });
-  const getMessageName = (role: BaseMessage["role"]) => {
-    switch (role) {
-      case "user":
-        return t("stage.chat.role.user", { defaultValue: "user" });
-      case "assistant":
-        return ASSISTANT_NAME;
-      case "error":
-        return t("stage.chat.role.error", { defaultValue: "error" });
-      default:
-        return "";
-    }
-  };
-
-  return (
-    <div className="flex flex-col relative w-full rounded-lg space-y-2">
-      {/* 普通历史消息 */}
-      {displayMessages.map((message: BaseMessage, index: number) => {
-        const role: "user" | "assistant" | "error" =
-          message.role === "user" ||
-          message.role === "assistant" ||
-          message.role === "error"
-            ? message.role
-            : "assistant";
-        const content: string =
-          typeof message.content === "string" ? message.content : "";
-        return (
-          <AiChatMessage
-            key={message.id ?? index}
-            name={getMessageName(role)}
-            role={role}
-            content={content}
-          />
-        );
-      })}
-
-      {/* 流式消息（assistant 回复中） */}
-      {sending && streamingMessage && (
-        <AiChatMessage
-          name={ASSISTANT_NAME}
-          role="assistant"
-          content={streamingMessage.content || ""}
-          loading={!streamingMessage.content}
-        />
-      )}
-      {/* 回到底部按钮（仅在未贴底时显示） */}
-      {showBackToBottom && (
-        <div className="sticky bottom-3 right-0 self-end z-10 pr-1">
-          <button
-            type="button"
-            onClick={() => scrollToBottom("smooth")}
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium shadow-md ring-1 ring-black/5 bg-primary-600/90 text-white hover:bg-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 dark:bg-primary-400/90 dark:text-neutral-900 dark:hover:bg-primary-300 backdrop-blur-sm transition-colors"
-            aria-label={t("stage.chat.action.back-to-bottom", {
-              defaultValue: "回到底部",
-            })}
-          >
-            {t("stage.chat.action.back-to-bottom", {
-              defaultValue: "回到底部",
-            })}
-          </button>
-        </div>
-      )}
-      {/* 底部哨兵：设置 scrollMarginBottom 防止被 sticky 按钮遮挡，确保“回到底部”能真正抵达视觉底部 */}
-      <div ref={endRef} style={{ scrollMarginBottom: 56 }} />
-    </div>
+  const getMessageName = React.useCallback(
+    (role: BaseMessage["role"]) => {
+      switch (role) {
+        case "user":
+          return t("stage.chat.role.user", { defaultValue: "user" });
+        case "assistant":
+          return ASSISTANT_NAME;
+        case "error":
+          return t("stage.chat.role.error", { defaultValue: "error" });
+        default:
+          return "";
+      }
+    },
+    [ASSISTANT_NAME, t]
   );
+
+  const items = useMemo<VirtualChatItem[]>(() => {
+    const mapped: VirtualChatItem[] = displayMessages.map((message: BaseMessage) => {
+      const role: "user" | "assistant" | "error" =
+        message.role === "user" || message.role === "assistant" || message.role === "error"
+          ? message.role
+          : "assistant";
+
+      return {
+        id: message.id,
+        kind: "history",
+        name: getMessageName(role),
+        role,
+        content: toVirtualChatContent(message.content),
+        cacheKey: message.id,
+        isStreaming: false,
+      };
+    });
+
+    if (sending && streamingMessage) {
+      mapped.push({
+        id: streamingMessage.id,
+        kind: "streaming",
+        name: ASSISTANT_NAME,
+        role: "assistant",
+        content: toVirtualChatContent(streamingMessage.content),
+        loading: !streamingMessage.content,
+        isStreaming: true,
+        streamSlices: streamingMessage.slices?.filter(isTextStreamSlice) ?? [],
+      });
+    }
+
+    return mapped;
+  }, [ASSISTANT_NAME, displayMessages, getMessageName, sending, streamingMessage]);
+
+  return <VirtualChatList items={items} sending={sending} />;
 };

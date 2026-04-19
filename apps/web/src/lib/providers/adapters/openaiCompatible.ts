@@ -41,12 +41,10 @@ interface ResolvedConnection {
 
 function resolveConnection(
   config: ProviderAdapterConfig,
-  options: OpenAICompatibleOptions,
+  options: OpenAICompatibleOptions
 ): ResolvedConnection {
   const apiKey = config.apiKey || readEnv(options.envApiKey);
-  const envBase = readEnv(
-    `${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`,
-  );
+  const envBase = readEnv(`${options.envApiKey ?? options.id.toUpperCase()}_BASE_URL`);
   const baseUrl = config.baseUrl?.trim() || envBase || options.defaultBaseUrl;
   return { apiKey, baseUrl };
 }
@@ -62,7 +60,7 @@ async function fetchJson<T>(url: string, init: RequestInit): Promise<T> {
 async function fetchModelListFromApi(
   apiKey: string,
   baseUrl: string,
-  headers?: Record<string, string>,
+  headers?: Record<string, string>
 ): Promise<ProviderModelInfo[]> {
   const url = `${trimEndSlash(baseUrl)}/models`;
   const body = await fetchJson<{
@@ -82,11 +80,7 @@ async function fetchModelListFromApi(
   }));
 }
 
-async function runChatCompletionProbe(params: {
-  apiKey: string;
-  baseUrl: string;
-  model: string;
-}) {
+async function runChatCompletionProbe(params: { apiKey: string; baseUrl: string; model: string }) {
   const endpoint = `${trimEndSlash(params.baseUrl)}/chat/completions`;
   await fetchJson(endpoint, {
     method: "POST",
@@ -107,7 +101,7 @@ async function runChatCompletionProbe(params: {
 }
 
 export function createOpenAICompatibleAdapter(
-  options: OpenAICompatibleOptions,
+  options: OpenAICompatibleOptions
 ): ChatProviderAdapter {
   const {
     id,
@@ -116,9 +110,7 @@ export function createOpenAICompatibleAdapter(
     validationChecks = ["model_list", "chat_completions"],
   } = options;
 
-  async function validateConfig(
-    config: ProviderAdapterConfig,
-  ): Promise<ProviderValidationResult> {
+  async function validateConfig(config: ProviderAdapterConfig): Promise<ProviderValidationResult> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
 
     const errors: string[] = [];
@@ -163,9 +155,7 @@ export function createOpenAICompatibleAdapter(
             });
           }
         } catch (err) {
-          errors.push(
-            `${check} 校验失败: ${(err as Error).message || "未知错误"}`,
-          );
+          errors.push(`${check} 校验失败: ${(err as Error).message || "未知错误"}`);
         }
       }
     }
@@ -173,9 +163,7 @@ export function createOpenAICompatibleAdapter(
     return { valid: errors.length === 0, errors };
   }
 
-  async function listModels(
-    config: ProviderAdapterConfig,
-  ): Promise<ProviderModelInfo[]> {
+  async function listModels(config: ProviderAdapterConfig): Promise<ProviderModelInfo[]> {
     const staticModels = modelList.length ? modelList : undefined;
 
     const { apiKey, baseUrl } = resolveConnection(config, options);
@@ -203,7 +191,7 @@ export function createOpenAICompatibleAdapter(
   async function* chatStream(
     messages: ChatMessageInput,
     config: ProviderAdapterConfig & { model?: string },
-    streamOptions?: { signal?: AbortSignal },
+    streamOptions?: { signal?: AbortSignal }
   ): AsyncIterable<ChatStreamChunk> {
     const { apiKey, baseUrl } = resolveConnection(config, options);
     const normalizedBase = baseUrl ? trimEndSlash(baseUrl) : "";
@@ -249,51 +237,65 @@ export function createOpenAICompatibleAdapter(
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-          if (!trimmed.startsWith("data:")) continue;
-          const dataStr = trimmed.slice(5).trim();
-          if (dataStr === "[DONE]") {
-            yield { type: "finish" };
-            continue;
-          }
-          try {
-            const json = JSON.parse(dataStr);
-            const delta = json?.choices?.[0]?.delta?.content;
-            if (typeof delta === "string") {
-              yield { type: "text-delta", text: delta };
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            if (!trimmed.startsWith("data:")) continue;
+            const dataStr = trimmed.slice(5).trim();
+            if (dataStr === "[DONE]") {
+              // OpenAI 风格 SSE 以 [DONE] 作为结束标记，
+              // 这里直接返回，避免下游收到重复的 finish 事件。
+              yield { type: "finish" };
+              return;
             }
-          } catch {
-            // ignore
+            try {
+              const json = JSON.parse(dataStr);
+              const delta = json?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") {
+                yield { type: "text-delta", text: delta };
+              }
+            } catch {
+              // ignore
+            }
           }
         }
-      }
 
-      if (buffer.trim().startsWith("data:")) {
-        const leftover = buffer.trim().slice(5).trim();
-        if (leftover && leftover !== "[DONE]") {
-          try {
-            const json = JSON.parse(leftover);
-            const delta = json?.choices?.[0]?.delta?.content;
-            if (typeof delta === "string") {
-              yield { type: "text-delta", text: delta };
+        // 在流结束时补做一次 decoder flush，避免最后一个 chunk 恰好落在半个字符上；
+        // 如果缓冲区里还残留一条 SSE 负载，则在这里完成最后一次解析。
+        buffer += decoder.decode();
+        if (buffer.trim().startsWith("data:")) {
+          const leftover = buffer.trim().slice(5).trim();
+          if (leftover && leftover !== "[DONE]") {
+            try {
+              const json = JSON.parse(leftover);
+              const delta = json?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string") {
+                yield { type: "text-delta", text: delta };
+              }
+            } catch {
+              // ignore leftover parse errors
             }
-          } catch {
-            // ignore leftover parse errors
           }
         }
-      }
 
-      yield { type: "finish" };
+        // 部分兼容 Provider 会直接 EOF，不显式发送 [DONE]，
+        // 因此在正常读到流结束时仍补发一次 finish。
+        yield { type: "finish" };
+      } finally {
+        try {
+          reader.releaseLock();
+        } catch {
+          // ignore reader state errors during teardown
+        }
+      }
     } catch (e) {
       yield { type: "error", error: (e as Error).message };
     }

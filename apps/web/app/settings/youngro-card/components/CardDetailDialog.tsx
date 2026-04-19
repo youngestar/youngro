@@ -29,8 +29,7 @@ export function CardDetailDialog({
 
   // 根据卡片内容动态决定可用 Tab
   const availableTabs = React.useMemo(() => {
-    if (!card)
-      return [] as { id: TabId; label: string; icon: React.ElementType }[];
+    if (!card) return [] as { id: TabId; label: string; icon: React.ElementType }[];
     const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [];
     if (card.description && card.description.trim().length > 0)
       tabs.push({ id: "description", label: "描述", icon: FileText });
@@ -42,8 +41,7 @@ export function CardDetailDialog({
       card.systemPrompt as string | undefined,
       card.postHistoryInstructions as string | undefined,
     ].some((v) => typeof v === "string" && v.trim().length > 0);
-    if (hasCharacter)
-      tabs.push({ id: "character", label: "角色设定", icon: UserRound });
+    if (hasCharacter) tabs.push({ id: "character", label: "角色设定", icon: UserRound });
     tabs.push({ id: "modules", label: "模块", icon: SettingsIcon });
     return tabs;
   }, [card]);
@@ -100,9 +98,7 @@ export function CardDetailDialog({
       <div className="flex flex-col gap-4">
         {tab === "notes" && card.notes && <RichBox text={card.notes} />}
 
-        {tab === "description" && card.description && (
-          <RichBox text={card.description} />
-        )}
+        {tab === "description" && card.description && <RichBox text={card.description} />}
 
         {tab === "character" && (
           <div className="flex max-h-80 flex-col gap-4 overflow-auto pr-1">
@@ -110,10 +106,7 @@ export function CardDetailDialog({
               [
                 ["性格 (Personality)", card.personality],
                 ["场景 (Scenario)", card.scenario],
-                [
-                  "系统提示 (System Prompt)",
-                  card.systemPrompt as string | undefined,
-                ],
+                ["系统提示 (System Prompt)", card.systemPrompt as string | undefined],
                 [
                   "历史后提示 (Post History Instructions)",
                   card.postHistoryInstructions as string | undefined,
@@ -127,7 +120,7 @@ export function CardDetailDialog({
                   </h2>
                   <RichBox text={value} />
                 </div>
-              ) : null,
+              ) : null
             )}
           </div>
         )}
@@ -172,9 +165,7 @@ function RichBox({ text }: { text: string }) {
 }
 
 function ModulesBox({ card }: { card: YoungroCard }) {
-  const youngro = (
-    card.extensions as { youngro?: YoungroExtension } | undefined
-  )?.youngro;
+  const youngro = (card.extensions as { youngro?: YoungroExtension } | undefined)?.youngro;
   const consciousness = youngro?.modules?.consciousness?.model ?? "default";
   const speechModel = youngro?.modules?.speech?.model ?? "default";
   const voice = youngro?.modules?.speech?.voice_id ?? "default";

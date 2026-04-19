@@ -17,7 +17,7 @@ export default async function ProviderDetail({
   if (!resolved) return notFound();
   const { category, id } = resolved;
   const exists = allProviders.some(
-    (p) => p.id === id && p.category === category && p.category !== "speech",
+    (p) => p.id === id && p.category === category && p.category !== "speech"
   );
   if (!exists) notFound();
   return <ClientProviderDetail category={category} id={id} />;

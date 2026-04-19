@@ -47,9 +47,7 @@ export function Toolbar({
           <div className="relative w-[132px] shrink-0">
             <HeadlessSelect
               value={sort}
-              onValueChange={(v) =>
-                onSortChange(v as "nameAsc" | "nameDesc" | "recent")
-              }
+              onValueChange={(v) => onSortChange(v as "nameAsc" | "nameDesc" | "recent")}
               className="w-full"
               {...noIcon}
               options={[

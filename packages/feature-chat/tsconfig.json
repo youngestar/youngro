@@ -1,14 +1,14 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@youngro/typescript-config/react-library.json",
   "compilerOptions": {
-    "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
     "declaration": true,
+    "rootDir": "./src",
     "outDir": "dist",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "strict": true
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

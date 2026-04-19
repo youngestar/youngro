@@ -2,14 +2,7 @@
 
 import React from "react";
 // import { Button } from "@youngro/ui";
-import {
-  Ghost,
-  Mic,
-  CheckCircle2,
-  PlayCircle,
-  Trash2,
-  Download,
-} from "lucide-react";
+import { Ghost, Mic, CheckCircle2, PlayCircle, Trash2, Download } from "lucide-react";
 import { IconButton } from "./IconButton";
 
 interface Props {
@@ -57,9 +50,7 @@ export function CardListItem({
         // Outer container mimicking AIRI: group, overlay gradient, subtle hover shadow
         "group relative flex min-h-[120px] cursor-pointer flex-col overflow-hidden rounded-xl border-2 bg-neutral-200/50 transition-all duration-400 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 hover:shadow-[0_4px_4px_rgba(220,220,220,0.4)] active:shadow-[0_0_0_rgba(220,220,220,0.25)] dark:border-neutral-800/25 dark:bg-neutral-800/50 " +
         // Selection state prefers border tint like AIRI
-        (isSelected
-          ? "border-primary-400 dark:border-primary-600"
-          : "border-neutral-100") +
+        (isSelected ? "border-primary-400 dark:border-primary-600" : "border-neutral-100") +
         // Gradient sweep overlay on hover (before pseudo)
         " before:content-[''] before:absolute before:inset-0 before:z-0 before:h-full before:w-1/4 before:opacity-0 before:transition-all before:duration-400 before:ease-in-out before:bg-gradient-to-r before:from-primary-500/0 before:to-primary-500/0 group-hover:before:opacity-100 group-hover:before:from-primary-500/20 group-hover:before:via-primary-500/10 group-hover:before:to-transparent dark:before:from-primary-400/0 dark:before:to-primary-400/0 dark:group-hover:before:from-primary-400/20 dark:group-hover:before:via-primary-400/10 dark:group-hover:before:to-transparent"
       }

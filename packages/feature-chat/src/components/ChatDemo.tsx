@@ -24,14 +24,15 @@ export function ChatDemo() {
         {messages.map((m) => (
           <div key={m.id} style={{ marginBottom: 8 }}>
             <strong>{m.role}:</strong>{" "}
-            {typeof m.content === "string"
-              ? m.content
-              : JSON.stringify(m.content)}
+            {typeof m.content === "string" ? m.content : JSON.stringify(m.content)}
           </div>
         ))}
         {sending && streamingMessage && (
           <div style={{ marginTop: 8 }}>
-            <strong>assistant (streaming):</strong> {streamingMessage.content}
+            <strong>assistant (streaming):</strong>{" "}
+            {typeof streamingMessage.content === "string"
+              ? streamingMessage.content
+              : JSON.stringify(streamingMessage.content)}
           </div>
         )}
       </div>

@@ -64,7 +64,7 @@ async function fetchTencentCloudVoices(request: VoiceGatewayRequest) {
     .filter((entry) =>
       requestedVoiceType !== null && !Number.isNaN(requestedVoiceType)
         ? entry.id === requestedVoiceType
-        : true,
+        : true
     )
     .map((entry) => ({
       id: String(entry.id),
@@ -86,10 +86,7 @@ async function fetchTencentCloudVoices(request: VoiceGatewayRequest) {
 
 async function fetchElevenLabsVoices(request: VoiceGatewayRequest) {
   if (!request.apiKey) {
-    return NextResponse.json(
-      { error: "API key is required for ElevenLabs" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "API key is required for ElevenLabs" }, { status: 400 });
   }
 
   const endpoint = `${normalizeBaseUrl(request.baseUrl)}voices`;
@@ -112,7 +109,7 @@ async function fetchElevenLabsVoices(request: VoiceGatewayRequest) {
           status: response.status,
           detail: errorBody,
         },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
@@ -130,19 +127,13 @@ async function fetchElevenLabsVoices(request: VoiceGatewayRequest) {
                   return { code: lang, title: lang };
                 }
                 if (lang && typeof lang === "object") {
-                  const code =
-                    lang.code ||
-                    lang.language_code ||
-                    lang.language ||
-                    "unknown";
+                  const code = lang.code || lang.language_code || lang.language || "unknown";
                   const title = lang.name || lang.title || code;
                   return { code, title };
                 }
                 return null;
               })
-              .filter((lang): lang is { code: string; title: string } =>
-                Boolean(lang),
-              )
+              .filter((lang): lang is { code: string; title: string } => Boolean(lang))
           : undefined;
 
         return {
@@ -168,21 +159,15 @@ async function fetchElevenLabsVoices(request: VoiceGatewayRequest) {
         error: "Unexpected error while contacting ElevenLabs",
         detail: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ providerId: string }> },
-) {
+export async function POST(request: Request, context: { params: Promise<{ providerId: string }> }) {
   const { providerId } = await context.params;
   if (!providerId) {
-    return NextResponse.json(
-      { error: "providerId is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "providerId is required" }, { status: 400 });
   }
 
   let body: VoiceGatewayRequest = {};
@@ -202,7 +187,7 @@ export async function POST(
         {
           error: `Voice listing for provider '${providerId}' is not implemented yet.`,
         },
-        { status: 501 },
+        { status: 501 }
       );
   }
 }

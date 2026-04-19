@@ -18,6 +18,7 @@ export interface HeaderLinkProps
   logoClassName?: string;
   /** Class for the text title */
   titleClassName?: string;
+  linkComponent?: React.ElementType;
 }
 
 /**
@@ -34,18 +35,20 @@ export const HeaderLink: React.FC<HeaderLinkProps> = ({
   className,
   logoClassName,
   titleClassName,
+  linkComponent,
   ...rest
 }) => {
+  const LinkComponent = (linkComponent ?? "a") as React.ElementType;
   const logoStyle: React.CSSProperties | undefined = hueRotate
     ? { filter: "hue-rotate(calc(var(--chromatic-hue, 0) * 1deg))" }
     : undefined;
 
   return (
-    <a
+    <LinkComponent
       href={href}
       className={clsx(
         "inline-flex items-center gap-2 px-2 text-2xl outline-none text-nowrap",
-        className,
+        className
       )}
       {...rest}
     >
@@ -60,11 +63,9 @@ export const HeaderLink: React.FC<HeaderLinkProps> = ({
       ) : null}
 
       {title ? (
-        <span className={clsx("font-semibold select-none", titleClassName)}>
-          {title}
-        </span>
+        <span className={clsx("font-semibold select-none", titleClassName)}>{title}</span>
       ) : null}
-    </a>
+    </LinkComponent>
   );
 };
 

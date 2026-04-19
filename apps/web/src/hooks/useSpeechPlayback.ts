@@ -2,10 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChatStore } from "@youngro/feature-chat";
 
 import { useSpeechStore } from "../store/speechStore";
-import {
-  useProvidersStore,
-  type SpeechProviderConfig,
-} from "../store/providersStore";
+import { useProvidersStore, type SpeechProviderConfig } from "../store/providersStore";
 import { useSpeechResources } from "./useSpeechResources";
 import type { BaseMessage } from "@youngro/feature-chat";
 
@@ -67,12 +64,10 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
   }));
 
   const providerState = useProvidersStore((state) =>
-    activeProviderId ? state.getProvider(activeProviderId) : undefined,
+    activeProviderId ? state.getProvider(activeProviderId) : undefined
   );
 
-  const providerConfig = providerState?.config as
-    | SpeechProviderConfig
-    | undefined;
+  const providerConfig = providerState?.config as SpeechProviderConfig | undefined;
 
   const { voices, fetchVoices } = useSpeechResources({
     providerId: activeProviderId || undefined,
@@ -85,10 +80,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
     void fetchVoices(undefined, providerConfig);
   }, [activeProviderId, providerState, voices, fetchVoices, providerConfig]);
 
-  const latestAssistant = useMemo(
-    () => findLatestAssistantMessage(messages),
-    [messages],
-  );
+  const latestAssistant = useMemo(() => findLatestAssistantMessage(messages), [messages]);
 
   const [status, setStatus] = useState<SpeechPlaybackStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -116,10 +108,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
   }, [cleanupAudio]);
 
   const providerReady = Boolean(
-    activeProviderId &&
-      activeVoiceId &&
-      providerState?.configured &&
-      providerConfig,
+    activeProviderId && activeVoiceId && providerState?.configured && providerConfig
   );
 
   const synthesize = useCallback(
@@ -129,22 +118,19 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
       setErrorMessage(null);
       try {
         const voice = voices?.find((v) => v.id === activeVoiceId);
-        const response = await fetch(
-          `/api/speech/providers/${activeProviderId}/synthesize`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...(providerConfig as SpeechProviderConfig),
-              text,
-              ssmlEnabled: useSSML,
-              voiceId: activeVoiceId,
-              voiceMetadata: voice?.metadata,
-              pitch,
-              rate,
-            }),
-          },
-        );
+        const response = await fetch(`/api/speech/providers/${activeProviderId}/synthesize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...(providerConfig as SpeechProviderConfig),
+            text,
+            ssmlEnabled: useSSML,
+            voiceId: activeVoiceId,
+            voiceMetadata: voice?.metadata,
+            pitch,
+            rate,
+          }),
+        });
 
         if (!response.ok) {
           const payload = (await response.json().catch(() => null)) as {
@@ -199,7 +185,7 @@ export function useSpeechPlayback(): UseSpeechPlaybackResult {
       pitch,
       rate,
       cleanupAudio,
-    ],
+    ]
   );
 
   useEffect(() => {

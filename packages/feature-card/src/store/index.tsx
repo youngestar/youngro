@@ -79,10 +79,9 @@ export function resolveYoungroExtension(
     consciousnessModel: string;
     speechModel: string;
     speechVoiceId: string;
-  },
+  }
 ): YoungroExtension {
-  const resolvedConsciousnessModel =
-    defaults.consciousnessModel || UNASSIGNED_MODULE_VALUE;
+  const resolvedConsciousnessModel = defaults.consciousnessModel || UNASSIGNED_MODULE_VALUE;
   const resolvedSpeechModel = defaults.speechModel || UNASSIGNED_MODULE_VALUE;
   const resolvedVoiceId = defaults.speechVoiceId || UNASSIGNED_MODULE_VALUE;
 
@@ -106,7 +105,7 @@ export function newYoungroCard(
     consciousnessModel: string;
     speechModel: string;
     speechVoiceId: string;
-  },
+  }
 ): YoungroCard {
   const ext = resolveYoungroExtension(card, defaults);
 
@@ -121,9 +120,7 @@ export function newYoungroCard(
       notesMultilingual: data.creator_notes_multilingual,
       personality: data.personality ?? "",
       scenario: data.scenario ?? "",
-      greetings: [data.first_mes, ...(data.alternate_greetings ?? [])].filter(
-        Boolean,
-      ) as string[],
+      greetings: [data.first_mes, ...(data.alternate_greetings ?? [])].filter(Boolean) as string[],
       systemPrompt: data.system_prompt ?? "",
       postHistoryInstructions: data.post_history_instructions ?? "",
       messageExample: parseMesExample(data.mes_example),
@@ -187,9 +184,7 @@ export interface YoungroCardActions {
 
 type YoungroCardContextType = [YoungroCardState, YoungroCardActions];
 
-const YoungroCardContext = React.createContext<YoungroCardContextType | null>(
-  null,
-);
+const YoungroCardContext = React.createContext<YoungroCardContextType | null>(null);
 
 const STORAGE_KEY_CARDS = "youngro-cards";
 const STORAGE_KEY_ACTIVE = "youngro-card-active-id";
@@ -204,22 +199,16 @@ function persist(state: YoungroCardState) {
   window.localStorage.setItem(STORAGE_KEY_ACTIVE, state.activeCardId);
 }
 
-export function YoungroCardProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [state, setState] = React.useState<YoungroCardState>(() =>
-    loadInitial(),
-  );
+export function YoungroCardProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = React.useState<YoungroCardState>(() => loadInitial());
+  const [hasLoaded, setHasLoaded] = React.useState(false);
   const stateRef = React.useRef(state);
 
   React.useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY_CARDS);
       const loadedCards: CardsMap = raw ? JSON.parse(raw) : {};
-      const loadedActive =
-        window.localStorage.getItem(STORAGE_KEY_ACTIVE) || "";
+      const loadedActive = window.localStorage.getItem(STORAGE_KEY_ACTIVE) || "";
 
       if (Object.keys(loadedCards).length > 0) {
         const firstKey = Object.keys(loadedCards)[0] || "default";
@@ -246,13 +235,19 @@ export function YoungroCardProvider({
       }
     } catch {
       // fallback: keep empty state and let user add
+    } finally {
+      setHasLoaded(true);
     }
   }, []);
 
   React.useEffect(() => {
-    persist(state);
     stateRef.current = state;
   }, [state]);
+
+  React.useEffect(() => {
+    if (!hasLoaded) return;
+    persist(state);
+  }, [hasLoaded, state]);
 
   const actions = React.useMemo<YoungroCardActions>(
     () => ({
@@ -269,8 +264,7 @@ export function YoungroCardProvider({
           ? (maybe as YoungroCard)
           : newYoungroCard(input as BaseCard, defaults);
         const id =
-          typeof crypto !== "undefined" &&
-          typeof crypto.randomUUID === "function"
+          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
             ? crypto.randomUUID()
             : `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         setState((prev: YoungroCardState) => ({
@@ -283,8 +277,7 @@ export function YoungroCardProvider({
         setState((prev: YoungroCardState) => {
           const copy = { ...prev.cards };
           delete copy[id];
-          const nextActive =
-            prev.activeCardId === id ? "default" : prev.activeCardId;
+          const nextActive = prev.activeCardId === id ? "default" : prev.activeCardId;
           return { cards: copy, activeCardId: nextActive };
         });
       },
@@ -296,30 +289,22 @@ export function YoungroCardProvider({
           window.dispatchEvent(
             new CustomEvent("youngro-card-activated", {
               detail: { card: selected },
-            }),
+            })
           );
         }
       },
     }),
-    [],
+    []
   );
 
-  const value = React.useMemo<YoungroCardContextType>(
-    () => [state, actions],
-    [state, actions],
-  );
+  const value = React.useMemo<YoungroCardContextType>(() => [state, actions], [state, actions]);
 
-  return (
-    <YoungroCardContext.Provider value={value}>
-      {children}
-    </YoungroCardContext.Provider>
-  );
+  return <YoungroCardContext.Provider value={value}>{children}</YoungroCardContext.Provider>;
 }
 
 export function useYoungroCards() {
   const ctx = React.useContext(YoungroCardContext);
-  if (!ctx)
-    throw new Error("useYoungroCards must be used within YoungroCardProvider");
+  if (!ctx) throw new Error("useYoungroCards must be used within YoungroCardProvider");
   const [state, actions] = ctx;
   const activeCard = state.cards[state.activeCardId];
   return { ...state, activeCard, ...actions };
@@ -360,8 +345,7 @@ export function composeDescription(input: {
   tags?: string[];
   description?: string;
 }) {
-  if (input.description && input.description.trim())
-    return cleanText(input.description);
+  if (input.description && input.description.trim()) return cleanText(input.description);
   const traits = (input.personality || "")
     .split(/[，,。\n]/)
     .map((s) => s.trim())
@@ -369,13 +353,9 @@ export function composeDescription(input: {
     .slice(0, 2);
   const traitText = traits.length ? traits.join("、") : "专业、可靠";
   const tagText =
-    input.tags && input.tags.length
-      ? `，擅长${input.tags.slice(0, 3).join("、")}`
-      : "";
+    input.tags && input.tags.length ? `，擅长${input.tags.slice(0, 3).join("、")}` : "";
   const scene = input.scenario ? `，场景：${trimTo(input.scenario, 60)}` : "";
-  return cleanText(
-    `${input.name} 是一位${traitText}的 AI 助手${tagText}${scene}。`,
-  );
+  return cleanText(`${input.name} 是一位${traitText}的 AI 助手${tagText}${scene}。`);
 }
 
 export function composeSystemPrompt(input: {
@@ -386,12 +366,8 @@ export function composeSystemPrompt(input: {
 }) {
   const blocks = [
     `你的身份：${cleanText(input.name)}。`,
-    input.personality
-      ? `人设/风格：${trimTo(cleanText(input.personality), 220)}`
-      : null,
-    input.scenario
-      ? `工作场景：${trimTo(cleanText(input.scenario), 220)}`
-      : null,
+    input.personality ? `人设/风格：${trimTo(cleanText(input.personality), 220)}` : null,
+    input.scenario ? `工作场景：${trimTo(cleanText(input.scenario), 220)}` : null,
     "语言与风格：使用简洁、礼貌、专业的中文回答；必要时分点阐述。",
     "能力与工具：如需外部信息，先澄清再选择检索/函数；不得编造。",
   ].filter(Boolean) as string[];
@@ -404,7 +380,7 @@ export function composeSystemPrompt(input: {
 
 export function composePostHistoryInstructions(
   defaults: string | undefined,
-  user: string | undefined,
+  user: string | undefined
 ) {
   const parts = [defaults || DEFAULT_POST_HISTORY_INSTRUCTIONS, user || ""]
     .map((x) => x.trim())
@@ -420,12 +396,9 @@ export function getRuntimeSystemPrompt(card: BaseCard | YoungroCard): string {
   const parts: string[] = [];
   if (card.systemPrompt) parts.push(cleanText(card.systemPrompt));
   if (card.description) parts.push(cleanText(card.description));
-  if (card.personality)
-    parts.push(`人设/风格：${trimTo(cleanText(card.personality), 220)}`);
-  if (card.scenario)
-    parts.push(`工作场景：${trimTo(cleanText(card.scenario), 220)}`);
-  if (card.postHistoryInstructions)
-    parts.push(cleanText(card.postHistoryInstructions));
+  if (card.personality) parts.push(`人设/风格：${trimTo(cleanText(card.personality), 220)}`);
+  if (card.scenario) parts.push(`工作场景：${trimTo(cleanText(card.scenario), 220)}`);
+  if (card.postHistoryInstructions) parts.push(cleanText(card.postHistoryInstructions));
   return dedupeLines(parts).join("\n");
 }
 
@@ -468,9 +441,7 @@ const CCV3DataSchema = z.object({
 
 const CCV3Schema = z.object({ data: CCV3DataSchema });
 
-export function parseImportedCard(
-  json: unknown,
-): BaseCard | CCV3CharacterCardV3 {
+export function parseImportedCard(json: unknown): BaseCard | CCV3CharacterCardV3 {
   // Try CCV3 first
   const cc = CCV3Schema.safeParse(json);
   if (cc.success) return cc.data as CCV3CharacterCardV3;
@@ -481,8 +452,7 @@ export function parseImportedCard(
   const err = cc.error ?? bc.error;
   const issues =
     err?.issues?.map(
-      (i: { path: (string | number)[]; message: string }) =>
-        `${i.path.join(".")}: ${i.message}`,
+      (i: { path: (string | number)[]; message: string }) => `${i.path.join(".")}: ${i.message}`
     ) ?? [];
   throw new Error(`无效的卡片 JSON：\n${issues.join("\n")}`);
 }

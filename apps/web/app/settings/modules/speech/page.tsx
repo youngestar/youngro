@@ -13,7 +13,7 @@ export default function ConsciousnessPage() {
         title="发声模块"
         subtitle="speech"
         showBackButton
-        onBack={() => router.back()}
+        onBack={() => router.replace("/settings/modules")}
       />
       <ClientSpeechPage />
     </div>

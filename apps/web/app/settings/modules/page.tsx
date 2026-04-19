@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { IconStatusItem, PageHeader } from "@youngro/ui";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,7 @@ export default function SettingsModulesPage() {
         title="模块"
         subtitle="Modules"
         showBackButton
-        onBack={() => router.back()}
+        onBack={() => router.replace("/settings")}
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {modulesList.map((module, index) => {
@@ -25,13 +26,10 @@ export default function SettingsModulesPage() {
             <IconStatusItem
               key={module.id}
               href={module.href}
+              linkComponent={Link}
               title={module.name}
               description={module.description}
-              icon={
-                ModuleIcon ? (
-                  <ModuleIcon className="h-full w-full" />
-                ) : undefined
-              }
+              icon={ModuleIcon ? <ModuleIcon className="h-full w-full" /> : undefined}
               iconColorClassName={module.iconColorClassName}
               iconImageSrc={module.iconImageSrc}
               configured={module.configured}

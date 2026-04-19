@@ -38,10 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="zh-CN"
-      className={`${fontSans.variable} ${fontMono.variable} ${fontCJK.variable}`}
-    >
+    <html lang="zh-CN" className={`${fontSans.variable} ${fontMono.variable} ${fontCJK.variable}`}>
       <body>
         <I18nProvider>{children}</I18nProvider>
       </body>

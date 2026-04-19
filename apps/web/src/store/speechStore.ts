@@ -50,7 +50,7 @@ interface SpeechStoreState {
   fetchVoices: (
     providerId: string,
     config: SpeechProviderConfig,
-    options?: VoiceFetchOptions,
+    options?: VoiceFetchOptions
   ) => Promise<VoiceInfo[]>;
 }
 
@@ -71,9 +71,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
       voiceStatus: {},
       setActiveProvider: (providerId) => {
         set((state) => {
-          const nextVoice = providerId
-            ? (state.voiceSelections[providerId] ?? null)
-            : null;
+          const nextVoice = providerId ? (state.voiceSelections[providerId] ?? null) : null;
           return { activeProviderId: providerId, activeVoiceId: nextVoice };
         });
       },
@@ -138,16 +136,13 @@ export const useSpeechStore = create<SpeechStoreState>()(
         }));
 
         try {
-          const response = await fetch(
-            `/api/speech/providers/${providerId}/voices`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              // Send full config so provider-specific fields (e.g. secretId/secretKey)
-              // are available to the server-side proxy handler.
-              body: JSON.stringify(config),
-            },
-          );
+          const response = await fetch(`/api/speech/providers/${providerId}/voices`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            // Send full config so provider-specific fields (e.g. secretId/secretKey)
+            // are available to the server-side proxy handler.
+            body: JSON.stringify(config),
+          });
 
           if (!response.ok) {
             const errorPayload = await response.json().catch(() => ({}));
@@ -171,8 +166,7 @@ export const useSpeechStore = create<SpeechStoreState>()(
 
           return voices;
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           set((prev) => ({
             voiceStatus: {
               ...prev.voiceStatus,
@@ -198,6 +192,6 @@ export const useSpeechStore = create<SpeechStoreState>()(
         availableVoices: state.availableVoices,
         voiceStatus: state.voiceStatus,
       }),
-    },
-  ),
+    }
+  )
 );

@@ -51,7 +51,7 @@ const button = cva(
       size: "md",
       iconOnly: false,
     },
-  },
+  }
 );
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
@@ -70,10 +70,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <button
-      {...props}
-      className={clsx(button({ intent, size, iconOnly }), className)}
-    >
+    <button {...props} className={clsx(button({ intent, size, iconOnly }), className)}>
       {icon && <Icon icon={Check} size="sm" className="mr-2" />}
       {children}
     </button>

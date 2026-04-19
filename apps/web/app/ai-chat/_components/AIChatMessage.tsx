@@ -1,4 +1,3 @@
-// HMR test: touch from web component to observe compile log
 "use client";
 
 /**
@@ -8,6 +7,7 @@
  * - loading 为真时展示占位内容（流式开头尚无文本）。
  */
 
+import React from "react";
 import MarkdownRenderer from "../../../src/components/MarkdownRenderer";
 import clsx from "clsx";
 import Image from "next/image";
@@ -19,38 +19,41 @@ export interface CommonContentPart {
 }
 
 export interface AiChatMessageProps {
+  id?: string;
   name: string;
   role: "user" | "assistant" | "error";
   content: string | CommonContentPart[];
   loading?: boolean;
+  cacheKey?: string;
+  isStreaming?: boolean;
+  streamSlices?: Array<{ type: "text"; text: string }>;
 }
 
-export default function AiChatMessage({
+function AiChatMessage({
   name,
   role,
   content,
   loading = false,
+  cacheKey,
+  isStreaming = false,
+  streamSlices,
 }: AiChatMessageProps) {
   const isUser = role === "user";
   const isAssistant = role === "assistant";
   const isError = role === "error";
 
-  const bubbleClass = clsx(
-    "flex flex-col shadow-sm min-w-20 rounded-lg px-2 py-1 shadow-md",
-    {
-      "bg-cyan-50/80 dark:bg-cyan-900/80 shadow-cyan-300/50": isUser,
-      "bg-primary-50/80 dark:bg-primary-900/80 shadow-primary-300/50":
-        isAssistant,
-      "bg-violet-50/80 dark:bg-violet-900/80 shadow-violet-300/50": isError,
-    },
-  );
+  const bubbleClass = clsx("flex flex-col shadow-sm min-w-20 rounded-lg px-2 py-1 shadow-md", {
+    "bg-cyan-50/80 dark:bg-cyan-900/80 shadow-cyan-300/50": isUser,
+    "bg-primary-50/80 dark:bg-primary-900/80 shadow-primary-300/50": isAssistant,
+    "bg-violet-50/80 dark:bg-violet-900/80 shadow-violet-300/50": isError,
+  });
 
   const textClass = clsx(
-    "prose stream-prose dark:prose-invert max-w-none break-words text-xs sm:text-base",
+    "chat-markdown prose stream-prose dark:prose-invert max-w-none break-words text-xs sm:text-base",
     {
       "text-primary-700 dark:text-primary-200": isAssistant,
       "text-violet-500": isError,
-    },
+    }
   );
 
   const wrapperClass = clsx({
@@ -81,6 +84,9 @@ export default function AiChatMessage({
                   key={i}
                   content={part.text || ""}
                   className={textClass}
+                  cacheKey={cacheKey ? `${cacheKey}:${i}` : undefined}
+                  fallbackMode="plain-text"
+                  isStreaming={isStreaming}
                 />
               ) : (
                 <Image
@@ -89,13 +95,35 @@ export default function AiChatMessage({
                   src={part.image_url?.url as string}
                   className="max-w-full rounded-lg"
                 />
-              ),
+              )
             )}
           </div>
         ) : (
-          <MarkdownRenderer content={content} className={textClass} />
+          <MarkdownRenderer
+            content={content}
+            className={textClass}
+            cacheKey={cacheKey}
+            fallbackMode="plain-text"
+            isStreaming={isStreaming}
+            streamSlices={streamSlices}
+          />
         )}
       </div>
     </div>
   );
 }
+
+function areEqual(prev: AiChatMessageProps, next: AiChatMessageProps) {
+  return (
+    prev.id === next.id &&
+    prev.name === next.name &&
+    prev.role === next.role &&
+    prev.loading === next.loading &&
+    prev.cacheKey === next.cacheKey &&
+    prev.isStreaming === next.isStreaming &&
+    prev.streamSlices === next.streamSlices &&
+    prev.content === next.content
+  );
+}
+
+export default React.memo(AiChatMessage, areEqual);

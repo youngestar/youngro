@@ -30,10 +30,7 @@ type DescribeVoicesResponse = {
 
 async function validateTencentCloud(body: VoiceGatewayRequest) {
   if (!body.secretId || !body.secretKey) {
-    return NextResponse.json(
-      { error: "请填写 SecretId 与 SecretKey" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "请填写 SecretId 与 SecretKey" }, { status: 400 });
   }
 
   try {
@@ -54,14 +51,15 @@ async function validateTencentCloud(body: VoiceGatewayRequest) {
           error: "Tencent Cloud 凭证校验失败",
           detail: "WebsiteType 格式不正确（可填 0=default, 1=international）",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
     params.WebsiteType = websiteType;
 
-    const response = (await (
-      client as unknown as TencentClientWithRequest
-    ).request("DescribeVoices", params)) as DescribeVoicesResponse;
+    const response = (await (client as unknown as TencentClientWithRequest).request(
+      "DescribeVoices",
+      params
+    )) as DescribeVoicesResponse;
 
     const possibleLists = [
       response?.Data?.VoiceTypes,
@@ -71,8 +69,7 @@ async function validateTencentCloud(body: VoiceGatewayRequest) {
       response?.Data?.List,
     ];
 
-    const total =
-      possibleLists.find((entry) => Array.isArray(entry))?.length ?? 0;
+    const total = possibleLists.find((entry) => Array.isArray(entry))?.length ?? 0;
 
     return NextResponse.json({ ok: true, voicesDetected: total });
   } catch (error) {
@@ -81,17 +78,14 @@ async function validateTencentCloud(body: VoiceGatewayRequest) {
         error: "Tencent Cloud 凭证校验失败",
         detail: error instanceof Error ? error.message : String(error),
       },
-      { status: 502 },
+      { status: 502 }
     );
   }
 }
 
 async function validateElevenLabs(body: VoiceGatewayRequest) {
   if (!body.apiKey) {
-    return NextResponse.json(
-      { error: "请提供 ElevenLabs API Key" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "请提供 ElevenLabs API Key" }, { status: 400 });
   }
 
   const endpoint = `${normalizeBaseUrl(body.baseUrl)}voices`;
@@ -113,7 +107,7 @@ async function validateElevenLabs(body: VoiceGatewayRequest) {
           error: "ElevenLabs 验证失败",
           detail,
         },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
@@ -129,21 +123,15 @@ async function validateElevenLabs(body: VoiceGatewayRequest) {
         error: "调用 ElevenLabs 接口失败",
         detail: error instanceof Error ? error.message : String(error),
       },
-      { status: 502 },
+      { status: 502 }
     );
   }
 }
 
-export async function POST(
-  request: Request,
-  context: { params: Promise<{ providerId: string }> },
-) {
+export async function POST(request: Request, context: { params: Promise<{ providerId: string }> }) {
   const { providerId } = await context.params;
   if (!providerId) {
-    return NextResponse.json(
-      { error: "providerId is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "providerId is required" }, { status: 400 });
   }
 
   let body: VoiceGatewayRequest = {};
@@ -159,9 +147,6 @@ export async function POST(
     case "elevenlabs":
       return validateElevenLabs(body);
     default:
-      return NextResponse.json(
-        { error: `Provider '${providerId}' 验证尚未实现` },
-        { status: 501 },
-      );
+      return NextResponse.json({ error: `Provider '${providerId}' 验证尚未实现` }, { status: 501 });
   }
 }

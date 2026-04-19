@@ -13,13 +13,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const EMPTY_ERRORS: string[] = [];
 
-export default function ClientProviderDetail({
-  category,
-  id,
-}: {
-  category: string;
-  id: string;
-}) {
+export default function ClientProviderDetail({ category, id }: { category: string; id: string }) {
   useProvidersHydrate();
   const providerState = useProvidersStore((s) => s.getProvider(id));
   const setConfig = useProvidersStore((s) => s.setConfig);
@@ -30,9 +24,7 @@ export default function ClientProviderDetail({
   const [baseUrl, setBaseUrl] = useState("");
   const [extraField, setExtraField] = useState(""); // voiceId / modelId dynamic placeholder
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
-  const [testStatus, setTestStatus] = useState<
-    "idle" | "testing" | "success" | "error"
-  >("idle");
+  const [testStatus, setTestStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
   const [lastValidatedAt, setLastValidatedAt] = useState<number | null>(null);
 
   useEffect(() => {
@@ -46,13 +38,13 @@ export default function ClientProviderDetail({
         (c as ChatProviderConfig).baseUrl ||
           (c as SpeechProviderConfig).baseUrl ||
           (c as TranscriptionProviderConfig).baseUrl ||
-          "",
+          ""
       );
       setExtraField(
         (c as SpeechProviderConfig).voiceId ||
           (c as TranscriptionProviderConfig).modelId ||
           (c as ChatProviderConfig).defaultModel ||
-          "",
+          ""
       );
       if (providerState.configured) {
         setLastValidatedAt(Date.now());
@@ -91,8 +83,7 @@ export default function ClientProviderDetail({
   const statusBadge = validating
     ? {
         label: "校验中...",
-        className:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/60",
+        className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/60",
       }
     : configured
       ? {
@@ -105,9 +96,7 @@ export default function ClientProviderDetail({
           className: "bg-neutral-500/10 text-neutral-500 border-neutral-200/60",
         };
   const baseUrlPlaceholder =
-    meta.category === "chat"
-      ? "https://api.example.com/v1/"
-      : "https://service.example.com/";
+    meta.category === "chat" ? "https://api.example.com/v1/" : "https://service.example.com/";
 
   const extraLabel =
     meta.category === "speech"
@@ -168,6 +157,7 @@ export default function ClientProviderDetail({
         title={meta.localizedName}
         subtitle={category}
         icon={Icon ? <Icon className="h-6 w-6 opacity-80" /> : undefined}
+        backHref="/settings/providers"
       />
 
       <div className="flex flex-col gap-6 rounded-xl bg-neutral-50 p-4 dark:bg-black/30">
@@ -175,13 +165,10 @@ export default function ClientProviderDetail({
           <div>
             <h2 className="text-lg font-medium">凭证配置</h2>
             <p className="text-xs text-neutral-500">
-              输入 {providerName} 的 API Key 与可选 Base URL，可使用代理地址（需
-              以 / 结尾）。
+              输入 {providerName} 的 API Key 与可选 Base URL，可使用代理地址（需 以 / 结尾）。
             </p>
           </div>
-          <span
-            className={`text-sm px-2 py-1 rounded-md border ${statusBadge.className}`}
-          >
+          <span className={`text-sm px-2 py-1 rounded-md border ${statusBadge.className}`}>
             {statusBadge.label}
           </span>
         </div>
@@ -244,35 +231,22 @@ export default function ClientProviderDetail({
             size="md"
             disabled={testStatus === "testing" || validating}
           >
-            {testStatus === "testing" || validating
-              ? "验证中..."
-              : "验证并拉取模型"}
+            {testStatus === "testing" || validating ? "验证中..." : "验证并拉取模型"}
           </Button>
-          <Button
-            type="button"
-            onClick={resetConfig}
-            intent="default"
-            size="md"
-          >
+          <Button type="button" onClick={resetConfig} intent="default" size="md">
             清空
           </Button>
           {saveStatus === "saved" && (
-            <span className="text-xs text-primary-600 dark:text-primary-400">
-              已保存（本地）
-            </span>
+            <span className="text-xs text-primary-600 dark:text-primary-400">已保存（本地）</span>
           )}
           {testStatus === "success" && (
             <span className="text-xs text-emerald-600 dark:text-emerald-400">
               验证成功
-              {lastValidatedAt
-                ? ` · ${new Date(lastValidatedAt).toLocaleTimeString()}`
-                : ""}
+              {lastValidatedAt ? ` · ${new Date(lastValidatedAt).toLocaleTimeString()}` : ""}
             </span>
           )}
           {testStatus === "error" && (
-            <span className="text-xs text-rose-500">
-              验证失败，请检查输入。
-            </span>
+            <span className="text-xs text-rose-500">验证失败，请检查输入。</span>
           )}
         </div>
         {validateErrors.length > 0 && (
@@ -306,17 +280,11 @@ export default function ClientProviderDetail({
             </Button>
           </div>
           {modelsStatus === "loading" && (
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              加载中...
-            </p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">加载中...</p>
           )}
-          {modelsStatus === "error" && (
-            <p className="text-sm text-rose-500">加载失败，可重试。</p>
-          )}
+          {modelsStatus === "error" && <p className="text-sm text-rose-500">加载失败，可重试。</p>}
           {modelsStatus === "success" && models.length === 0 && (
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              暂无数据。
-            </p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">暂无数据。</p>
           )}
           {modelsStatus === "success" && models.length > 0 && (
             <ul className="text-sm list-disc pl-5 space-y-1">

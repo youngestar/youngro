@@ -20,8 +20,7 @@
   --complementary-h: calc(var(--chromatic-hue) + 180);
   --complementary-s: 70%;
   --complementary-l: 50%;
-  --complementary: var(--complementary-h) var(--complementary-s)
-    var(--complementary-l);
+  --complementary: var(--complementary-h) var(--complementary-s) var(--complementary-l);
   --complementary-foreground: 0 0% 100%;
 
   /* A few usable primary shades (derive from primary-h) */

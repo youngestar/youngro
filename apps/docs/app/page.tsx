@@ -59,12 +59,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Icon
-            icon={Square}
-            size="sm"
-            className={styles.logo}
-            aria-label="Window icon"
-          />
+          <Icon icon={Square} size="sm" className={styles.logo} aria-label="Window icon" />
           Examples
         </a>
         <a
@@ -72,12 +67,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Icon
-            icon={Globe}
-            size="sm"
-            className={styles.logo}
-            aria-label="Globe icon"
-          />
+          <Icon icon={Globe} size="sm" className={styles.logo} aria-label="Globe icon" />
           Go to turborepo.com →
         </a>
       </footer>

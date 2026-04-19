@@ -13,9 +13,7 @@ export const ChatToolbar: React.FC = () => {
         intent="default"
         title="清空历史"
         disabled={
-          sending ||
-          (Array.isArray(messages) &&
-            messages.every((m) => m.role === "system"))
+          sending || (Array.isArray(messages) && messages.every((m) => m.role === "system"))
         }
         onClick={() => cleanup()}
       >

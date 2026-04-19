@@ -22,7 +22,7 @@
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json -w",
     "check-types": "tsc -p tsconfig.json --noEmit",
-    "lint": "echo 'no lint for feature-youngro-card yet'"
+    "lint": "pnpm exec eslint src --max-warnings 0 --ext .ts,.tsx"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -31,10 +31,11 @@
   "dependencies": {
     "@youngro/ui": "workspace:*",
     "lucide-react": "^0.546.0",
+    "zustand": "^4.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0"
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1"
   }
 }

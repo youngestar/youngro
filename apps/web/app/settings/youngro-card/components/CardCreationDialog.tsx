@@ -3,13 +3,7 @@
 import React from "react";
 import { Button, Field, Input, Textarea, Icon } from "@youngro/ui";
 import { SimpleModal } from "./SimpleModal";
-import {
-  User,
-  Brain,
-  Settings as SettingsIcon,
-  Eye,
-  Undo2,
-} from "lucide-react";
+import { User, Brain, Settings as SettingsIcon, Eye, Undo2 } from "lucide-react";
 import { CardListItem } from "./CardListItem";
 
 export interface CardCreationValues {
@@ -47,9 +41,7 @@ export function CardCreationDialog({
     notes: "",
   }));
   const [submitting, setSubmitting] = React.useState(false);
-  const [tab, setTab] = React.useState<"identity" | "behavior" | "settings">(
-    "identity",
-  );
+  const [tab, setTab] = React.useState<"identity" | "behavior" | "settings">("identity");
   const [error, setError] = React.useState<string>("");
   // 右侧预览改为使用 CardListItem，无需内部 tab
 
@@ -195,23 +187,17 @@ export function CardCreationDialog({
                   <Input
                     tone="plain"
                     value={values.name}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, name: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
                     placeholder="例如：ReLU"
                     className={nameInvalid ? "border-red-300" : undefined}
                   />
-                  {nameInvalid && (
-                    <p className="mt-1 text-xs text-red-600">名称为必填项</p>
-                  )}
+                  {nameInvalid && <p className="mt-1 text-xs text-red-600">名称为必填项</p>}
                 </Field>
                 <Field label="昵称（可选）">
                   <Input
                     tone="plain"
                     value={values.nickname ?? ""}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, nickname: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, nickname: e.target.value }))}
                     placeholder="例如：小蓝"
                   />
                 </Field>
@@ -219,15 +205,9 @@ export function CardCreationDialog({
                   <Textarea
                     tone="plain"
                     value={values.description}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, description: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, description: e.target.value }))}
                     rows={3}
-                    className={
-                      values.description.trim() === ""
-                        ? "border-red-300"
-                        : undefined
-                    }
+                    className={values.description.trim() === "" ? "border-red-300" : undefined}
                   />
                   <CharCounter value={values.description} limit={2000} />
                   {values.description.trim() === "" && (
@@ -238,9 +218,7 @@ export function CardCreationDialog({
                   <Textarea
                     tone="plain"
                     value={values.notes ?? ""}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, notes: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, notes: e.target.value }))}
                     rows={3}
                   />
                   <CharCounter value={values.notes ?? ""} limit={400} subtle />
@@ -254,15 +232,9 @@ export function CardCreationDialog({
                   <Textarea
                     tone="plain"
                     value={values.personality}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, personality: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, personality: e.target.value }))}
                     rows={4}
-                    className={
-                      values.personality.trim() === ""
-                        ? "border-red-300"
-                        : undefined
-                    }
+                    className={values.personality.trim() === "" ? "border-red-300" : undefined}
                   />
                   <CharCounter value={values.personality} limit={600} />
                   {values.personality.trim() === "" && (
@@ -273,15 +245,9 @@ export function CardCreationDialog({
                   <Textarea
                     tone="plain"
                     value={values.scenario}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, scenario: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, scenario: e.target.value }))}
                     rows={4}
-                    className={
-                      values.scenario.trim() === ""
-                        ? "border-red-300"
-                        : undefined
-                    }
+                    className={values.scenario.trim() === "" ? "border-red-300" : undefined}
                   />
                   <CharCounter value={values.scenario} limit={600} />
                   {values.scenario.trim() === "" && (
@@ -317,22 +283,14 @@ export function CardCreationDialog({
                   <Textarea
                     tone="plain"
                     value={values.systemPrompt}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, systemPrompt: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, systemPrompt: e.target.value }))}
                     rows={5}
                     placeholder="You are ReLU. Be helpful and concise."
-                    className={
-                      values.systemPrompt.trim() === ""
-                        ? "border-red-300"
-                        : undefined
-                    }
+                    className={values.systemPrompt.trim() === "" ? "border-red-300" : undefined}
                   />
                   <CharCounter value={values.systemPrompt} limit={1200} />
                   {values.systemPrompt.trim() === "" && (
-                    <p className="mt-1 text-xs text-red-600">
-                      系统提示为必填项
-                    </p>
+                    <p className="mt-1 text-xs text-red-600">系统提示为必填项</p>
                   )}
                 </Field>
                 <Field label={"历史后提示 (Post History Instructions)（必填）"}>
@@ -347,35 +305,24 @@ export function CardCreationDialog({
                     }
                     rows={4}
                     className={
-                      values.postHistoryInstructions.trim() === ""
-                        ? "border-red-300"
-                        : undefined
+                      values.postHistoryInstructions.trim() === "" ? "border-red-300" : undefined
                     }
                   />
-                  <CharCounter
-                    value={values.postHistoryInstructions}
-                    limit={800}
-                  />
+                  <CharCounter value={values.postHistoryInstructions} limit={800} />
                   {values.postHistoryInstructions.trim() === "" && (
-                    <p className="mt-1 text-xs text-red-600">
-                      历史后提示为必填项
-                    </p>
+                    <p className="mt-1 text-xs text-red-600">历史后提示为必填项</p>
                   )}
                 </Field>
                 <Field label={"版本（必填）"}>
                   <Input
                     tone="plain"
                     value={values.version}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, version: e.target.value }))
-                    }
+                    onChange={(e) => setValues((v) => ({ ...v, version: e.target.value }))}
                     placeholder="1.0 或 1.0.0"
                     className={versionInvalid ? "border-red-300" : undefined}
                   />
                   {versionInvalid && (
-                    <p className="mt-1 text-xs text-red-600">
-                      版本号格式需为 1.0 或 1.0.0
-                    </p>
+                    <p className="mt-1 text-xs text-red-600">版本号格式需为 1.0 或 1.0.0</p>
                   )}
                   {!versionInvalid && (
                     <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">

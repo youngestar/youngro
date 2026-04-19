@@ -16,7 +16,7 @@ export interface NDJSONParseOptions {
 
 export async function consumeNDJSONStream(
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  opts: NDJSONParseOptions,
+  opts: NDJSONParseOptions
 ): Promise<void> {
   const decoder = new TextDecoder();
   let buffer = "";
@@ -47,7 +47,7 @@ export async function consumeNDJSONStream(
       try {
         const obj = JSON.parse(last) as NDJSONChunk;
         opts.onChunk(obj);
-      } catch (e) {
+      } catch {
         // ignore trailing partial
       }
     }

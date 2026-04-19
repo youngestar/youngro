@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
@@ -69,17 +69,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: apps/web/.next/cache
-          key: ${{ runner.os }}-nextcache-web-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**') }}
+          key: ${{ runner.os }}-nextcache-web-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**') }}
           restore-keys: |
-            ${{ runner.os }}-nextcache-web-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextcache-web-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Cache Next.js (docs)
         uses: actions/cache@v4
         with:
           path: apps/docs/.next/cache
-          key: ${{ runner.os }}-nextcache-docs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('apps/docs/**') }}
+          key: ${{ runner.os }}-nextcache-docs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/docs/**') }}
           restore-keys: |
-            ${{ runner.os }}-nextcache-docs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextcache-docs-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -106,4 +106,3 @@ jobs:
 
       - name: Verify docs build output
         run: test -f apps/docs/.next/BUILD_ID || (echo "docs BUILD_ID missing" && exit 1)
-

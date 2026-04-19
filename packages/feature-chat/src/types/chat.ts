@@ -3,7 +3,7 @@ export type MessageRole = "system" | "assistant" | "user" | "tool" | "error";
 export interface BaseMessage {
   id: string;
   role: MessageRole;
-  content: string | any[];
+  content: string | unknown[];
   timestamp?: string;
 }
 
@@ -14,25 +14,25 @@ export interface ChatSliceText {
 
 export interface ChatSliceToolCall {
   type: "tool-call";
-  toolCall: any;
+  toolCall: unknown;
 }
 
 export interface ChatSliceToolResult {
   type: "tool-call-result";
   id: string;
-  result?: any;
+  result?: unknown;
 }
 
 export type ChatSlice = ChatSliceText | ChatSliceToolCall | ChatSliceToolResult;
 
 export interface AssistantMessage extends BaseMessage {
   slices?: ChatSlice[];
-  tool_results?: { id: string; result?: any }[];
+  tool_results?: { id: string; result?: unknown }[];
 }
 
 export type StreamEvent =
   | { type: "text-delta"; text: string }
-  | { type: "tool-call"; toolCall: any }
-  | { type: "tool-result"; toolCallId: string; result?: any }
+  | { type: "tool-call"; toolCall: unknown }
+  | { type: "tool-result"; toolCallId: string; result?: unknown }
   | { type: "finish" }
-  | { type: "error"; error: any };
+  | { type: "error"; error: unknown };

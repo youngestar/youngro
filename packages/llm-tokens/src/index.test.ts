@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  parseTokens,
-  stripTokens,
-  nextToken,
-  KNOWN_EMOTIONS,
-  ANY_TOKEN_RE,
-} from "./index";
+import { parseTokens, stripTokens, nextToken, KNOWN_EMOTIONS, ANY_TOKEN_RE } from "./index";
 
 describe("emotion-tokens basic parsing", () => {
   it("parses mixed emote and delay tokens", () => {
@@ -38,7 +32,10 @@ describe("emotion-tokens basic parsing", () => {
     const { tokens } = parseTokens("a<|DELAY:0.25|>b");
     const delay = tokens.find((t) => t.kind === "delay");
     expect(delay).toBeTruthy();
-    expect((delay as any).seconds).toBeCloseTo(0.25, 5);
+    expect(delay?.kind).toBe("delay");
+    if (delay?.kind === "delay") {
+      expect(delay.seconds).toBeCloseTo(0.25, 5);
+    }
   });
 
   it("stripTokens removes all markers", () => {

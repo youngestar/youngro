@@ -7,20 +7,7 @@ export const fonts = {
 };
 
 export function safelistAllPrimaryBackgrounds() {
-  const shades = [
-    undefined,
-    50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    600,
-    700,
-    800,
-    900,
-    950,
-  ];
+  const shades = [undefined, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
   const opacities = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
   const all: string[] = [];
   for (const shade of shades) {

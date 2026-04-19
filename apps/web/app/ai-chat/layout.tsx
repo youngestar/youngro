@@ -8,10 +8,9 @@ import useTurnToPage from "../../src/hooks/useTurnToPage";
 import { Button, Icon } from "@youngro/ui";
 import CrossBackground from "../../src/components/Backgrounds/CrossBackground";
 import dynamic from "next/dynamic";
-const AnimatedWave = dynamic(
-  () => import("../../src/components/Widgets/AnimatedWave"),
-  { ssr: false },
-);
+const AnimatedWave = dynamic(() => import("../../src/components/Widgets/AnimatedWave"), {
+  ssr: false,
+});
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
   const turnTo = useTurnToPage();
@@ -58,9 +57,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           {/* Content */}
-          <div className="mx-auto h-[calc(100%-56px)] px-3 py-3 relative z-10">
-            {children}
-          </div>
+          <div className="mx-auto h-[calc(100%-56px)] px-3 py-3 relative z-10">{children}</div>
         </div>
       </AnimatedWave>
     </CrossBackground>

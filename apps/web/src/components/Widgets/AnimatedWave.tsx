@@ -20,7 +20,7 @@ function generateSineWavePath(
   height: number,
   amplitude: number,
   waveLength: number,
-  direction: WaveDirection,
+  direction: WaveDirection
 ): string {
   const points: string[] = [];
   const numberOfWaves = Math.ceil(width / waveLength);
@@ -54,13 +54,7 @@ export function AnimatedWave({
 }: React.PropsWithChildren<AnimatedWaveProps>) {
   const fullHeight = height + amplitude * 2;
   const maskImage = useMemo(() => {
-    const path = generateSineWavePath(
-      waveLength,
-      fullHeight,
-      amplitude,
-      waveLength,
-      direction,
-    );
+    const path = generateSineWavePath(waveLength, fullHeight, amplitude, waveLength, direction);
     const svg = `<svg width="${waveLength}" height="${fullHeight}" xmlns="http://www.w3.org/2000/svg"><path d="${path}"/></svg>`;
     // Use URL-encoded SVG to avoid SSR/CSR divergence
     return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
@@ -84,8 +78,7 @@ export function AnimatedWave({
             animationDuration: `${duration}s`,
             animationTimingFunction: "linear",
             animationIterationCount: "infinite",
-            animationDirection:
-              movementDirection === "left" ? "normal" : "reverse",
+            animationDirection: movementDirection === "left" ? "normal" : "reverse",
             willChange: "transform",
           }}
         />

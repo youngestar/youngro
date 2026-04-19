@@ -17,28 +17,25 @@ export type SelectGroup = {
 // options can be either a flat list of items or groups with children
 export type SelectOption = SelectItem | SelectGroup;
 
-const select = cva(
-  "h-10 rounded-md px-3 py-2 text-sm font-medium outline-none",
-  {
-    variants: {
-      tone: {
-        tinted:
-          "bg-primary-200/20 dark:bg-primary-400/20 text-primary-600 placeholder-primary-400 dark:text-primary-300/70 dark:placeholder-primary-300/50 focus-visible:ring-2 focus-visible:ring-primary-400/60",
-        plain:
-          "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 border border-neutral-200 dark:border-neutral-700 focus-visible:ring-2 focus-visible:ring-primary-400/60",
-      },
-      vsize: {
-        sm: "h-8 text-sm",
-        md: "h-10 text-sm",
-        lg: "h-12 text-base",
-      },
+const select = cva("h-10 rounded-md px-3 py-2 text-sm font-medium outline-none", {
+  variants: {
+    tone: {
+      tinted:
+        "bg-primary-200/20 dark:bg-primary-400/20 text-primary-600 placeholder-primary-400 dark:text-primary-300/70 dark:placeholder-primary-300/50 focus-visible:ring-2 focus-visible:ring-primary-400/60",
+      plain:
+        "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 border border-neutral-200 dark:border-neutral-700 focus-visible:ring-2 focus-visible:ring-primary-400/60",
     },
-    defaultVariants: {
-      tone: "tinted",
-      vsize: "md",
+    vsize: {
+      sm: "h-8 text-sm",
+      md: "h-10 text-sm",
+      lg: "h-12 text-base",
     },
   },
-);
+  defaultVariants: {
+    tone: "tinted",
+    vsize: "md",
+  },
+});
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -74,10 +71,7 @@ export const Select: React.FC<SelectProps> = ({
   };
 
   return (
-    <select
-      {...selectProps}
-      className={clsx(select({ tone, vsize }), className)}
-    >
+    <select {...selectProps} className={clsx(select({ tone, vsize }), className)}>
       {placeholder ? (
         // an empty, disabled option to act as placeholder when nothing is selected
         <option value="" disabled>
@@ -101,10 +95,7 @@ export const Select: React.FC<SelectProps> = ({
 
             // flat option
             return (
-              <option
-                key={(o as SelectItem).value}
-                value={(o as SelectItem).value}
-              >
+              <option key={(o as SelectItem).value} value={(o as SelectItem).value}>
                 {(o as SelectItem).label}
               </option>
             );
