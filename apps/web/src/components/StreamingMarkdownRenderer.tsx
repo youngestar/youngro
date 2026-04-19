@@ -217,38 +217,93 @@ export default function StreamingMarkdownRenderer({
   if (viewState.useFullFallback) {
     if (viewState.fallbackHtml !== null) {
       return (
-        <div className={className} dangerouslySetInnerHTML={{ __html: viewState.fallbackHtml }} />
+        <div
+          className={className}
+          data-md-block-count={0}
+          data-md-render-mode="fallback-full"
+          dangerouslySetInnerHTML={{ __html: viewState.fallbackHtml }}
+        />
       );
     }
 
     if (fallbackMode === "plain-text") {
-      return <div className={`${className} ${styles.plainText}`}>{content}</div>;
+      return (
+        <div
+          className={`${className} ${styles.plainText}`}
+          data-md-block-count={0}
+          data-md-render-mode="fallback-plain-text"
+        >
+          {content}
+        </div>
+      );
     }
 
-    return <div className={className}>{/** loading 占位 */}</div>;
+    return (
+      <div className={className} data-md-block-count={0} data-md-render-mode="fallback-empty">
+        {/** loading 占位 */}
+      </div>
+    );
   }
 
   if (viewState.blocks.length === 0 && !viewState.activeTailHtml) {
     if (viewState.activeTailSource) {
-      return <div className={`${className} ${styles.plainText}`}>{viewState.activeTailSource}</div>;
+      return (
+        <div
+          className={`${className} ${styles.plainText}`}
+          data-md-block-count={0}
+          data-md-render-mode="incremental-tail-plain-text"
+        >
+          {viewState.activeTailSource}
+        </div>
+      );
     }
 
     if (fallbackMode === "plain-text") {
-      return <div className={`${className} ${styles.plainText}`}>{content}</div>;
+      return (
+        <div
+          className={`${className} ${styles.plainText}`}
+          data-md-block-count={0}
+          data-md-render-mode="incremental-empty-plain-text"
+        >
+          {content}
+        </div>
+      );
     }
 
-    return <div className={className}>{/** loading 占位 */}</div>;
+    return (
+      <div className={className} data-md-block-count={0} data-md-render-mode="incremental-empty">
+        {/** loading 占位 */}
+      </div>
+    );
   }
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      data-md-block-count={viewState.blocks.length}
+      data-md-render-mode="incremental"
+      data-md-tail-length={viewState.activeTailSource.length}
+    >
       {viewState.blocks.map((block) => (
-        <div key={block.id} dangerouslySetInnerHTML={{ __html: block.html }} />
+        <div
+          key={block.id}
+          data-md-block-end={block.endOffset}
+          data-md-block-id={block.id}
+          data-md-block-kind={block.kind}
+          data-md-block-reason={block.reason}
+          data-md-block-start={block.startOffset}
+          dangerouslySetInnerHTML={{ __html: block.html }}
+        />
       ))}
       {viewState.activeTailHtml ? (
-        <div dangerouslySetInnerHTML={{ __html: viewState.activeTailHtml }} />
+        <div
+          data-md-tail-mode="html"
+          dangerouslySetInnerHTML={{ __html: viewState.activeTailHtml }}
+        />
       ) : viewState.activeTailSource ? (
-        <div className={styles.plainText}>{viewState.activeTailSource}</div>
+        <div className={styles.plainText} data-md-tail-mode="plain-text">
+          {viewState.activeTailSource}
+        </div>
       ) : null}
     </div>
   );

@@ -4,7 +4,7 @@ import * as React from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import clsx from "clsx";
 
-export type ScrollAreaProps = React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
+export type ScrollAreaProps = React.ComponentPropsWithRef<typeof ScrollAreaPrimitive.Root> & {
   variant?: "default" | "contrast" | "textarea";
   thickness?: "sm" | "md" | "lg";
   viewportClassName?: string;
@@ -15,98 +15,90 @@ export type ScrollAreaProps = React.ComponentPropsWithoutRef<typeof ScrollAreaPr
 /**
  * ScrollArea
  *
- * A thin wrapper around @radix-ui/react-scroll-area following the same
- * patterns as other UI components in this package (forwardRef + clsx).
+ * A thin wrapper around @radix-ui/react-scroll-area that accepts `ref` as a prop.
  * Default styles are aligned with shadcn/ui, using design tokens where possible.
  */
-export const ScrollArea = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  ScrollAreaProps
->(
-  (
-    {
-      className,
-      viewportClassName,
-      scrollbarClassName,
-      thumbClassName,
-      variant = "default",
-      thickness = "md",
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    const isContrast = variant === "contrast";
-    const isTextareaTone = variant === "textarea";
-    const thicknessClsVertical = thickness === "lg" ? "w-3" : thickness === "sm" ? "w-2" : "w-2.5"; // md default ≈ 10px
-    const thicknessClsHorizontal =
-      thickness === "lg" ? "h-3" : thickness === "sm" ? "h-2" : "h-2.5";
-    return (
-      <ScrollAreaPrimitive.Root
-        ref={ref}
-        className={clsx("relative overflow-hidden", className)}
-        {...props}
+export function ScrollArea({
+  className,
+  viewportClassName,
+  scrollbarClassName,
+  thumbClassName,
+  variant = "default",
+  thickness = "md",
+  children,
+  ref,
+  ...props
+}: ScrollAreaProps) {
+  const isContrast = variant === "contrast";
+  const isTextareaTone = variant === "textarea";
+  const thicknessClsVertical = thickness === "lg" ? "w-3" : thickness === "sm" ? "w-2" : "w-2.5"; // md default ≈ 10px
+  const thicknessClsHorizontal = thickness === "lg" ? "h-3" : thickness === "sm" ? "h-2" : "h-2.5";
+
+  return (
+    <ScrollAreaPrimitive.Root
+      ref={ref}
+      className={clsx("relative overflow-hidden", className)}
+      {...props}
+    >
+      <ScrollAreaPrimitive.Viewport
+        className={clsx("h-full w-full rounded-[inherit]", viewportClassName)}
       >
-        <ScrollAreaPrimitive.Viewport
-          className={clsx("h-full w-full rounded-[inherit]", viewportClassName)}
-        >
-          {children}
-        </ScrollAreaPrimitive.Viewport>
-        <ScrollAreaPrimitive.Scrollbar
-          orientation="vertical"
+        {children}
+      </ScrollAreaPrimitive.Viewport>
+      <ScrollAreaPrimitive.Scrollbar
+        orientation="vertical"
+        className={clsx(
+          "flex select-none touch-none p-0.5 transition-colors",
+          thicknessClsVertical,
+          isContrast
+            ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
+            : isTextareaTone
+              ? "bg-primary-50/50 dark:bg-primary-950/70"
+              : undefined,
+          scrollbarClassName
+        )}
+      >
+        <ScrollAreaPrimitive.Thumb
           className={clsx(
-            "flex select-none touch-none p-0.5 transition-colors",
-            thicknessClsVertical,
+            "relative flex-1 rounded-full shadow-sm",
             isContrast
-              ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
+              ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
               : isTextareaTone
-                ? "bg-primary-50/50 dark:bg-primary-950/70"
-                : undefined,
-            scrollbarClassName
+                ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
+                : "bg-border",
+            thumbClassName
           )}
-        >
-          <ScrollAreaPrimitive.Thumb
-            className={clsx(
-              "relative flex-1 rounded-full shadow-sm",
-              isContrast
-                ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
-                : isTextareaTone
-                  ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
-                  : "bg-border",
-              thumbClassName
-            )}
-          />
-        </ScrollAreaPrimitive.Scrollbar>
-        <ScrollAreaPrimitive.Scrollbar
-          orientation="horizontal"
+        />
+      </ScrollAreaPrimitive.Scrollbar>
+      <ScrollAreaPrimitive.Scrollbar
+        orientation="horizontal"
+        className={clsx(
+          "flex select-none touch-none p-0.5 transition-colors",
+          thicknessClsHorizontal,
+          isContrast
+            ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
+            : isTextareaTone
+              ? "bg-primary-200/20 dark:bg-primary-400/20 hover:bg-primary-200/30 dark:hover:bg-primary-400/30"
+              : undefined,
+          scrollbarClassName
+        )}
+      >
+        <ScrollAreaPrimitive.Thumb
           className={clsx(
-            "flex select-none touch-none p-0.5 transition-colors",
-            thicknessClsHorizontal,
+            "relative flex-1 rounded-full shadow-sm",
             isContrast
-              ? "bg-neutral-200/60 dark:bg-neutral-800/60 hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
+              ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
               : isTextareaTone
-                ? "bg-primary-200/20 dark:bg-primary-400/20 hover:bg-primary-200/30 dark:hover:bg-primary-400/30"
-                : undefined,
-            scrollbarClassName
+                ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
+                : "bg-border",
+            thumbClassName
           )}
-        >
-          <ScrollAreaPrimitive.Thumb
-            className={clsx(
-              "relative flex-1 rounded-full shadow-sm",
-              isContrast
-                ? "bg-neutral-500/70 dark:bg-neutral-400/70 hover:bg-neutral-600/80 dark:hover:bg-neutral-300/80"
-                : isTextareaTone
-                  ? "bg-primary-400/70 dark:bg-primary-300/70 hover:bg-primary-500/80 dark:hover:bg-primary-400/80"
-                  : "bg-border",
-              thumbClassName
-            )}
-          />
-        </ScrollAreaPrimitive.Scrollbar>
-        <ScrollAreaPrimitive.Corner />
-      </ScrollAreaPrimitive.Root>
-    );
-  }
-);
+        />
+      </ScrollAreaPrimitive.Scrollbar>
+      <ScrollAreaPrimitive.Corner />
+    </ScrollAreaPrimitive.Root>
+  );
+}
 ScrollArea.displayName = "ScrollArea";
 
 export default ScrollArea;

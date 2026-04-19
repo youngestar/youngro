@@ -49,6 +49,255 @@
   overflow-wrap: anywhere;
 }
 
+.chat-markdown {
+  --chat-md-heading-1: hsl(var(--primary-700) / 1);
+  --chat-md-heading-2: hsl(var(--primary-650) / 1);
+  --chat-md-heading-3: hsl(var(--primary-600) / 1);
+  --chat-md-heading-4: hsl(var(--primary-550) / 1);
+  --chat-md-marker: hsl(var(--primary-500) / 1);
+  --chat-md-link: hsl(var(--primary-600) / 1);
+  --chat-md-link-hover: hsl(var(--primary-700) / 1);
+  --chat-md-inline-code-bg: hsl(var(--primary-100) / 0.85);
+  --chat-md-inline-code-text: hsl(var(--primary-800) / 1);
+  --chat-md-quote-border: hsl(var(--primary-300) / 1);
+  --chat-md-quote-bg: hsl(var(--primary-50) / 0.8);
+  --chat-md-quote-text: hsl(var(--primary-700) / 1);
+  --chat-md-strong: hsl(var(--primary-800) / 1);
+  --chat-md-em: hsl(var(--primary-700) / 1);
+  --chat-md-hr: hsl(var(--primary-200) / 1);
+  --chat-md-table-head-bg: hsl(var(--primary-100) / 0.85);
+  --chat-md-table-head-border: hsl(var(--primary-200) / 1);
+  --chat-md-table-head-text: hsl(var(--primary-800) / 1);
+  --chat-md-table-divider: hsl(var(--primary-200) / 1);
+  --chat-md-table-row-alt: hsl(var(--primary-50) / 0.55);
+  --chat-md-table-wrap-bg: hsl(var(--primary-50) / 0.35);
+  --chat-md-pre-border: hsl(var(--primary-200) / 1);
+  --chat-md-pre-shadow: hsl(var(--primary-700) / 0.08);
+  --chat-md-pre-toolbar-bg: linear-gradient(
+    180deg,
+    hsl(var(--primary-100) / 0.95),
+    hsl(var(--primary-50) / 0.78)
+  );
+  --chat-md-pre-toolbar-border: hsl(var(--primary-200) / 1);
+  --chat-md-pre-dot-1: hsl(8 86% 68% / 1);
+  --chat-md-pre-dot-2: hsl(42 96% 62% / 1);
+  --chat-md-pre-dot-3: hsl(145 62% 50% / 1);
+}
+
+.chat-markdown :where(h1) {
+  color: var(--chat-md-heading-1);
+}
+
+.chat-markdown :where(h2) {
+  color: var(--chat-md-heading-2);
+}
+
+.chat-markdown :where(h3) {
+  color: var(--chat-md-heading-3);
+}
+
+.chat-markdown :where(h4),
+.chat-markdown :where(h5),
+.chat-markdown :where(h6) {
+  color: var(--chat-md-heading-4);
+}
+
+.chat-markdown :where(ul > li)::marker,
+.chat-markdown :where(ol > li)::marker {
+  color: var(--chat-md-marker);
+}
+
+.chat-markdown :where(a) {
+  color: var(--chat-md-link);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+  transition: color 160ms ease;
+}
+
+.chat-markdown :where(a:hover) {
+  color: var(--chat-md-link-hover);
+}
+
+.chat-markdown :where(:not(pre) > code) {
+  background: var(--chat-md-inline-code-bg);
+  color: var(--chat-md-inline-code-text);
+  border-radius: 0.375rem;
+  padding: 0.14em 0.38em;
+  font-weight: 500;
+}
+
+.chat-markdown :where(blockquote) {
+  border-inline-start: 0.28rem solid var(--chat-md-quote-border);
+  background: var(--chat-md-quote-bg);
+  color: var(--chat-md-quote-text);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+
+.chat-markdown :where(blockquote p:first-of-type)::before,
+.chat-markdown :where(blockquote p:last-of-type)::after {
+  content: none;
+}
+
+.chat-markdown :where(strong) {
+  color: var(--chat-md-strong);
+}
+
+.chat-markdown :where(em) {
+  color: var(--chat-md-em);
+}
+
+.chat-markdown :where(hr) {
+  border-color: var(--chat-md-hr);
+  opacity: 1;
+}
+
+.chat-markdown :where(.md-table-wrap) {
+  border: 1px solid var(--chat-md-table-divider);
+  border-radius: 0.875rem;
+  background: var(--chat-md-table-wrap-bg);
+}
+
+.chat-markdown :where(th) {
+  background: var(--chat-md-table-head-bg);
+  border-color: var(--chat-md-table-divider);
+  border-bottom-color: var(--chat-md-table-head-border);
+  color: var(--chat-md-table-head-text);
+}
+
+.chat-markdown :where(td) {
+  border-color: var(--chat-md-table-divider);
+}
+
+.chat-markdown :where(tbody tr:nth-child(even)) {
+  background: var(--chat-md-table-row-alt);
+}
+
+.chat-markdown :where(pre) {
+  position: relative;
+  border: 1px solid var(--chat-md-pre-border);
+  border-radius: 0.875rem;
+  box-shadow: 0 12px 30px var(--chat-md-pre-shadow);
+  padding: 2.5rem 1rem 1rem;
+}
+
+.chat-markdown :where(pre)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2rem;
+  border-bottom: 1px solid var(--chat-md-pre-toolbar-border);
+  background: var(--chat-md-pre-toolbar-bg);
+  pointer-events: none;
+}
+
+.chat-markdown :where(pre)::after {
+  content: "";
+  position: absolute;
+  top: 0.72rem;
+  left: 0.85rem;
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 9999px;
+  background: var(--chat-md-pre-dot-1);
+  box-shadow:
+    0.95rem 0 0 var(--chat-md-pre-dot-2),
+    1.9rem 0 0 var(--chat-md-pre-dot-3);
+  pointer-events: none;
+}
+
+.dark .chat-markdown {
+  --chat-md-heading-1: hsl(var(--primary-200) / 1);
+  --chat-md-heading-2: hsl(var(--primary-300) / 1);
+  --chat-md-heading-3: hsl(var(--primary-400) / 1);
+  --chat-md-heading-4: hsl(var(--primary-400) / 1);
+  --chat-md-marker: hsl(var(--primary-300) / 1);
+  --chat-md-link: hsl(var(--primary-300) / 1);
+  --chat-md-link-hover: hsl(var(--primary-200) / 1);
+  --chat-md-inline-code-bg: hsl(var(--primary-950) / 0.9);
+  --chat-md-inline-code-text: hsl(var(--primary-200) / 1);
+  --chat-md-quote-border: hsl(var(--primary-500) / 1);
+  --chat-md-quote-bg: hsl(var(--primary-950) / 0.55);
+  --chat-md-quote-text: hsl(var(--primary-200) / 1);
+  --chat-md-strong: hsl(var(--primary-100) / 1);
+  --chat-md-em: hsl(var(--primary-300) / 1);
+  --chat-md-hr: hsl(var(--primary-700) / 1);
+  --chat-md-table-head-bg: hsl(var(--primary-950) / 0.72);
+  --chat-md-table-head-border: hsl(var(--primary-700) / 1);
+  --chat-md-table-head-text: hsl(var(--primary-200) / 1);
+  --chat-md-table-divider: hsl(var(--primary-800) / 1);
+  --chat-md-table-row-alt: hsl(var(--primary-950) / 0.46);
+  --chat-md-table-wrap-bg: hsl(var(--primary-950) / 0.22);
+  --chat-md-pre-border: hsl(var(--primary-800) / 1);
+  --chat-md-pre-shadow: hsl(var(--primary-950) / 0.38);
+  --chat-md-pre-toolbar-bg: linear-gradient(
+    180deg,
+    hsl(var(--primary-900) / 0.98),
+    hsl(var(--primary-950) / 0.86)
+  );
+  --chat-md-pre-toolbar-border: hsl(var(--primary-800) / 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .chat-markdown {
+    --chat-md-heading-1: hsl(var(--primary-200) / 1);
+    --chat-md-heading-2: hsl(var(--primary-300) / 1);
+    --chat-md-heading-3: hsl(var(--primary-400) / 1);
+    --chat-md-heading-4: hsl(var(--primary-400) / 1);
+    --chat-md-marker: hsl(var(--primary-300) / 1);
+    --chat-md-link: hsl(var(--primary-300) / 1);
+    --chat-md-link-hover: hsl(var(--primary-200) / 1);
+    --chat-md-inline-code-bg: hsl(var(--primary-950) / 0.9);
+    --chat-md-inline-code-text: hsl(var(--primary-200) / 1);
+    --chat-md-quote-border: hsl(var(--primary-500) / 1);
+    --chat-md-quote-bg: hsl(var(--primary-950) / 0.55);
+    --chat-md-quote-text: hsl(var(--primary-200) / 1);
+    --chat-md-strong: hsl(var(--primary-100) / 1);
+    --chat-md-em: hsl(var(--primary-300) / 1);
+    --chat-md-hr: hsl(var(--primary-700) / 1);
+    --chat-md-table-head-bg: hsl(var(--primary-950) / 0.72);
+    --chat-md-table-head-border: hsl(var(--primary-700) / 1);
+    --chat-md-table-head-text: hsl(var(--primary-200) / 1);
+    --chat-md-table-divider: hsl(var(--primary-800) / 1);
+    --chat-md-table-row-alt: hsl(var(--primary-950) / 0.46);
+    --chat-md-table-wrap-bg: hsl(var(--primary-950) / 0.22);
+    --chat-md-pre-border: hsl(var(--primary-800) / 1);
+    --chat-md-pre-shadow: hsl(var(--primary-950) / 0.38);
+    --chat-md-pre-toolbar-bg: linear-gradient(
+      180deg,
+      hsl(var(--primary-900) / 0.98),
+      hsl(var(--primary-950) / 0.86)
+    );
+    --chat-md-pre-toolbar-border: hsl(var(--primary-800) / 1);
+  }
+}
+
+/* 对齐流式输出与结束时（无/有 Shiki）的 <pre> 容器基础样式 */
+.prose pre:not(.shiki),
+.stream-prose pre:not(.shiki) {
+  /* 参照 github-light 的默认背景与文本色 */
+  background-color: #f6f8fa !important;
+  color: #24292e !important;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose pre:not(.shiki),
+  .stream-prose pre:not(.shiki) {
+    /* 参照 github-dark 的默认背景与文本色 */
+    background-color: #24292e !important;
+    color: #e1e4e8 !important;
+  }
+}
+
+.chat-markdown.prose pre {
+  border-radius: 0.875rem;
+  padding: 2.5rem 1rem 1rem;
+}
+
 /* Set base font families so the injected CSS variables actually take effect globally */
 @layer base {
   html {

@@ -5,9 +5,31 @@ export interface TextStreamSlice {
   text: string;
 }
 
+export type SplitReason =
+  | "blank-line"
+  | "blockquote"
+  | "closed-display-math"
+  | "closed-fence"
+  | "heading"
+  | "list"
+  | "thematic-break";
+
+export type BlockKind =
+  | "blockquote"
+  | "code-fence"
+  | "display-math"
+  | "heading"
+  | "list"
+  | "paragraph"
+  | "thematic-break";
+
 export interface RenderedMarkdownBlock {
+  endOffset: number;
   id: string;
+  kind: BlockKind;
+  reason: SplitReason;
   source: string;
+  startOffset: number;
   html: string;
 }
 
@@ -24,14 +46,23 @@ export interface AdvanceStreamingMarkdownResult {
   state: StreamingMarkdownState;
 }
 
+export interface FinalizedMarkdownSegment {
+  endOffset: number;
+  kind: BlockKind;
+  reason: SplitReason;
+  source: string;
+  startOffset: number;
+}
+
 interface SplitBlocksResult {
-  finalizedSources: string[];
+  finalizedSegments: FinalizedMarkdownSegment[];
   remainingTailSource: string;
 }
 
 interface MarkdownBlockScanState {
   fenceMarker: "```" | "~~~" | null;
   inDisplayMath: boolean;
+  openSimpleBlock: { kind: "blockquote" } | { kind: "list"; listKind: "bullet" | "ordered" } | null;
 }
 
 export function createInitialStreamingMarkdownState(): StreamingMarkdownState {
@@ -65,57 +96,201 @@ function isFenceCloseLine(line: string, fenceMarker: "```" | "~~~") {
   return line.trimStart().startsWith(fenceMarker);
 }
 
+function isBlankLine(line: string) {
+  return line.trim() === "";
+}
+
+function stripTrailingNewline(line: string) {
+  return line.endsWith("\n") ? line.slice(0, -1) : line;
+}
+
+function isAtxHeadingLine(line: string) {
+  return /^ {0,3}#{1,6}(?:\s|$)/.test(stripTrailingNewline(line));
+}
+
+function isThematicBreakLine(line: string) {
+  return /^ {0,3}(?:(?:-\s*){3,}|(?:_\s*){3,}|(?:\*\s*){3,})$/.test(stripTrailingNewline(line));
+}
+
+function isBlockquoteLine(line: string) {
+  return /^ {0,3}> ?/.test(stripTrailingNewline(line));
+}
+
+function getSimpleListKind(line: string): "bullet" | "ordered" | null {
+  const normalized = stripTrailingNewline(line);
+
+  if (/^ {0,3}[*+-] +/.test(normalized)) return "bullet";
+  if (/^ {0,3}\d+[.)] +/.test(normalized)) return "ordered";
+
+  return null;
+}
+
 function splitIntoLines(source: string) {
-  const lines: Array<{ end: number; text: string }> = [];
+  const lines: Array<{ end: number; start: number; text: string }> = [];
   let start = 0;
 
   for (let index = 0; index < source.length; index += 1) {
     if (source[index] !== "\n") continue;
 
     const end = index + 1;
-    lines.push({ end, text: source.slice(start, end) });
+    lines.push({ end, start, text: source.slice(start, end) });
     start = end;
   }
 
   if (start < source.length) {
-    lines.push({ end: source.length, text: source.slice(start) });
+    lines.push({ end: source.length, start, text: source.slice(start) });
   }
 
   return lines;
 }
 
+function isLineTerminated(line: string) {
+  return line.endsWith("\n");
+}
+
+function inferBlockKind(source: string, reason: SplitReason): BlockKind {
+  if (reason === "blockquote") return "blockquote";
+  if (reason === "closed-fence") return "code-fence";
+  if (reason === "closed-display-math") return "display-math";
+  if (reason === "heading" || isAtxHeadingLine(source)) return "heading";
+  if (reason === "list") return "list";
+  if (reason === "thematic-break" || isThematicBreakLine(source)) return "thematic-break";
+  return "paragraph";
+}
+
 export function splitStableMarkdownBlocks(source: string): SplitBlocksResult {
   if (!source) {
     return {
-      finalizedSources: [],
+      finalizedSegments: [],
       remainingTailSource: "",
     };
   }
 
-  const finalizedSources: string[] = [];
+  const finalizedSegments: FinalizedMarkdownSegment[] = [];
   const lines = splitIntoLines(source);
   const scanState: MarkdownBlockScanState = {
     fenceMarker: null,
     inDisplayMath: false,
+    openSimpleBlock: null,
   };
 
   let blockStart = 0;
 
+  const pushSegment = (
+    startOffset: number,
+    endOffset: number,
+    reason: SplitReason,
+    kind?: BlockKind
+  ) => {
+    const candidate = source.slice(startOffset, endOffset);
+    if (!candidate.trim()) {
+      return;
+    }
+
+    finalizedSegments.push({
+      endOffset,
+      kind: kind ?? inferBlockKind(candidate, reason),
+      reason,
+      source: candidate,
+      startOffset,
+    });
+  };
+
   for (const line of lines) {
     const trimmed = line.text.trim();
     let closedSpecialBlock = false;
+    let closingReason: SplitReason | null = null;
 
     if (scanState.fenceMarker) {
       if (isFenceCloseLine(line.text, scanState.fenceMarker)) {
         scanState.fenceMarker = null;
         closedSpecialBlock = true;
+        closingReason = "closed-fence";
       }
     } else if (scanState.inDisplayMath) {
       if (trimmed === "$$") {
         scanState.inDisplayMath = false;
         closedSpecialBlock = true;
+        closingReason = "closed-display-math";
       }
     } else {
+      const blockquoteLine = isBlockquoteLine(line.text);
+      const listKind = getSimpleListKind(line.text);
+
+      if (scanState.openSimpleBlock) {
+        const continuesBlockquote =
+          scanState.openSimpleBlock.kind === "blockquote" && blockquoteLine;
+        const continuesList =
+          scanState.openSimpleBlock.kind === "list" &&
+          listKind !== null &&
+          scanState.openSimpleBlock.listKind === listKind;
+
+        if (!(continuesBlockquote || continuesList)) {
+          pushSegment(
+            blockStart,
+            line.start,
+            scanState.openSimpleBlock.kind === "blockquote" ? "blockquote" : "list",
+            scanState.openSimpleBlock.kind
+          );
+          blockStart = line.start;
+          scanState.openSimpleBlock = null;
+        }
+      }
+
+      if (isAtxHeadingLine(line.text)) {
+        if (line.start > blockStart) {
+          pushSegment(blockStart, line.start, "heading", "paragraph");
+        }
+
+        // Do not freeze the current heading line until it has actually ended.
+        // During streaming, a partial line like `#` or `# Tit` can still grow.
+        if (isLineTerminated(line.text)) {
+          pushSegment(line.start, line.end, "heading", "heading");
+          blockStart = line.end;
+        } else {
+          blockStart = line.start;
+        }
+        continue;
+      }
+
+      if (isThematicBreakLine(line.text)) {
+        if (line.start > blockStart) {
+          pushSegment(blockStart, line.start, "thematic-break", "paragraph");
+        }
+
+        // Keep an unterminated last line in the active tail so it can still
+        // evolve into another structure before the newline arrives.
+        if (isLineTerminated(line.text)) {
+          pushSegment(line.start, line.end, "thematic-break", "thematic-break");
+          blockStart = line.end;
+        } else {
+          blockStart = line.start;
+        }
+        continue;
+      }
+
+      if (blockquoteLine) {
+        if (!scanState.openSimpleBlock) {
+          if (line.start > blockStart) {
+            pushSegment(blockStart, line.start, "blockquote", "paragraph");
+          }
+          blockStart = line.start;
+          scanState.openSimpleBlock = { kind: "blockquote" };
+        }
+        continue;
+      }
+
+      if (listKind) {
+        if (!scanState.openSimpleBlock) {
+          if (line.start > blockStart) {
+            pushSegment(blockStart, line.start, "list", "paragraph");
+          }
+          blockStart = line.start;
+          scanState.openSimpleBlock = { kind: "list", listKind };
+        }
+        continue;
+      }
+
       const fenceMarker = getFenceMarker(line.text);
       if (fenceMarker) {
         scanState.fenceMarker = fenceMarker;
@@ -129,23 +304,26 @@ export function splitStableMarkdownBlocks(source: string): SplitBlocksResult {
       continue;
     }
 
-    if (closedSpecialBlock || trimmed === "") {
-      const candidate = source.slice(blockStart, line.end);
-      if (candidate.trim()) {
-        finalizedSources.push(candidate);
-      }
+    if (closedSpecialBlock && closingReason) {
+      pushSegment(blockStart, line.end, closingReason);
+      blockStart = line.end;
+      continue;
+    }
+
+    if (isBlankLine(line.text)) {
+      pushSegment(blockStart, line.end, "blank-line");
       blockStart = line.end;
     }
   }
 
   return {
-    finalizedSources,
+    finalizedSegments,
     remainingTailSource: source.slice(blockStart),
   };
 }
 
-function createBlockId(index: number) {
-  return `block-${index}`;
+function createBlockId(startOffset: number, endOffset: number) {
+  return `block-${startOffset}-${endOffset}`;
 }
 
 async function renderStreamingBlock(source: string) {
@@ -184,16 +362,21 @@ export async function advanceStreamingMarkdownState(
   }
 
   const combinedTailSource = `${prev.activeTailSource}${appendedText}`;
-  const { finalizedSources, remainingTailSource } = splitStableMarkdownBlocks(combinedTailSource);
+  const { finalizedSegments, remainingTailSource } = splitStableMarkdownBlocks(combinedTailSource);
 
   const finalizedBlocks: RenderedMarkdownBlock[] = [...prev.finalizedBlocks];
+  const tailBaseOffset = prev.consumedTextLength - prev.activeTailSource.length;
 
-  for (const sourceFragment of finalizedSources) {
+  for (const segment of finalizedSegments) {
     try {
       finalizedBlocks.push({
-        id: createBlockId(finalizedBlocks.length),
-        source: sourceFragment,
-        html: await renderStreamingBlock(sourceFragment),
+        endOffset: tailBaseOffset + segment.endOffset,
+        id: createBlockId(tailBaseOffset + segment.startOffset, tailBaseOffset + segment.endOffset),
+        kind: segment.kind,
+        reason: segment.reason,
+        source: segment.source,
+        startOffset: tailBaseOffset + segment.startOffset,
+        html: await renderStreamingBlock(segment.source),
       });
     } catch {
       return {
